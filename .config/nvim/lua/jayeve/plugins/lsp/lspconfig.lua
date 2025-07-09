@@ -85,20 +85,34 @@ lspconfig.gopls.setup({
 		gopls = {
 			completeUnimported = true,
 			usePlaceholders = true,
-			-- https://github.com/bazel-contrib/rules_go/wiki/Editor-setup
-			env = {
-				GOPACKAGESDRIVER = "./tools/gopackagesdriver.sh",
-			},
-			directoryFilters = {
-				"-bazel-bin",
-				"-bazel-out",
-				"-bazel-testlogs",
-				"-bazel-mypkg",
-			},
 		},
 	},
 })
 
+-- -- confgure golong when programming in ere go code
+-- lspconfig.gopls.setup({
+-- 	capabilities = capabilities,
+-- 	cmd = { "gopls" },
+-- 	filetypes = { "go", "gomod", "goworkd", "gotmpl" },
+-- 	root_dir = require("lspconfig.util").root_pattern("go.work", "go.mod", ".git"),
+-- 	settings = {
+-- 		gopls = {
+-- 			completeUnimported = true,
+-- 			usePlaceholders = true,
+-- 			-- https://github.com/bazel-contrib/rules_go/wiki/Editor-setup
+-- 			env = {
+-- 				GOPACKAGESDRIVER = "./tools/gopackagesdriver.sh",
+-- 			},
+-- 			directoryFilters = {
+-- 				"-bazel-bin",
+-- 				"-bazel-out",
+-- 				"-bazel-testlogs",
+-- 				"-bazel-mypkg",
+-- 			},
+-- 		},
+-- 	},
+-- })
+--
 -- configure css server
 lspconfig["cssls"].setup({
 	capabilities = capabilities,
@@ -133,21 +147,21 @@ lspconfig["clangd"].setup({})
 
 lspconfig["intelephense"].setup({})
 
-lspconfig.ruff_lsp.setup({
-	init_options = {
-		settings = {
-			-- Any extra CLI arguments for `ruff` go here.
-			args = {},
-		},
-	},
-})
-
-lspconfig.rust_analyzer.setup({
-	settings = {
-		["rust-analyzer"] = {},
-	},
-})
-
+-- lspconfig.ruff_lsp.setup({
+-- 	init_options = {
+-- 		settings = {
+-- 			-- Any extra CLI arguments for `ruff` go here.
+-- 			args = {},
+-- 		},
+-- 	},
+-- })
+--
+-- lspconfig.rust_analyzer.setup({
+-- 	settings = {
+-- 		["rust-analyzer"] = {},
+-- 	},
+-- })
+--
 lspconfig.pyright.setup({
 	settings = {
 		pyright = { autoImportCompletion = true },

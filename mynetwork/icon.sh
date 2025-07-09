@@ -7,6 +7,7 @@ get_current_network_icon() {
     current_network="$(ipconfig getsummary en0 | awk -F ' SSID : ' '/ SSID : / {print $2}')"
     if [[ -z $current_network ]]; then
       echo "󰖪"
+      # echo "󰱮"
     else
       echo "󱚽"
     fi

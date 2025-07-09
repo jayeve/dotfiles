@@ -81,7 +81,7 @@ keymap.set("n", "<leader><tab>", "<cmd>Telescope find_files<cr>") -- find files 
 keymap.set("n", "<leader>r", "<cmd>Telescope live_grep<cr>") -- find string in current working directory as you type
 keymap.set("n", "<leader>c", "<cmd>Telescope grep_string<cr>") -- find string under cursor in current working directory
 keymap.set("n", "<leader>o", "<cmd>Telescope buffers<cr>") -- list open buffers in current neovim instance
-keymap.set("n", "<leader>n", "<cmd>Telescope help_tags<cr>") -- list available help tags
+keymap.set("n", "<leader>N", "<cmd>Telescope help_tags<cr>") -- list available help tags
 keymap.set("n", "<leader>h", "<cmd>Telescope oldfiles<cr>") -- list previously opened files
 keymap.set("n", "<leader>L", "<cmd>Telescope jumplist<cr>") -- list of previous cursor positions
 keymap.set("n", "<leader>j", "<cmd>Telescope zoxide list<cr>") -- list projects by recentcy, using zoxide
@@ -89,7 +89,7 @@ keymap.set("n", "<leader>y", "<cmd>Telescope neoclip<cr>") -- list yank history
 keymap.set("n", "<leader>f", "<cmd>Telescope file_browser<cr>") -- open file file_browser switch to folder browser with ctrl-f
 keymap.set("n", "<leader>k", "<cmd>Telescope frecency<cr>") -- file frecency
 keymap.set("n", "<leader>u", "<cmd>Telescope harpoon marks<cr>") -- harpoon marks
-keymap.set("n", "<leader>m", "<cmd>Telescope metals commands<cr>")
+keymap.set("n", "<leader>M", "<cmd>Telescope metals commands<cr>")
 
 -- telescope git commands (not on youtube nvim video)
 keymap.set("n", "<leader>gc", "<cmd>Telescope git_commits<cr>") -- list all git commits (use <cr> to checkout) ["gc" for git commits]
@@ -104,12 +104,22 @@ local actions = safeCall("gitlinker.actions")
 
 which_key.register({
 	["<leader>"] = {
+		n = {
+			jayeve.open_notes,
+			"Open this week's notes",
+		},
 		C = {
 			jayeve.copy_file_path_to_clipboard,
 			"Copy cur buffer filepath",
 		},
 		g = {
 			name = "git",
+		},
+		m = {
+			function()
+				prj.tmux_session_picker()
+			end,
+			"switch tmux session",
 		},
 		p = {
 			function()

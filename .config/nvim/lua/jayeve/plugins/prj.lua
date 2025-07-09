@@ -148,6 +148,47 @@ local function split_input_on_whitespace(input)
 	return result
 end
 
+local function attach_to_tmux_session(session)
+	if vim.env.TMUX == nil then
+		-- Attach to the new session
+		os.execute("tmux attach-session -t " .. session)
+	else
+		-- Switch to the new session
+		os.execute("tmux switch-client -t " .. session)
+	end
+end
+
+function M.tmux_session_picker()
+	pickers
+		.new({}, {
+			prompt_title = "TMUX session picker",
+			finder = finders.new_table({
+				results = get_tmux_sessions(),
+				-- entry_maker = function(entry)
+				-- 	local display_name = table.concat(entry, "  ")
+				-- 	if contains(tmux_sessions, entry[2]) then
+				-- 		display_name = table.concat(entry, "  ") .. " ●"
+				-- 	end
+				-- 	return {
+				-- 		value = entry,
+				-- 		display = display_name,
+				-- 		ordinal = table.concat(entry, "/"),
+				-- 	}
+				-- end,
+			}),
+			sorter = conf.generic_sorter({}),
+			attach_mappings = function(_, _)
+				actions.select_default:replace(function(prompt_bufnr)
+					local selection = action_state.get_selected_entry()
+					actions.close(prompt_bufnr)
+					attach_to_tmux_session(selection[1])
+				end)
+				return true
+			end,
+		})
+		:find()
+end
+
 function M.git_dir_picker(root_dir)
 	local tmux_sessions = get_tmux_sessions()
 	pickers

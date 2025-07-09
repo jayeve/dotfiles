@@ -38,7 +38,7 @@ M.define_augroups({
 		{ "BufWinEnter", "*", "setlocal formatoptions-=c formatoptions-=r formatoptions-=o" },
 		{ "BufRead", "*", "setlocal formatoptions-=c formatoptions-=r formatoptions-=o" },
 		{ "BufNewFile", "*", "setlocal formatoptions-=c formatoptions-=r formatoptions-=o" },
-		{ "VimLeavePre", "*", "set title set titleold=" },
+		-- { "VimLeavePre", "*", "set title set titleold=" },
 	},
 	-- _solidity = {
 	--     {'BufWinEnter', '.sol', 'setlocal filetype=solidity'}, {'BufRead', '*.sol', 'setlocal filetype=solidity'},
@@ -136,6 +136,51 @@ function M.show_cur_location()
 	vim.notify("cur file → " .. file_str .. "\ncur dir → " .. cur_dir, vim.log.levels.INFO, {
 		title = "jayeve.utils",
 	})
+end
+
+local function open_or_create_file(filepath)
+	-- Check if the file exists
+	local file = io.open(filepath, "r")
+
+	if file then
+		vim.notify("Opening file: " .. filepath, vim.log.levels.INFO, {
+			title = "jayeve.utils",
+		})
+		file:close() -- Close the file if it exists
+	else
+		-- Create the file if it does not exist
+		local new_file = io.open(filepath, "w")
+		if new_file then
+			new_file:close()
+		else
+			vim.notify("Error: unable to create file" .. filepath, vim.log.levels.INFO, {
+				title = "jayeve.utils",
+			})
+			return
+		end
+	end
+
+	-- Open the file in a vertical split
+	vim.cmd("edit " .. vim.fn.fnameescape(filepath))
+end
+
+local function get_monday_date()
+	-- Get current date
+	local now = os.time()
+	local current_date = os.date("*t", now)
+
+	-- Determine how many days to subtract to get to Monday
+	local days_to_monday = (current_date.wday - 2) % 7
+	local monday_time = now - (days_to_monday * 86400)
+
+	-- Format the date as YYYY.MM.DD
+	return os.date("%Y.%m.%d", monday_time)
+end
+
+function M.open_notes()
+	-- Get the current buffer's file path
+	local path = "/Users/jevans/cloudflare/vaults/work/weekly-notes/week-of-" .. get_monday_date() .. ".md"
+	open_or_create_file(path)
 end
 
 -- Define a function to copy the file path to the clipboard
