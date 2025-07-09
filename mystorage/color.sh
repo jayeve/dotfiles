@@ -16,10 +16,10 @@
 # thm_black4="#626880"
 get_current_storage_color() {
   if [[ "$(uname)" == "Darwin" ]]; then
-    current_storage="$(df -h / | awk 'NR==2 {gsub("%","",$5); print 100 - $5}')"
-    if (( current_storage <= 33 )); then
+    current_storage="$(df -k / | awk 'NR==2 {printf "%.2f\n", ($4 / $2) * 100}')"
+    if (( current_storage <= 15 )); then
       echo "#e78284" # thm_red
-    elif (( current_storage <= 66 )); then
+    elif (( current_storage <= 40 )); then
       echo "#e5c890" # thm_yellow
     else
       echo "#a6d189" #thm_green
