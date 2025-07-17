@@ -148,16 +148,31 @@ local function open_or_create_file(filepath)
 		})
 		file:close() -- Close the file if it exists
 	else
-		-- Create the file if it does not exist
-		local new_file = io.open(filepath, "w")
-		if new_file then
-			new_file:close()
-		else
-			vim.notify("Error: unable to create file" .. filepath, vim.log.levels.INFO, {
-				title = "jayeve.utils",
-			})
-			return
+		-- Create template if file doesn't exist
+		local weekdays = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" }
+		local lines = {}
+
+		for _, day in ipairs(weekdays) do
+			table.insert(lines, "# " .. day)
+			table.insert(lines, "")
+			table.insert(lines, "## Tasks")
+			table.insert(lines, "")
+			table.insert(lines, "- [ ]")
+			table.insert(lines, "- [ ]")
+			table.insert(lines, "")
 		end
+
+		vim.fn.writefile(lines, filepath)
+		vim.cmd("edit " .. filepath)
+		-- local new_file = io.open(filepath, "w")
+		-- if new_file then
+		-- 	new_file:close()
+		-- else
+		-- 	vim.notify("Error: unable to create file" .. filepath, vim.log.levels.INFO, {
+		-- 		title = "jayeve.utils",
+		-- 	})
+		-- 	return
+		-- end
 	end
 
 	-- Open the file in a vertical split
@@ -175,6 +190,12 @@ local function get_monday_date()
 
 	-- Format the date as YYYY.MM.DD
 	return os.date("%Y.%m.%d", monday_time)
+end
+
+function M.open_personal_notes()
+	-- Get the current buffer's file path
+	local path = "/Users/jevans/vaults/personal/weekly-notes/week-of-" .. get_monday_date() .. ".md"
+	open_or_create_file(path)
 end
 
 function M.open_notes()

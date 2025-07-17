@@ -104,9 +104,13 @@ local actions = safeCall("gitlinker.actions")
 
 which_key.register({
 	["<leader>"] = {
+		N = {
+			jayeve.open_personal_notes,
+			"Open this week's personal notes",
+		},
 		n = {
 			jayeve.open_notes,
-			"Open this week's notes",
+			"Open this week's weekly notes",
 		},
 		C = {
 			jayeve.copy_file_path_to_clipboard,
