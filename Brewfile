@@ -57,6 +57,7 @@ brew "htop" # a prettier 'top'
 brew "hugo" # template-based static site generator
 brew "iftop" # 'top' for network interfaces
 brew "imagemagick" # create, compress, convert images
+brew "img2pdf" # create pdf from jpg, png, jpeg, etc.
 brew "java"
 brew "jpegoptim" # optimise JPEG images
 brew "jzelinskie/faq/faq" # like jq for JSON, but more formats (https://github.com/jzelinskie/faq)
@@ -95,6 +96,7 @@ brew "octant" # 'top' for kubernetes
 brew "openmtp" # file transfer
 brew "optipng" # PNG file optimization utility
 brew "p7zip" # 7-Zip file archiver
+brew "pandoc" # docx -> pdf converter
 brew "par" # a paragraph [of text] formatting tool
 brew "parallel" # run a command on multiple cores
 brew "php"
@@ -150,13 +152,16 @@ brew "zoxide" # a better 'cd' command, and better than autojump
 brew "zsh" # default MacOS shell
 brew "zstd" # Zstandard compression
 cask "1password" # password manager
+cask "libreoffice" # docx -> pdf convertion
 cask "localsend" # like airdrop
 cask "alacritty" # terminal in rust, easier to configure
 cask "amethyst" # a shitty automatic tiling window manager
 cask "android-platform-tools" # android dev tools
 cask "anki" # a notecard app
+cask "hammerspoon" # used with karabiner-elements to print custom elements (like →)
 cask "karabiner-elements" # keyboard key configuration app
 cask "macdown" # Markdown text editor
+cask "mactex" # pdf engine for pandoc
 cask "rectangle" # a manual tiling window manager
 cask "inkscape" # for building keycap legends
 cask "font-fira-code" # more icons in my font

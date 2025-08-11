@@ -155,11 +155,6 @@ local function open_or_create_file(filepath)
 		for _, day in ipairs(weekdays) do
 			table.insert(lines, "# " .. day)
 			table.insert(lines, "")
-			table.insert(lines, "## Tasks")
-			table.insert(lines, "")
-			table.insert(lines, "- [ ]")
-			table.insert(lines, "- [ ]")
-			table.insert(lines, "")
 		end
 
 		vim.fn.writefile(lines, filepath)
