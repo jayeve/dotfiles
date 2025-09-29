@@ -27,32 +27,66 @@ mason.setup({
 	log_level = vim.log.levels.OFF,
 })
 
-mason_lspconfig.setup({
-	-- list of servers for mason to install
-	ensure_installed = {
-		"intelephense",
-		"tsserver",
-		"html",
-		"cssls",
-		"tailwindcss",
-		"lua_ls",
-		"rust_analyzer",
-		"pyright",
-		"clangd",
-		"gopls",
-	},
-	-- auto-install configured servers (with lspconfig)
-	automatic_installation = true, -- not the same as ensure_installed
-})
 
-mason_null_ls.setup({
-	-- list of formatters & linters for mason to install
-	ensure_installed = {
-		"rustfmt", -- rust formatter
-		"prettier", -- ts/js formatter
-		"stylua", -- lua formatter
-		"eslint_d", -- ts/js linter
-	},
-	-- auto-install configured formatters & linters (with null-ls)
-	automatic_installation = true,
-})
+local os_name = vim.loop.os_uname().sysname
+if os_name == "Darwin" then
+  mason_lspconfig.setup({
+    -- list of servers for mason to install
+    ensure_installed = {
+      "intelephense",
+      "tsserver",
+      "html",
+      "cssls",
+      "tailwindcss",
+      "lua_ls",
+      "rust_analyzer",
+      "pyright",
+      "clangd",
+      "gopls",
+    },
+    -- auto-install configured servers (with lspconfig)
+    automatic_installation = true, -- not the same as ensure_installed
+  })
+
+  mason_null_ls.setup({
+    -- list of formatters & linters for mason to install
+    ensure_installed = {
+      "rustfmt", -- rust formatter
+      "prettier", -- ts/js formatter
+      "stylua", -- lua formatter
+      "eslint_d", -- ts/js linter
+    },
+    -- auto-install configured formatters & linters (with null-ls)
+    automatic_installation = true,
+  })
+elseif os_name == "Linux" then
+  mason_lspconfig.setup({
+    -- list of servers for mason to install
+    ensure_installed = {
+      "intelephense",
+      "tsserver",
+      "html",
+      "cssls",
+      "tailwindcss",
+      "lua_ls",
+      "rust_analyzer",
+      "pyright",
+      -- "clangd",
+      -- "gopls",
+    },
+    -- auto-install configured servers (with lspconfig)
+    automatic_installation = true, -- not the same as ensure_installed
+  })
+
+  mason_null_ls.setup({
+    -- list of formatters & linters for mason to install
+    ensure_installed = {
+      -- "rustfmt", -- rust formatter
+      "prettier", -- ts/js formatter
+      "stylua", -- lua formatter
+      "eslint_d", -- ts/js linter
+    },
+    -- auto-install configured formatters & linters (with null-ls)
+    automatic_installation = true,
+  })
+end
