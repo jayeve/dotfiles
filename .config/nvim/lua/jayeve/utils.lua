@@ -1,7 +1,7 @@
 local M = {}
 
 function M.check_lsp_client_active(name)
-	local clients = vim.lsp.get_active_clients()
+	local clients = vim.lsp.get_clients()
 	for _, client in pairs(clients) do
 		if client.name == name then
 			return true
@@ -24,7 +24,7 @@ function M.define_augroups(definitions) -- {{{1
 		vim.cmd("autocmd!")
 
 		for _, def in pairs(definition) do
-			local command = table.concat(vim.tbl_flatten({ "autocmd", def }), " ")
+      local command = table.concat(vim.iter({ "autocmd", def }):flatten():totable(), " ")
 			vim.cmd(command)
 		end
 
@@ -34,7 +34,7 @@ end
 
 M.define_augroups({
 	_general_settings = {
-		{ "TextYankPost", "*", "lua require('vim.highlight').on_yank({higroup = 'Search', timeout = 200})" },
+		{ "TextYankPost", "*", "lua require('vim.hl').on_yank({higroup = 'Search', timeout = 200})" },
 		{ "BufWinEnter", "*", "setlocal formatoptions-=c formatoptions-=r formatoptions-=o" },
 		{ "BufRead", "*", "setlocal formatoptions-=c formatoptions-=r formatoptions-=o" },
 		{ "BufNewFile", "*", "setlocal formatoptions-=c formatoptions-=r formatoptions-=o" },
@@ -80,7 +80,7 @@ vim.cmd([[
 endfunction
 ]])
 
-local function find_git_root()
+local function find_current_buffer_git_root()
 	local dot_git_path = vim.fn.finddir(".git", ".;")
 	local is_git_project = vim.fn.fnamemodify(dot_git_path, ":t") == ".git"
 	return is_git_project and vim.fn.fnamemodify(vim.fn.fnamemodify(dot_git_path, ":p"), ":h:h") or nil
@@ -119,7 +119,7 @@ function M.file_exists(name)
 end
 
 function M.cd_to_git_root()
-	local git_root = find_git_root()
+	local git_root = find_current_buffer_git_root()
 	if git_root then
 		vim.cmd.cd(git_root)
 	else
@@ -226,46 +226,177 @@ function M.cd_to_current_buf_directory()
 	end
 end
 
-local function is_blank(bufnr)
-	bufnr = bufnr or 0 -- Default to current buffer if bufnr is not provided
-	local bufname = vim.fn.bufname(bufnr)
-	if vim.fn.empty(bufname) == 1 then
-		-- Buffer is unnamed, now check if it's empty
-		local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-		for _, line in ipairs(lines) do
-			if not vim.trim(line) == "" then
-				return false -- Non-empty line found, buffer is not empty
+-- Save as: lua/gitlab_blame_link.lua (or put in your config directly)
+-- Provides :GitlabBlameLink to open the MR (or commit) for the current line.
+
+local function syslist(cmd)
+	-- Prefer vim.system if present (nvim 0.10+), otherwise fallback to systemlist
+	if vim.system then
+		local res = vim.system(cmd, { text = true }):wait()
+		if res.code ~= 0 then
+			return nil, res.stderr
+		end
+		local out = {}
+		for line in string.gmatch(res.stdout or "", "([^\n]*)\n?") do
+			if line ~= "" then
+				table.insert(out, line)
 			end
 		end
-		return true -- All lines are empty, buffer is empty and unnamed
+		return out, nil
 	else
-		return false -- Buffer has a name, so it's not both empty and unnamed
+		local out = vim.fn.systemlist(cmd)
+		if vim.v.shell_error ~= 0 then
+			return nil, table.concat(out or {}, "\n")
+		end
+		return out, nil
 	end
 end
 
-local function exist_other_buffers(target_bufnr)
-	local buf_list = vim.fn.getbufinfo({ buflisted = 1 })
-	for _, buf_info in ipairs(buf_list) do
-		if buf_info.bufnr ~= target_bufnr then
-			return true
+local function git_remote_url(root)
+	local out = syslist({ "git", "-C", root, "remote", "get-url", "origin" })
+	return out and out[1] or nil
+end
+
+local function normalize_gitlab_base(remote)
+	-- Convert git@host:group/repo.git -> https://host/group/repo
+	-- Convert https://host/group/repo(.git)? -> https://host/group/repo
+	if not remote then
+		return nil
+	end
+	local host, path
+
+	-- ssh form
+	local ssh_host, ssh_path = remote:match("^git@([^:]+):(.+)$")
+	if ssh_host then
+		host, path = ssh_host, ssh_path
+	else
+		-- https form
+		local prot, https_host, https_path = remote:match("^(https?://)([^/]+)/(.+)$")
+		if https_host then
+			host, path = https_host, https_path
 		end
 	end
-	return false
+	if not host or not path then
+		return nil
+	end
+	path = path:gsub("%.git$", "")
+	return ("https://%s/%s"):format(host, path)
 end
 
-local function is_empty_vim()
-	local current_bufnr = vim.fn.bufnr("")
-	return is_blank(current_bufnr) and not exist_other_buffers(current_bufnr)
+local function blame_commit_sha(absfile, lnum)
+	local current_buf_git_root = find_current_buffer_git_root()
+	-- Use porcelain blame so the commit is predictable to parse
+	local out, err = syslist({
+		"git",
+		"-C",
+		current_buf_git_root,
+		"blame",
+		"-L",
+		("%d,%d"):format(lnum, lnum),
+		"--porcelain",
+		"--",
+		absfile,
+	})
+	if not out then
+		return nil, ("git blame failed: %s"):format(err or "unknown")
+	end
+	-- First line starts with "<sha> <orig-lineno> <lineno> <numlines>"
+	local sha = out[1] and out[1]:match("^([0-9a-f]+) ")
+	if sha == "0000000000000000000000000000000000000000" then
+		return nil, "Line is not committed yet"
+	end
+	return sha, nil
 end
 
--- vim.api.nvim_create_autocmd({ "VimEnter" }, {
--- 	callback = function()
--- 		if is_empty_vim() then
--- 			require("telescope").extensions.zoxide.list()
--- 			-- require("telescope.builtin").oldfiles()
--- 			-- vim.cmd("Telescope frecency")
--- 		end
--- 	end,
--- })
+local function commit_body(sha)
+	local out = syslist({ "git", "show", "-s", "--format=%B", sha })
+	if not out then
+		return ""
+	end
+	return table.concat(out, "\n")
+end
+
+local function open_url(url)
+	-- Try nvim's opener; otherwise OS open
+	if vim.ui and vim.ui.open then
+		vim.ui.open(url)
+	else
+		local uname = syslist({ "uname" })
+		if uname and uname[1] and uname[1]:match("Darwin") then
+			syslist({ "open", url })
+		else
+			syslist({ "xdg-open", url })
+		end
+	end
+end
+
+function M.open_gitlab_link_for_current_line()
+	-- Preconditions: inside a git repo, file tracked
+	local root = find_current_buffer_git_root()
+	if not root then
+		vim.notify("Not inside a Git repository", vim.log.levels.ERROR, { title = "jayeve.utils" })
+		return
+	end
+
+	local bufnr = vim.api.nvim_get_current_buf()
+	local file = vim.api.nvim_buf_get_name(bufnr)
+	if file == "" then
+		vim.notify("Buffer has no name", vim.log.levels.ERROR, { title = "jayeve.utils" })
+		return
+	end
+
+	-- Get line number (1-based)
+	local lnum = vim.api.nvim_win_get_cursor(0)[1]
+
+	-- Find introducing commit
+	local sha, err = blame_commit_sha(file, lnum)
+	if not sha then
+		vim.notify(err or "Failed to find blame commit", vim.log.levels.ERROR, { title = "jayeve.utils" })
+		return
+	end
+
+	-- Build GitLab base URL from remote
+	local remote = git_remote_url(find_current_buffer_git_root())
+	local base = normalize_gitlab_base(remote)
+	if not base or not base:match("gitlab") then
+		-- Fallback: just echo the commit
+		vim.notify(
+			("Commit %s (remote not GitLab?): %s"):format(sha, remote or "nil"),
+			vim.log.levels.WARN,
+			{ title = "jayeve.utils" }
+		)
+		return
+	end
+
+	-- Try to detect MR number in commit body (e.g., "See merge request !123")
+	local body = commit_body(sha)
+	local mr = body:match("!([0-9]+)")
+	vim.notify(body, vim.log.levels.INFO, { title = "jayeve.utils" })
+
+	if mr then
+		local mr_url = ("%s/-/merge_requests/%s"):format(base, mr)
+		vim.notify(("Opening MR !%s (commit %s)"):format(mr, sha), vim.log.levels.INFO, { title = "jayeve.utils" })
+		open_url(mr_url)
+	else
+		-- Open a search page scoped to merge requests for this SHA (works in many setups)
+		local search_url = ("%s/-/commit/%s"):format(base, sha)
+    vim.fn.setreg("+", search_url)
+    -- optional: notify user
+    vim.notify(
+      "Copied to clipboard: " .. search_url,
+			vim.log.levels.INFO,
+			{ title = "jayeve.utils" }
+    )
+		vim.notify(
+			("Opening commit (no MR tag found). Commit: %s"):format(sha),
+			vim.log.levels.INFO,
+			{ title = "jayeve.utils" }
+		)
+		-- Prefer MR search; if your instance is private, at least commit URL is useful:
+		open_url(search_url)
+		-- Uncomment to also open the specific commit page:
+		-- open_url(commit_url)
+	end
+end
 
 return M

@@ -119,6 +119,10 @@ which_key.register({
 		g = {
 			name = "git",
 		},
+		gC = {
+			jayeve.open_gitlab_link_for_current_line,
+			"Open gitlab MR or commit",
+		},
 		m = {
 			function()
 				prj.tmux_session_picker()

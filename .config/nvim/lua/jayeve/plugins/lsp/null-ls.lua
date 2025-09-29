@@ -1,5 +1,5 @@
 -- import null-ls plugin safely
-local setup, null_ls = pcall(require, "null-ls")
+local setup, null_ls = pcall(require, "none-ls")
 if not setup then
 	local info = debug.getinfo(1, "S").short_src
 	print(info, "failed to load")
@@ -39,7 +39,7 @@ null_ls.setup({
 					vim.lsp.buf.format({
 						filter = function(client)
 							--  only use null-ls for formatting instead of lsp server
-							return client.name == "null-ls"
+							return client.name == "none-ls"
 						end,
 						bufnr = bufnr,
 					})

@@ -150,3 +150,6 @@ export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init --path)"
 eval "$(pyenv init -)"
+
+# Added by Windsurf
+export PATH="/Users/jevans/.codeium/windsurf/bin:$PATH"

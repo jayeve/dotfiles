@@ -1,46 +1,95 @@
--- import lualine plugin safely
+-- safely import lualine
 local status, lualine = pcall(require, "lualine")
 if not status then
-	local info = debug.getinfo(1, "S").short_src
-	print(info, "failed to load")
-	return
+  local info = debug.getinfo(1, "S").short_src
+  print(info, "failed to load")
+  return
 end
 
--- get lualine nightfly theme
-local lualine_nightfly = require("lualine.themes.nightfly")
--- local gruvbox = require("lualine.themes.gruvbox")
+-- base theme: nightfly
+local nightfly = require("lualine.themes.nightfly")
 
--- new colors for theme
-local new_colors = {
-	blue = "#65D1FF",
-	green = "#33ff68",
-	violet = "#FF61EF",
-	yellow = "#FFDA7B",
-	black = "#000000",
-	purple = "af33ff",
-	light_purple = "#9153d3",
-	white = "#ffffff",
+-- dark-mode friendly pastel lavender colors
+local dark_pastel = {
+  bg_dark       = "#1e1e2e",  -- main background (matches terminal)
+  fg_light      = "#e0d9f0",  -- text on dark bg
+  lavender      = "#9b7fbf",  -- deeper pastel lavender
+  light_lavender= "#bfa3e0",  -- highlight/secondary
+  blue          = "#7fbce0",
+  green         = "#80d080",
+  yellow        = "#e0d07f",
+  pink          = "#e0a3b0",
+  gray          = "#2e2e3e",  -- inactive sections
 }
 
--- change nightlfy theme colors
-lualine_nightfly.normal.a.fg = new_colors.black
-lualine_nightfly.normal.a.bg = new_colors.light_purple
-lualine_nightfly.insert.a.bg = new_colors.blue
-lualine_nightfly.visual.a.bg = new_colors.green
-lualine_nightfly.command = {
+-- normal mode
+nightfly.normal.a.fg = dark_pastel.bg_dark
+nightfly.normal.a.bg = dark_pastel.lavender
+nightfly.normal.b.fg = dark_pastel.fg_light
+nightfly.normal.b.bg = dark_pastel.bg_dark
+
+-- insert mode
+nightfly.insert.a.fg = dark_pastel.bg_dark
+nightfly.insert.a.bg = dark_pastel.blue
+nightfly.insert.b.fg = dark_pastel.fg_light
+nightfly.insert.b.bg = dark_pastel.bg_dark
+
+-- visual mode
+nightfly.visual.a.fg = dark_pastel.bg_dark
+nightfly.visual.a.bg = dark_pastel.green
+nightfly.visual.b.fg = dark_pastel.fg_light
+nightfly.visual.b.bg = dark_pastel.bg_dark
+
+-- replace mode
+nightfly.replace.a.fg = dark_pastel.bg_dark
+nightfly.replace.a.bg = dark_pastel.pink
+nightfly.replace.b.fg = dark_pastel.fg_light
+nightfly.replace.b.bg = dark_pastel.bg_dark
+
+-- command mode
+nightfly.command = {
 	a = {
 		gui = "bold",
-		bg = new_colors.yellow,
-		fg = new_colors.black, -- black
+		bg = dark_pastel.yellow,
+		fg = dark_pastel.bg_dark, -- black
+	},
+	b = {
+		gui = "bold",
+		bg = dark_pastel.bg_dark,
+		fg = dark_pastel.fg_light, -- black
 	},
 }
 
--- configure lualine with modified theme
+-- inactive
+nightfly.inactive.a.bg = dark_pastel.gray
+nightfly.inactive.a.fg = dark_pastel.fg_light
+nightfly.inactive.b.bg = dark_pastel.gray
+nightfly.inactive.b.fg = dark_pastel.fg_light
+
+-- setup lualine
 lualine.setup({
-	options = {
-		theme = lualine_nightfly,
-	},
-	sections = {
-		lualine_x = { "encoding", "fileformat", "filetype" },
-	},
+  options = {
+    theme = nightfly,
+    component_separators = { left = "", right = "" },
+    section_separators = { left = "", right = "" },
+    icons_enabled = true,
+  },
+  sections = {
+    lualine_a = { "mode" },
+    lualine_b = { "branch", "diff" },
+    lualine_c = { "filename" },
+    lualine_x = { "encoding", "fileformat", "filetype" },
+    lualine_y = { "progress" },
+    lualine_z = { "location" },
+  },
+  inactive_sections = {
+    lualine_a = {},
+    lualine_b = {},
+    lualine_c = { "filename" },
+    lualine_x = { "location" },
+    lualine_y = {},
+    lualine_z = {},
+  },
+  tabline = {},
+  extensions = {},
 })
