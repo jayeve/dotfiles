@@ -1,58 +1,57 @@
-# add the argument to $PATH only if it's not already present
-function extend_path() {
-  [[ ":$PATH:" != *":$1:"* ]] && export PATH="$1:$PATH"
-}
+# Load colors
+autoload -Uz colors && colors
 
-# default editor
-export EDITOR=$(which nvim)
-export XDG_CONFIG_HOME="$HOME/.config"
+# History settings
+HISTFILE=~/.zsh_history
+HISTSIZE=5000
+SAVEHIST=5000
+# append to history, don’t overwrite
+setopt append_history
 
-# use neovim as manpager
-export MANPAGER='nvim +Man!'
-export MANWIDTH=80
+# write to history immediately after each command
+setopt inc_append_history
 
-# source a script, if it exists
-function source_if_exists() { [[ -s $1 ]] && source $1 || true }
+# remove duplicate entries
+setopt hist_ignore_dups hist_ignore_space
 
-# profile startup
-zmodload zsh/zprof
+# share history across all sessions
+setopt share_history
 
-# less
-export PAGER='less'
-export LESS='-F -g -i -M -R -S -w -X -z-4'
-if (( $+commands[lesspipe.sh] )); then
-  export LESSOPEN='| /usr/bin/env lesspipe.sh %s 2>&-'
-fi
+# optional: ignore commands starting with space
+setopt hist_ignore_space
 
-# Path to your oh-my-zsh installation.
-export ZSH="$HOME/.oh-my-zsh"
-source_if_exists $ZSH/oh-my-zsh.sh
-
-# zoxide for quicker directory changes
+# Completion system (with caching, but faster than OMZ)
 autoload -Uz compinit
-compinit -i
-# add ~/.local/bin to $PATH if it exists. necessary for zoxide
-[[ -d "$HOME/.local/bin" ]] && extend_path "$HOME/.local/bin"
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path "$HOME/.cache/zsh"
+mkdir -p "$HOME/.cache/zsh"
+compinit -d "$HOME/.cache/zcompdump"
 
-eval "$(zoxide init zsh)"
+# Editor / pager
+export EDITOR=nvim
+export PAGER=less
+export LESS='-F -g -i -M -R -S -w -X -z-4'
 
-plugins=(
-  git
-  docker
-  docker-compose
-  fzf
-  kubectl
-  kubectx
-  # fzf-tab
-  zsh-autosuggestions
-  fast-syntax-highlighting
-)
+# PATH extension helper
+extend_path() { [[ ":$PATH:" != *":$1:"* ]] && PATH="$1:$PATH" }
+extend_path "$HOME/.local/bin"
+extend_path "$HOME/bin"
 
-# Set name of the theme to load --- if set to "random", it will
-# load a random theme each time oh-my-zsh is loaded, in which case,
-# to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="j"
+# Aliases
+alias ll='ls -lh'
+alias la='ls -lha'
+alias gs='git status'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git pull'
+
+# Useful extras (optional)
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
+fi
+if command -v fzf >/dev/null 2>&1; then
+  source <(fzf --zsh)
+fi
 
 # cross-platform clipboard
 if which xclip > /dev/null; then
@@ -60,15 +59,8 @@ if which xclip > /dev/null; then
   alias pbpaste='xclip -selection clipboard -o'
 fi
 
-#if which rg > /dev/null; then export RIPGREP_CONFIG_PATH=$HOME/.ripgreprc; fi
-
-source_if_exists "$HOME/.gvm/scripts/gvm"
-source_if_exists "$HOME/.iterm2_shell_integration.zsh"
-source_if_exists "$HOME/.nix-profile/etc/profile.d/nix.sh"
-
 source_if_exists "$HOME/.work_functions.zsh"
 source_if_exists "$HOME/.zsh_aliases"
-source_if_exists "$HOME/.aws/token_profile"
 
 # fe [FUZZY PATTERN] - Open the selected file with the default editor
 #   - Bypass fuzzy finder if there's only one match (--select-1)
@@ -130,26 +122,69 @@ gch () {
     xargs git checkout
 }
 
+# basic setup
+# allow $(...) in PROMPT
+setopt prompt_subst
 
-# airport network utility
-sys_name=$(uname -s)
-if [[ $sys_name == "Darwin" ]]; then
-  ln -s /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport /usr/sbin/airport
-elif [[ $sys_name == "Linux" ]]; then
-  echo "airport not supported on Linux"
-else
-  echo "Unknown system. sorry Windows"
-fi
+# git_info: command substitution will be evaluated when prompt is shown
+git_info() {
 
-export DOCKER_DEFAULT_PLATFORM=linux/amd64
-export NVM_DIR="$HOME/.nvm"
-  [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
-  [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+  # Exit if not inside a Git repository
+  ! git rev-parse --is-inside-work-tree > /dev/null 2>&1 && return
 
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init --path)"
-eval "$(pyenv init -)"
+  # Git branch/tag, or name-rev if on detached head
+  local GIT_LOCATION=${$(git symbolic-ref -q HEAD || git name-rev --name-only --no-undefined --always HEAD)#(refs/heads/|tags/)}
 
-# Added by Windsurf
-export PATH="/Users/jevans/.codeium/windsurf/bin:$PATH"
+  local cpu_name="j@cloudflare"
+  local AHEAD="%{$fg[yellow]%}⇡NUM%{$reset_color%}"
+  local BEHIND="%{$fg[cyan]%}⇣NUM%{$reset_color%}"
+  local MERGING="%{$fg[magenta]%}%{$reset_color%}"
+  local UNTRACKED="%{$fg[red]%}●%{$reset_color%}"
+  local MODIFIED="%{$fg[red]%}●%{$reset_color%}"
+  local STAGED="%{$fg[green]%}●%{$reset_color%}"
+
+  local -a DIVERGENCES
+  local -a FLAGS
+
+  local NUM_AHEAD="$(git log --oneline @{u}.. 2> /dev/null | wc -l | tr -d ' ')"
+  if [ "$NUM_AHEAD" -gt 0 ]; then
+    DIVERGENCES+=( "${AHEAD//NUM/$NUM_AHEAD}" )
+  fi
+
+  local NUM_BEHIND="$(git log --oneline ..@{u} 2> /dev/null | wc -l | tr -d ' ')"
+  if [ "$NUM_BEHIND" -gt 0 ]; then
+    DIVERGENCES+=( "${BEHIND//NUM/$NUM_BEHIND}" )
+  fi
+
+  local GIT_DIR="$(git rev-parse --git-dir 2> /dev/null)"
+  if [ -n $GIT_DIR ] && test -r $GIT_DIR/MERGE_HEAD; then
+    FLAGS+=( "$MERGING" )
+  fi
+
+  if [[ -n $(git ls-files --other --exclude-standard 2> /dev/null) ]]; then
+    FLAGS+=( "$UNTRACKED" )
+  fi
+
+  if ! git diff --quiet 2> /dev/null; then
+    FLAGS+=( "$MODIFIED" )
+  fi
+
+  if ! git diff --cached --quiet 2> /dev/null; then
+    FLAGS+=( "$STAGED" )
+  fi
+
+  local -a GIT_INFO
+  [ -n "$GIT_STATUS" ] && GIT_INFO+=( "$GIT_STATUS" )
+  [[ ${#DIVERGENCES[@]} -ne 0 ]] && GIT_INFO+=( "${(j::)DIVERGENCES}" )
+  [[ ${#FLAGS[@]} -ne 0 ]] && GIT_INFO+=( "${(j::)FLAGS}" )
+  GIT_INFO+=( "\033[38;5;15m$GIT_LOCATION%{$reset_color%}" )
+  echo "$fg[red][${(j: :)GIT_INFO}$fg[red]]"
+}
+OS=$(uname -s)
+OS_LOWER="${OS:l}"
+# PROMPT: uses prompt escapes (%F{color}, %B/%b for bold, %~ for path, etc.)
+PROMPT=$'%F{red}┌─%(?,,%F{red}[%F{red}%B✗%b%f%F{red}]─)[%F{cyan}%~%f%F{red}]-$(git_info)-[%F{cyan}%W-%@%F{red}]-[%F{green}jobs: %j%F{red}]
+%F{red}└───[%B%F{green}$(whoami)@$OS_LOWER%F{red}]╼ %B%F{yellow}%(!.#.$)%b%f '
+
+# PS2 (continuation prompt)
+PS2=$' %F{green}|>%f '

@@ -35,7 +35,6 @@ alias fixup="git commit -a --fixup=HEAD"
 # alias vi="/usr/local/Cellar/vim/8.1.0500_1/bin/vim" # use brew's vim because --with-python3
 alias all="vi -p *"
 
-alias sss="source ~/.zshrc"
 
 # zoxide to j to put on a home key (default autojump command)
 alias j="z"

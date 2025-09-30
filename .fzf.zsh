@@ -1,13 +1,9 @@
 # Setup fzf
-# ---------
-if [[ ! "$PATH" == */Users/jevans/.fzf/bin* ]]; then
-  PATH="${PATH:+${PATH}:}/Users/jevans/.fzf/bin"
+if [[ ! "$PATH" == *$HOME/.fzf/bin* ]]; then
+  PATH="${PATH:+${PATH}:}$HOME/.fzf/bin"
 fi
 
 # Auto-completion
-# ---------------
-source "/Users/jevans/.fzf/shell/completion.zsh"
-
+source_if_exists "$HOME/.fzf/shell/completion.zsh"
 # Key bindings
-# ------------
-source "/Users/jevans/.fzf/shell/key-bindings.zsh"
+source_if_exists "$HOME/.fzf/shell/key-bindings.zsh"
