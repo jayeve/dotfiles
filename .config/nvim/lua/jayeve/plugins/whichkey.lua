@@ -102,125 +102,88 @@ local which_key = safeCall("which-key")
 local gitlinker = safeCall("gitlinker")
 local actions = safeCall("gitlinker.actions")
 
-which_key.register({
-	["<leader>"] = {
-		N = {
-			jayeve.open_personal_notes,
-			"Open this week's personal notes",
-		},
-		n = {
-			jayeve.open_notes,
-			"Open this week's weekly notes",
-		},
-		C = {
-			jayeve.copy_file_path_to_clipboard,
-			"Copy cur buffer filepath",
-		},
-		g = {
-			name = "git",
-		},
-		gC = {
-			jayeve.open_gitlab_link_for_current_line,
-			"Open gitlab MR or commit",
-		},
-		m = {
-			function()
-				prj.tmux_session_picker()
-			end,
-			"switch tmux session",
-		},
-		p = {
-			function()
-				local base = os.getenv("HOME") .. "/cloudflare"
-				prj.git_dir_picker(base)
-			end,
-			"open CF project in tmux",
-		},
-		P = {
-			togglePurple,
-			"Toggle Purple Display",
-		},
-		a = {
-			function()
-				vim.api.nvim_call_function("ToggleRTL", {})
-			end,
-			"Toggle Arabic (Left -> Right) mode",
-		},
-		i = {
-			name = "Harpoon",
-			a = { harpoon_mark.add_file, "add file to harpoon" },
-			r = { harpoon_mark.remove_file, "remove file from harpoon" },
-			l = { harpoon_ui.toggle_quick_menu, "Toggle quick menu" },
-		},
-		q = {
-			function()
-				vim.cmd("bdelete")
-			end,
-			"close current buffer",
-		},
-		B = {
-			function()
-				gitlinker.get_repo_url({ action_callback = actions.open_in_browser })
-			end,
-			"open ref link in browser",
-		},
-		z = {
-			function()
-				vim.cmd("ZenMode")
-			end,
-			"Zen mode",
-		},
+which_key.add({
+	{ "<leader>N", jayeve.open_personal_notes, desc = "Open this week's personal notes" },
+	{ "<leader>n", jayeve.open_notes, desc = "Open this week's weekly notes" },
+	{ "<leader>C", jayeve.copy_file_path_to_clipboard, desc = "Copy cur buffer filepath" },
+	{ "<leader>gC", jayeve.open_gitlab_link_for_current_line, desc = "Open gitlab MR or commit" },
+	{
+		"<leader>m",
+		function()
+			prj.tmux_session_picker()
+		end,
+		desc = "switch tmux session",
 	},
-	["<leader>="] = {
+	{
+		"<leader>p",
+		function()
+			local base = os.getenv("HOME") .. "/cloudflare"
+			prj.git_dir_picker(base)
+		end,
+		desc = "open CF project in tmux",
+	},
+	{ "<leader>P", togglePurple, desc = "Toggle Purple Display" },
+	{
+		"<leader>a",
+		function()
+			vim.api.nvim_call_function("ToggleRTL", {})
+		end,
+		desc = "Toggle Arabic (Left -> Right) mode",
+	},
+	{ "<leader>ia", harpoon_mark.add_file, desc = "add file to harpoon" },
+	{ "<leader>ir", harpoon_mark.remove_file, desc = "remove file from harpoon" },
+	{ "<leader>il", harpoon_ui.toggle_quick_menu, desc = "Toggle quick menu" },
+	{
+		"<leader>q",
+		function()
+			vim.cmd("bdelete")
+		end,
+		desc = "close current buffer",
+	},
+	{
+		"<leader>B",
+		function()
+			gitlinker.get_repo_url({ action_callback = actions.open_in_browser })
+		end,
+		desc = "open ref link in browser",
+	},
+	{
+		"<leader>z",
+		function()
+			vim.cmd("ZenMode")
+		end,
+		desc = "Zen mode",
+	},
+	{
+		"<leader>=",
 		function()
 			vim.api.nvim_input("<C-w>=")
 		end,
-		"equalize windows",
+		desc = "equalize windows",
 	},
-	["<leader>g."] = {
-		-- use nvim_create_user_command("NameOfCommand")and put in a standalon file
-		jayeve.cd_to_git_root,
-		"cd into cur buf's git root",
-	},
-	["<leader>."] = {
-		jayeve.cd_to_current_buf_directory,
-		"cd into cur buf's dir",
-	},
-	["<c-g>"] = {
-		jayeve.show_cur_location,
-		"show current location",
-	},
-	-- ["g"] = {
-	-- 	t = {
-	-- 		function()
-	-- 			vim.cmd("BufferLineCycleNext")
-	-- 		end,
-	-- 		"BufferLineCycleNext",
-	-- 	},
-	-- 	T = {
-	-- 		function()
-	-- 			vim.cmd("BufferLineCyclePrev")
-	-- 		end,
-	-- 		"BufferLineCyclePrev",
-	-- 	},
-	-- },
-	["]q"] = {
+	{ "<leader>g.", jayeve.cd_to_git_root, desc = "cd into cur buf's git root" },
+	{ "<leader>.", jayeve.cd_to_current_buf_directory, desc = "cd into cur buf's dir" },
+	{ "<c-g>", jayeve.show_cur_location, desc = "show current location" },
+	{
+		"]q",
 		function()
 			vim.cmd("cnext")
 		end,
-		"Next in quickfix list",
+		desc = "Next in quickfix list",
 	},
-	["[q"] = {
+	{
+		"[q",
 		function()
 			vim.cmd("cprev")
 		end,
-		"Prev in quickfix list",
+		desc = "Prev in quickfix list",
 	},
-	["<leader>I"] = {
+	{
+		"<leader>I",
 		function()
 			vim.cmd("IBLToggle")
 		end,
-		"toggle indent marker lines",
+		desc = "toggle indent marker lines",
 	},
 })
 
@@ -249,40 +212,45 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		keymap.set({ "n", "v" }, ",ca", "<cmd> lua vim.lsp.buf.code_action()<cr>", opts)
 		keymap.set("n", "gR", "<cmd> lua vim.lsp.buf.references()<cr>", opts)
 		keymap.set("n", ",rs", ":LspRestart<cr>")
-		which_key.register({
-			["]d"] = {
+		which_key.add({
+			{
+				"]d",
 				function()
-					vim.diagnostic.goto_next()
+					vim.diagnostic.jump({ count = 1, float = true })
 				end,
-				"next diagnostic message",
+				desc = "next diagnostic message",
 			},
-			["[d"] = {
+			{
+				"[d",
 				function()
-					vim.diagnostic.goto_prev()
+					vim.diagnostic.jump({ count = -1, float = true })
 				end,
-				"prev diagnostic message",
+				desc = "prev diagnostic message",
 			},
-			[",rn"] = {
+			{
+				",rn",
 				function()
 					vim.lsp.buf.rename()
 				end,
-				"rename variable",
+				desc = "rename variable",
 			},
-			["<leader>"] = {
-				F = {
-					function()
-						vim.lsp.buf.format({ async = true })
-					end,
-					"Foramt buffer (async)",
-					buffer = ev.buf,
-				},
-				["wl"] = {
-					function()
-						print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-					end,
-					"list workspace folder",
-				},
+			{
+				"<leader>F",
+				function()
+					vim.lsp.buf.format({ async = true })
+				end,
+				desc = "Foramt buffer (async)",
+				buffer = ev.buf,
+				mode = "n",
 			},
-		}, { mode = "n" })
+			{
+				"<leader>wl",
+				function()
+					print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+				end,
+				desc = "list workspace folder",
+				mode = "n",
+			},
+		})
 	end,
 })

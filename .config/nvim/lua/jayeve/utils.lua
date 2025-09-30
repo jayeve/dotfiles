@@ -24,7 +24,7 @@ function M.define_augroups(definitions) -- {{{1
 		vim.cmd("autocmd!")
 
 		for _, def in pairs(definition) do
-      local command = table.concat(vim.iter({ "autocmd", def }):flatten():totable(), " ")
+			local command = table.concat(vim.iter({ "autocmd", def }):flatten():totable(), " ")
 			vim.cmd(command)
 		end
 
@@ -380,13 +380,9 @@ function M.open_gitlab_link_for_current_line()
 	else
 		-- Open a search page scoped to merge requests for this SHA (works in many setups)
 		local search_url = ("%s/-/commit/%s"):format(base, sha)
-    vim.fn.setreg("+", search_url)
-    -- optional: notify user
-    vim.notify(
-      "Copied to clipboard: " .. search_url,
-			vim.log.levels.INFO,
-			{ title = "jayeve.utils" }
-    )
+		vim.fn.setreg("+", search_url)
+		-- optional: notify user
+		vim.notify("Copied to clipboard: " .. search_url, vim.log.levels.INFO, { title = "jayeve.utils" })
 		vim.notify(
 			("Opening commit (no MR tag found). Commit: %s"):format(sha),
 			vim.log.levels.INFO,

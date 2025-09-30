@@ -1,5 +1,5 @@
 -- import null-ls plugin safely
-local setup, null_ls = pcall(require, "none-ls")
+local setup, null_ls = pcall(require, "null-ls")
 if not setup then
 	local info = debug.getinfo(1, "S").short_src
 	print(info, "failed to load")
@@ -19,14 +19,9 @@ null_ls.setup({
 	sources = {
 		--  to disable file types use
 		--  "formatting.prettier.with({disabled_filetypes: {}})" (see null-ls docs)
+		require("none-ls.code_actions.eslint"),
 		formatting.prettier, -- js/ts formatter
 		formatting.stylua, -- lua formatter
-		diagnostics.eslint_d.with({ -- js/ts linter
-			-- only enable eslint if root has .eslintrc.js (not in youtube nvim video)
-			condition = function(utils)
-				return utils.root_has_file(".eslintrc.js") -- change file extension if you use something else
-			end,
-		}),
 	},
 	-- configure format on save
 	on_attach = function(current_client, bufnr)
@@ -39,7 +34,7 @@ null_ls.setup({
 					vim.lsp.buf.format({
 						filter = function(client)
 							--  only use null-ls for formatting instead of lsp server
-							return client.name == "none-ls"
+							return client.name == "null-ls"
 						end,
 						bufnr = bufnr,
 					})

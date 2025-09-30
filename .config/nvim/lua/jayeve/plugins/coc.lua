@@ -56,7 +56,6 @@ g.coc_global_extensions = {
 	"coc-svg",
 	"coc-tailwindcss",
 	"coc-tslint-plugin",
-	"coc-tsserver",
 	"coc-vetur",
 	"coc-vimlsp",
 	"coc-webpack",
@@ -66,6 +65,7 @@ g.coc_global_extensions = {
 	"coc-yank",
 	"coc-lists",
 	-- 'coc-rust-analyzer'
+	-- "coc-tsserver",
 }
 
 function _G.check_back_space()

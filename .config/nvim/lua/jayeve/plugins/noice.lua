@@ -6,6 +6,10 @@ if not status then
 	return
 end
 
+require("notify").setup({
+	background_colour = "#000000",
+})
+
 noice.setup({
 	sections = {
 		lualine_x = {

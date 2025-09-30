@@ -1,9 +1,9 @@
 -- safely import lualine
 local status, lualine = pcall(require, "lualine")
 if not status then
-  local info = debug.getinfo(1, "S").short_src
-  print(info, "failed to load")
-  return
+	local info = debug.getinfo(1, "S").short_src
+	print(info, "failed to load")
+	return
 end
 
 -- base theme: nightfly
@@ -11,15 +11,15 @@ local nightfly = require("lualine.themes.nightfly")
 
 -- dark-mode friendly pastel lavender colors
 local dark_pastel = {
-  bg_dark       = "#1e1e2e",  -- main background (matches terminal)
-  fg_light      = "#e0d9f0",  -- text on dark bg
-  lavender      = "#9b7fbf",  -- deeper pastel lavender
-  light_lavender= "#bfa3e0",  -- highlight/secondary
-  blue          = "#7fbce0",
-  green         = "#80d080",
-  yellow        = "#e0d07f",
-  pink          = "#e0a3b0",
-  gray          = "#2e2e3e",  -- inactive sections
+	bg_dark = "#1e1e2e", -- main background (matches terminal)
+	fg_light = "#e0d9f0", -- text on dark bg
+	lavender = "#9b7fbf", -- deeper pastel lavender
+	light_lavender = "#bfa3e0", -- highlight/secondary
+	blue = "#7fbce0",
+	green = "#80d080",
+	yellow = "#e0d07f",
+	pink = "#e0a3b0",
+	gray = "#2e2e3e", -- inactive sections
 }
 
 -- normal mode
@@ -68,28 +68,28 @@ nightfly.inactive.b.fg = dark_pastel.fg_light
 
 -- setup lualine
 lualine.setup({
-  options = {
-    theme = nightfly,
-    component_separators = { left = "", right = "" },
-    section_separators = { left = "", right = "" },
-    icons_enabled = true,
-  },
-  sections = {
-    lualine_a = { "mode" },
-    lualine_b = { "branch", "diff" },
-    lualine_c = { "filename" },
-    lualine_x = { "encoding", "fileformat", "filetype" },
-    lualine_y = { "progress" },
-    lualine_z = { "location" },
-  },
-  inactive_sections = {
-    lualine_a = {},
-    lualine_b = {},
-    lualine_c = { "filename" },
-    lualine_x = { "location" },
-    lualine_y = {},
-    lualine_z = {},
-  },
-  tabline = {},
-  extensions = {},
+	options = {
+		theme = nightfly,
+		component_separators = { left = "", right = "" },
+		section_separators = { left = "", right = "" },
+		icons_enabled = true,
+	},
+	sections = {
+		lualine_a = { "mode" },
+		lualine_b = { "branch", "diff" },
+		lualine_c = { "filename" },
+		lualine_x = { "encoding", "fileformat", "filetype" },
+		lualine_y = { "progress" },
+		lualine_z = { "location" },
+	},
+	inactive_sections = {
+		lualine_a = {},
+		lualine_b = {},
+		lualine_c = { "filename" },
+		lualine_x = { "location" },
+		lualine_y = {},
+		lualine_z = {},
+	},
+	tabline = {},
+	extensions = {},
 })
