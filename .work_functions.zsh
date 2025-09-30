@@ -123,4 +123,6 @@ export JAVA_HOME=$HOME/OpenJDK/jdk-22.jdk/Contents/Home
 export PATH=$JAVA_HOME/bin:$PATH
 
 # ---------- TEMPORAL CLI COMPLETION ----------
-eval "$(temporal completion zsh)"
+if command -v temporal >/dev/null 2>&1; then
+  eval "$(temporal completion zsh)"
+fi
