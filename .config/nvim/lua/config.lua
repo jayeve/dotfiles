@@ -251,6 +251,7 @@ require("jayeve.plugins.glow")
 require("jayeve.plugins.obsidian")
 require("jayeve.plugins.indent-blankline")
 require("jayeve.utils")
+require("jayeve.extractor")
 
 -- require("jayeve.plugins.leap")
 -- require("jayeve.plugins.bufferline")

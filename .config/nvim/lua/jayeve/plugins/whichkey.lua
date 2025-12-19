@@ -10,7 +10,8 @@ end
 local harpoon_mark = safeCall("harpoon.mark")
 local harpoon_ui = safeCall("harpoon.ui")
 local lualine_nightfly = safeCall("lualine.themes.nightfly")
-local jayeve = require("jayeve.utils")
+local utils = require("jayeve.utils")
+local extractor = require("jayeve.extractor")
 local prj = require("jayeve.plugins.prj")
 
 local function togglePurple()
@@ -102,11 +103,57 @@ local which_key = safeCall("which-key")
 local gitlinker = safeCall("gitlinker")
 local actions = safeCall("gitlinker.actions")
 
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "csv",
+	callback = function()
+		which_key.add({
+			",j",
+			extractor.play_clip,
+			desc = "Play audio clip for current line",
+		})
+	end,
+})
+
 which_key.add({
-	{ "<leader>N", jayeve.open_personal_notes, desc = "Open this week's personal notes" },
-	{ "<leader>n", jayeve.open_notes, desc = "Open this week's weekly notes" },
-	{ "<leader>C", jayeve.copy_file_path_to_clipboard, desc = "Copy cur buffer filepath" },
-	{ "<leader>gC", jayeve.open_gitlab_link_for_current_line, desc = "Open gitlab MR or commit" },
+	{
+		",a",
+		function()
+			extractor.subtract_seconds_from_start(0.25)
+		end,
+		desc = "SUBTRACT 0.25 seconds from START of clip (extractor)",
+	},
+	{
+		",s",
+		function()
+			extractor.add_seconds_to_start(0.25)
+		end,
+		desc = "ADD 0.25 seconds to START of clip (extractor)",
+	},
+	{
+		",d",
+		function()
+			extractor.subtract_seconds_from_end(0.25)
+		end,
+		desc = "SUBTRACT 0.25 seconds END of clip (extractor)",
+	},
+	{
+		",f",
+		function()
+			extractor.add_seconds_to_end(0.25)
+		end,
+		desc = "ADD 0.25 seconds to END of clip (extractor)",
+	},
+	{ ",q", extractor.SubtractSecondsFromStart, desc = "SUBTRACT xx time from START of clip (extractor)" },
+	{ ",w", extractor.AddSecondsToStart, desc = "ADD xx time to START of clip (extractor)" },
+	{ ",e", extractor.SubtractSecondsFromEnd, desc = "SUBTRACT xx time from END of clip (extractor)" },
+	{ ",r", extractor.AddSecondsToEnd, desc = "ADD xx time to END of clip (extractor)" },
+	{ ",,", extractor.SetStartTime, desc = "Set start time for clip (extractor)" },
+
+	{ ",<leader>", extractor.SetDifference, desc = "set difference for clip audio (extractor)" },
+	{ "<leader>N", utils.open_personal_notes, desc = "Open this week's personal notes" },
+	{ "<leader>n", utils.open_notes, desc = "Open this week's weekly notes" },
+	{ "<leader>C", utils.copy_file_path_to_clipboard, desc = "Copy cur buffer filepath" },
+	{ "<leader>gC", utils.open_gitlab_link_for_current_line, desc = "Open gitlab MR or commit" },
 	{
 		"<leader>m",
 		function()
@@ -161,9 +208,9 @@ which_key.add({
 		end,
 		desc = "equalize windows",
 	},
-	{ "<leader>g.", jayeve.cd_to_git_root, desc = "cd into cur buf's git root" },
-	{ "<leader>.", jayeve.cd_to_current_buf_directory, desc = "cd into cur buf's dir" },
-	{ "<c-g>", jayeve.show_cur_location, desc = "show current location" },
+	{ "<leader>g.", utils.cd_to_git_root, desc = "cd into cur buf's git root" },
+	{ "<leader>.", utils.cd_to_current_buf_directory, desc = "cd into cur buf's dir" },
+	{ "<c-g>", utils.show_cur_location, desc = "show current location" },
 	{
 		"]q",
 		function()

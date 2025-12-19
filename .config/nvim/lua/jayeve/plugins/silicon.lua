@@ -1,4 +1,4 @@
-local status, silicon = pcall(require, "silicon")
+local status, silicon = pcall(require, "nvim-silicon")
 if not status then
 	local info = debug.getinfo(1, "S").short_src
 	print(info, "failed to load")

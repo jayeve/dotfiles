@@ -126,3 +126,10 @@ export PATH=$JAVA_HOME/bin:$PATH
 if command -v temporal >/dev/null 2>&1; then
   eval "$(temporal completion zsh)"
 fi
+
+curl-tracing() {
+  local response=$(cloudflared access curl https://tracegen.cfperf.net -s -XPOST)
+  echo "Signed trace: $(jq -r .signed_trace <<<${response})"
+  curl -sH "cf-trace-id:$(jq -r .signed_trace <<<${response})" "$@"
+  echo "Jaeger UI: https://tracing.cfdata.org/trace/$(jq -r .trace_id <<<${response})"
+}

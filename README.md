@@ -30,6 +30,26 @@ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
 ## Installation
 
+### Tmux
+
+```bash
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+mkdir -p ~/.tmux/plugins/tmux/custom
+cp ./{mynetwork.sh,mystorage.sh} ~/.tmux/plugins/tmux/custom/
+```
+
+### Linux
+
+```bash
+cd linux
+# install what we can
+xargs -a apt-requirements.txt -r -n1 sudo apt-get install -y || true
+# set default shell to zsh
+chsh -s /usr/bin/zsh
+```
+
+### MacOS
+
 ```bash
 ./install.sh
 ```

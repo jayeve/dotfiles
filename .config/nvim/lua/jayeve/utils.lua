@@ -80,7 +80,7 @@ vim.cmd([[
 endfunction
 ]])
 
-local function find_current_buffer_git_root()
+function M.find_current_buffer_git_root()
 	local dot_git_path = vim.fn.finddir(".git", ".;")
 	local is_git_project = vim.fn.fnamemodify(dot_git_path, ":t") == ".git"
 	return is_git_project and vim.fn.fnamemodify(vim.fn.fnamemodify(dot_git_path, ":p"), ":h:h") or nil

@@ -128,6 +128,7 @@ brew "silicon" # take screenshots of code
 brew "sk" # skim: fuzzy finder in rust
 brew "socat" # Multipurpose relay (SOcket CAT)
 brew "sox" # Sound eXchange: play, record and convert audio files.
+brew "speedtest-cli"
 brew "sqlite" # database
 brew "stow" # symlink manager (for dotfiles)
 brew "subversion" # source control

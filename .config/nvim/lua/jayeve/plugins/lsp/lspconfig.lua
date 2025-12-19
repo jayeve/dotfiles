@@ -161,11 +161,16 @@ lspconfig["intelephense"].setup({})
 -- 	},
 -- })
 --
--- lspconfig.rust_analyzer.setup({
--- 	settings = {
--- 		["rust-analyzer"] = {},
--- 	},
--- })
+lspconfig.rust_analyzer.setup({
+	settings = {
+		["rust-analyzer"] = {
+			cargo = {
+				features = { "boringssl", "s2n" }, -- list your features here
+				allFeatures = true, -- or set to true
+			},
+		},
+	},
+})
 --
 lspconfig.pyright.setup({
 	settings = {
