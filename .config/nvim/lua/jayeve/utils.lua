@@ -119,7 +119,7 @@ function M.file_exists(name)
 end
 
 function M.cd_to_git_root()
-	local git_root = find_current_buffer_git_root()
+	local git_root = M.find_current_buffer_git_root()
 	if git_root then
 		vim.cmd.cd(git_root)
 	else

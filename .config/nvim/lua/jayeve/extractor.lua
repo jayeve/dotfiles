@@ -108,7 +108,7 @@ local function set_start_time(new_time_str)
 		table.insert(cols, trim(field))
 	end
 
-	if #cols < 2 then
+	if #cols < 3 then
 		vim.notify("Not enough CSV columns", vim.log.levels.ERROR, { title = "jayeve.extractor" })
 		return
 	end
@@ -120,6 +120,7 @@ local function set_start_time(new_time_str)
 	end
 
 	cols[2] = format_time(seconds, had_fraction)
+	cols[3] = format_time(seconds + 5, had_fraction)
 
 	vim.api.nvim_set_current_line(table.concat(cols, ","))
 end
