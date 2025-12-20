@@ -32,6 +32,9 @@ export EDITOR=nvim
 export PAGER=less
 export LESS='-F -g -i -M -R -S -w -X -z-4'
 
+# load fzf
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
 # PATH extension helper
 extend_path() { [[ ":$PATH:" != *":$1:"* ]] && PATH="$1:$PATH" }
 extend_path "$HOME/.local/bin"
@@ -48,9 +51,6 @@ alias gl='git pull'
 # Useful extras (optional)
 if command -v zoxide >/dev/null 2>&1; then
   eval "$(zoxide init zsh)"
-fi
-if command -v fzf >/dev/null 2>&1; then
-  source <(fzf --zsh)
 fi
 
 # cross-platform clipboard

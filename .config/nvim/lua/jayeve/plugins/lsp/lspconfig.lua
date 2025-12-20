@@ -14,14 +14,6 @@ if not cmp_nvim_lsp_status then
 	return
 end
 
--- import typescript plugin safely
-local typescript_setup, typescript = pcall(require, "typescript")
-if not typescript_setup then
-	local info = debug.getinfo(1, "S").short_src
-	print(info, "failed to load")
-	return
-end
-
 local keymap = vim.keymap -- for conciseness
 
 -- used to enable autocompletion (assign to every lsp server config)
@@ -43,16 +35,6 @@ end
 -- configure html server
 lspconfig["html"].setup({
 	capabilities = capabilities,
-})
-
--- configure typescript server with plugin
-typescript.setup({
-	server = {
-		capabilities = capabilities,
-		root_dir = require("lspconfig.util").root_pattern(".git"),
-		filetypes = { "typescript", "typescriptreact", "typescript.tsx" },
-		cmd = { "typescript-language-server", "--stdio" },
-	},
 })
 
 -- make bash-lsp work with zsh (nvim builtin-lsp)
@@ -129,7 +111,7 @@ lspconfig["tailwindcss"].setup({
 })
 
 -- configure lua server (with special settings)
-lspconfig.lua_ls.setup({
+lspconfig["lua_ls"].setup({
 	capabilities = capabilities,
 	settings = { -- custom settings for lua
 		Lua = {

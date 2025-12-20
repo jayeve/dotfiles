@@ -136,10 +136,15 @@ lazy.setup({
 	{ "hrsh7th/cmp-path" }, -- source for file system paths
 
 	-- snippets
-	{ "L3MON4D3/LuaSnip" }, -- snippet engine
+  {
+    "L3MON4D3/LuaSnip",
+    -- follow latest release.
+    version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
+    -- install jsregexp (optional!).
+    build = "make install_jsregexp"
+  },
 	{ "saadparwaiz1/cmp_luasnip" }, -- for autocompletion
 	{ "rafamadriz/friendly-snippets" }, -- useful snippets
-
 	-- managing & installing lsp servers, linters & formatters
 	{ "williamboman/mason.nvim" }, -- in charge of managing lsp servers, linters & formatters
 	{ "williamboman/mason-lspconfig.nvim" }, -- bridges gap b/w mason & lspconfig
