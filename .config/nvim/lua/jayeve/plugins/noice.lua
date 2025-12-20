@@ -6,8 +6,33 @@ if not status then
 	return
 end
 
+local stages_util = require("notify.stages.util")
+
 require("notify").setup({
 	background_colour = "#000000",
+	top_down = false, -- Stack from bottom up
+	render = "compact", -- Use compact render style for left-aligned text
+	timeout = 3000, -- 3 seconds
+	stages = {
+		function(state)
+			local next_height = state.message.height + 2
+			local next_row =
+				stages_util.available_slot(state.open_windows, next_height, stages_util.DIRECTION.BOTTOM_UP)
+			if not next_row then
+				return nil
+			end
+			return {
+				relative = "editor",
+				anchor = "SW",
+				width = state.message.width,
+				height = state.message.height,
+				col = 0, -- Left side
+				row = next_row,
+				border = "rounded",
+				style = "minimal",
+			}
+		end,
+	},
 })
 
 noice.setup({
@@ -18,9 +43,9 @@ noice.setup({
 			relative = "editor",
 			position = {
 				row = "100%", -- bottom
-				col = "100%", -- right
+				col = "0%", -- left
 			},
-			anchor = "SE", -- grow up/left from bottom-right corner
+			anchor = "SW", -- grow up/right from bottom-left corner
 
 			-- size controls
 			size = {
@@ -42,10 +67,16 @@ noice.setup({
 					FloatBorder = "DiagnosticInfo",
 				},
 			},
-			align = "right",
+			align = "left",
 		},
 	},
 	routes = {
+		{
+			filter = {
+				event = "notify",
+			},
+			view = "mini",
+		},
 		{
 			filter = {
 				event = "msg_show",

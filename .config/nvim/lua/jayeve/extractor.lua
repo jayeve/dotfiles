@@ -345,13 +345,6 @@ local function get_extractor_binary(callback)
 
 	local binary_path = project_root .. "/target/debug/extractor"
 
-	-- -- Check if binary exists
-	-- if vim.fn.filereadable(binary_path) == 1 then
-	-- 	callback(binary_path)
-	-- 	return
-	-- end
-
-	-- Binary doesn't exist, build it
 	vim.notify("Building extractor binary...", vim.log.levels.INFO, { title = "jayeve.extractor" })
 
 	vim.fn.jobstart("cargo build", {
@@ -412,11 +405,11 @@ M.play_clip = function()
 			cmd = cmd .. " -p " .. vim.fn.shellescape(downloads_path)
 		end
 
-		vim.notify(
-			string.format("Playing clip from line %d...", line_number),
-			vim.log.levels.INFO,
-			{ title = "jayeve.extractor" }
-		)
+		-- vim.notify(
+		-- 	string.format("Playing clip from line %d...", line_number),
+		-- 	vim.log.levels.INFO,
+		-- 	{ title = "jayeve.extractor" }
+		-- )
 
 		vim.fn.jobstart(cmd, {
 			on_exit = function(_, exit_code)
@@ -432,6 +425,7 @@ M.play_clip = function()
 				if data and #data > 0 then
 					for _, line in ipairs(data) do
 						if line ~= "" then
+							vim.api.nvim_echo({ { "[extractor] " .. line, "Normal" } }, false, {})
 						end
 					end
 				end
@@ -440,6 +434,7 @@ M.play_clip = function()
 				if data and #data > 0 then
 					for _, line in ipairs(data) do
 						if line ~= "" then
+							vim.api.nvim_echo({ { "[extractor] " .. line, "Normal" } }, false, {})
 						end
 					end
 				end
