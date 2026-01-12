@@ -13,3 +13,5 @@
   dno = "diff --name-only"
 [url "git@gitlab.cfdata.org:cloudflare/"]
 	insteadOf = ssh://git@stash.cfdata.org:7999/
+[include]
+	path = /Users/jevans/.local/share/cloudflare-warp-certs/gitconfig

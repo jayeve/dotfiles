@@ -411,7 +411,10 @@ M.play_clip = function()
 		-- 	{ title = "jayeve.extractor" }
 		-- )
 
-		vim.fn.jobstart(cmd, {
+		-- Wrap in explicit shell array format to ensure child process output is captured
+		vim.fn.jobstart({ "sh", "-c", cmd }, {
+			stdout_buffered = false,
+			stderr_buffered = false,
 			on_exit = function(_, exit_code)
 				if exit_code ~= 0 then
 					vim.notify(

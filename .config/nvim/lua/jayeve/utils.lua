@@ -284,7 +284,7 @@ local function normalize_gitlab_base(remote)
 end
 
 local function blame_commit_sha(absfile, lnum)
-	local current_buf_git_root = find_current_buffer_git_root()
+	local current_buf_git_root = M.find_current_buffer_git_root()
 	-- Use porcelain blame so the commit is predictable to parse
 	local out, err = syslist({
 		"git",
@@ -332,7 +332,7 @@ end
 
 function M.open_gitlab_link_for_current_line()
 	-- Preconditions: inside a git repo, file tracked
-	local root = find_current_buffer_git_root()
+	local root = M.find_current_buffer_git_root()
 	if not root then
 		vim.notify("Not inside a Git repository", vim.log.levels.ERROR, { title = "jayeve.utils" })
 		return
@@ -356,7 +356,7 @@ function M.open_gitlab_link_for_current_line()
 	end
 
 	-- Build GitLab base URL from remote
-	local remote = git_remote_url(find_current_buffer_git_root())
+	local remote = git_remote_url(M.find_current_buffer_git_root())
 	local base = normalize_gitlab_base(remote)
 	if not base or not base:match("gitlab") then
 		-- Fallback: just echo the commit

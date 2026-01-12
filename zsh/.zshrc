@@ -188,3 +188,8 @@ PROMPT=$'%F{red}┌─%(?,,%F{red}[%F{red}%B✗%b%f%F{red}]─)[%F{cyan}%~%f%F{r
 
 # PS2 (continuation prompt)
 PS2=$' %F{green}|>%f '
+export PATH="$HOME/.cargo/bin:$PATH"
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# opencode
+export PATH=/Users/jevans/.opencode/bin:$PATH
