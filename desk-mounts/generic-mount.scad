@@ -33,9 +33,9 @@ showing right in front of you
 // DEVICE DIMENSIONS
 //////////////////////
 
-device_height = 25.75; // height of the device (Z axis when looking head on from front)
-device_width = 74.45;   // width of the device (X axis when looking head on from front)
-device_depth = 150;     // depth of the device (Y axis when looking head on from front)
+device_height = 23.18; // height of the device (Z axis when looking head on from front)
+device_width = 63.66;   // width of the device (X axis when looking head on from front)
+device_depth = 98;     // depth of the device (Y axis when looking head on from front)
 
 //////////////////////
 // USER TUNING
