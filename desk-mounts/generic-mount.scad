@@ -42,7 +42,8 @@ device_depth = 98;     // depth of the device (Y axis when looking head on from 
 //////////////////////
 show_device = false;
 
-clearance = 0.5;     // clearance around device
+rounded_radius = 4;
+clearance = 1.5;     // clearance around device
 wall = 4;            // main wall thickness
 
 // device sits here
@@ -69,7 +70,7 @@ window_y_scale = 0.70;
 window_z_scale = 0.70;
 
 // Base weight reduction
-base_cutout = true;
+base_cutout = false;
 base_cutout_margin = 12;  // leave this much material at edges
 
 //////////////////////
@@ -98,7 +99,7 @@ module cable_mount(){
   plate_h  = inner_h + flange_th;
   lip_z    = wall + inner_h + wall;
   eps = 0.01;
-  
+
   difference(){
     union(){
       // Left wall
@@ -113,38 +114,23 @@ module cable_mount(){
       // (lower than retention lips by device height)
       translate([-inner_span/2 - wall , 0, 0])
         cube([inner_span + 2*wall , plate_d, shelf_th]);
-      
+
       // Reinforcement fillets at wall-to-shelf transitions (inside corners)
       // These add material where the shelf meets the walls for strength
-      
-      // Left wall inner fillet (where shelf meets wall on the inside)
-      translate([-inner_span/2, 0, shelf_th])
-        rotate([0, 90, 0])
-          linear_extrude(height=eps)
-            difference(){
-              square([transition_fillet_r, plate_d]);
-              translate([transition_fillet_r, -eps])
-                square([transition_fillet_r + eps, plate_d + 2*eps]);
-              for(y = [0, plate_d]){
-                translate([transition_fillet_r, y])
-                  circle(r=transition_fillet_r);
-              }
-            }
-      
       // Better approach: use cylinders to create the fillet
       // Left inner fillet
-      translate([-inner_span/2, 0, shelf_th])
-        rotate([-90, 0, 0])
+      translate([-inner_span/2, device_depth, shelf_th])
+        rotate([90, 0, 0])
           linear_extrude(height=plate_d)
             difference(){
               square([transition_fillet_r, transition_fillet_r]);
               translate([transition_fillet_r, transition_fillet_r])
                 circle(r=transition_fillet_r);
             }
-      
+
       // Right inner fillet
-      translate([inner_span/2, 0, shelf_th])
-        rotate([-90, 0, 0])
+      translate([inner_span/2, device_depth, shelf_th])
+        rotate([90, 0, 0])
           linear_extrude(height=plate_d)
             difference(){
               translate([-transition_fillet_r, 0])
@@ -160,6 +146,31 @@ module cable_mount(){
       // Right flange
       translate([inner_span/2 + wall, 0, plate_h - flange_th])
         cube([flange_w, plate_d, flange_th]);
+
+      // Reinforcement fillets at wall-to-flange transitions (outside corners)
+      // These add material where the flange meets the wall for strength
+      // Better approach: use cylinders to create the fillet
+      // Left outer fillet
+      translate([-inner_span/2 - wall, device_depth, inner_h])
+        rotate([90, 180, 0])
+          linear_extrude(height=plate_d)
+            difference(){
+              square([transition_fillet_r, transition_fillet_r]);
+              translate([transition_fillet_r, transition_fillet_r])
+                circle(r=transition_fillet_r);
+            }
+
+      // Right outer fillet
+      translate([inner_span/2+wall, device_depth, inner_h])
+        rotate([90, 180, 0])
+          linear_extrude(height=plate_d)
+            difference(){
+              translate([-transition_fillet_r, 0])
+                square([transition_fillet_r, transition_fillet_r]);
+              translate([-transition_fillet_r, transition_fillet_r])
+                circle(r=transition_fillet_r);
+            }
+
     }
 
     // Left wall screw slots
@@ -195,14 +206,12 @@ module cable_mount(){
               plate_d*window_y_scale,
               inner_h*window_z_scale]);
     }
-    
     // Base weight reduction cutout
     if(base_cutout){
       // Calculate cutout dimensions (leave margin at edges for strength)
       cutout_width = inner_span + 2*wall - 2*base_cutout_margin;
       cutout_length = plate_d - 2*base_cutout_margin;
       cutout_depth = shelf_th - 1.5;  // leave bottom layer for strength
-      
       // Center cutout in the base
       translate([
         -cutout_width/2,
