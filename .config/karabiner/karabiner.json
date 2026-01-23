@@ -1,238 +1,197 @@
 {
-    "profiles": [
+  "profiles": [
+    {
+      "complex_modifications": {
+        "rules": [
+          {
+            "manipulators": [
+              {
+                "description": "Change caps_lock to command+control+option+shift.",
+                "from": {
+                  "key_code": "caps_lock",
+                  "modifiers": { "optional": ["any"] }
+                },
+                "to": [
+                  {
+                    "key_code": "left_shift",
+                    "modifiers": ["left_command", "left_control", "left_option"]
+                  }
+                ],
+                "to_if_alone": [{ "key_code": "escape" }],
+                "type": "basic"
+              }
+            ]
+          },
+          {
+            "description": "Hyper+V to toggle accessibility keyboard",
+            "manipulators": [
+              {
+                "from": {
+                  "key_code": "v",
+                  "modifiers": {
+                    "mandatory": [
+                      "left_command",
+                      "left_option",
+                      "left_control",
+                      "left_shift"
+                    ]
+                  }
+                },
+                "to": [
+                  {
+                    "shell_command": "osascript /Users/jevans/.config/macos-automations/ToggleAccessibilityKeyboard.scpt"
+                  }
+                ],
+                "type": "basic"
+              }
+            ]
+          },
+          {
+            "description": "Exchange semicolon and colon",
+            "manipulators": [
+              {
+                "from": {
+                  "key_code": "semicolon",
+                  "modifiers": { "optional": ["caps_lock"] }
+                },
+                "to": [
+                  {
+                    "key_code": "semicolon",
+                    "modifiers": ["left_shift"]
+                  }
+                ],
+                "type": "basic"
+              },
+              {
+                "from": {
+                  "key_code": "semicolon",
+                  "modifiers": {
+                    "mandatory": ["shift"],
+                    "optional": ["caps_lock"]
+                  }
+                },
+                "to": [{ "key_code": "semicolon" }],
+                "type": "basic"
+              }
+            ]
+          }
+        ]
+      },
+      "devices": [
         {
-            "complex_modifications": {
-                "rules": [
-                    {
-                        "description": "New Rule (change left_shift+caps_lock to page_down, right_shift+caps_lock to left_command+mission_control)",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "caps_lock",
-                                    "modifiers": {
-                                        "mandatory": ["left_shift"],
-                                        "optional": ["any"]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "page_down",
-                                        "modifiers": []
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "caps_lock",
-                                    "modifiers": {
-                                        "mandatory": ["right_shift"],
-                                        "optional": ["any"]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "apple_vendor_keyboard_key_code": "mission_control",
-                                        "modifiers": ["left_command"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "from": { "key_code": "page_down" },
-                                "to": [{ "shell_command": "osascript -e 'tell application \"System Events\" to keystroke \"→\"'" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "New Rule (change left_shift+caps_lock to page_down, right_shift+caps_lock to left_command+mission_control)",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "caps_lock",
-                                    "modifiers": {
-                                        "mandatory": ["left_shift"],
-                                        "optional": ["any"]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "page_down",
-                                        "modifiers": []
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "caps_lock",
-                                    "modifiers": {
-                                        "mandatory": ["right_shift"],
-                                        "optional": ["any"]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "apple_vendor_keyboard_key_code": "mission_control",
-                                        "modifiers": ["left_command"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "from": { "key_code": "scroll_lock" },
-                                "to": [{ "shell_command": "osascript -e 'tell application \"System Events\" to keystroke \"→\"'" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "Exchange semicolon and colon",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "semicolon",
-                                    "modifiers": { "optional": ["caps_lock"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "semicolon",
-                                        "modifiers": ["left_shift"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "semicolon",
-                                    "modifiers": {
-                                        "mandatory": ["shift"],
-                                        "optional": ["caps_lock"]
-                                    }
-                                },
-                                "to": [{ "key_code": "semicolon" }],
-                                "type": "basic"
-                            }
-                        ]
-                    }
-                ]
+          "identifiers": {
+            "is_keyboard": true,
+            "product_id": 630,
+            "vendor_id": 1452
+          },
+          "simple_modifications": [
+            {
+              "from": { "key_code": "left_command" },
+              "to": [{ "key_code": "left_command" }]
             },
-            "devices": [
-                {
-                    "identifiers": {
-                        "is_keyboard": true,
-                        "product_id": 630,
-                        "vendor_id": 1452
-                    },
-                    "simple_modifications": [
-                        {
-                            "from": { "key_code": "left_command" },
-                            "to": [{ "key_code": "left_command" }]
-                        },
-                        {
-                            "from": { "key_code": "left_control" },
-                            "to": [{ "key_code": "left_control" }]
-                        }
-                    ]
-                },
-                {
-                    "identifiers": {
-                        "is_keyboard": true,
-                        "product_id": 30354,
-                        "vendor_id": 3141
-                    },
-                    "simple_modifications": [
-                        {
-                            "from": { "key_code": "a" },
-                            "to": [{ "key_code": "a" }]
-                        }
-                    ]
-                },
-                {
-                    "identifiers": { "is_keyboard": true },
-                    "simple_modifications": [
-                        {
-                            "from": { "key_code": "caps_lock" },
-                            "to": [{ "key_code": "left_control" }]
-                        },
-                        {
-                            "from": { "key_code": "left_command" },
-                            "to": [{ "key_code": "left_command" }]
-                        },
-                        {
-                            "from": { "key_code": "left_control" },
-                            "to": [{ "key_code": "caps_lock" }]
-                        },
-                        {
-                            "from": { "key_code": "left_option" },
-                            "to": [{ "key_code": "left_option" }]
-                        },
-                        {
-                            "from": { "key_code": "right_command" },
-                            "to": [{ "key_code": "right_command" }]
-                        }
-                    ]
-                },
-                {
-                    "identifiers": {
-                        "is_keyboard": true,
-                        "product_id": 620,
-                        "vendor_id": 76
-                    },
-                    "simple_modifications": [
-                        {
-                            "from": { "key_code": "left_command" },
-                            "to": [{ "key_code": "left_command" }]
-                        },
-                        {
-                            "from": { "key_code": "left_control" },
-                            "to": [{ "key_code": "caps_lock" }]
-                        },
-                        {
-                            "from": { "key_code": "left_option" },
-                            "to": [{ "key_code": "left_option" }]
-                        },
-                        {
-                            "from": { "key_code": "caps_lock" },
-                            "to": [{ "key_code": "left_control" }]
-                        },
-                        {
-                            "from": { "key_code": "right_command" },
-                            "to": [{ "key_code": "right_command" }]
-                        }
-                    ]
-                }
-            ],
-            "name": "Default profile",
-            "selected": true,
-            "simple_modifications": [
-                {
-                    "from": { "key_code": "caps_lock" },
-                    "to": [{ "key_code": "left_control" }]
-                },
-                {
-                    "from": { "key_code": "left_command" },
-                    "to": [{ "key_code": "left_option" }]
-                },
-                {
-                    "from": { "key_code": "left_control" },
-                    "to": [{ "key_code": "caps_lock" }]
-                },
-                {
-                    "from": { "key_code": "left_option" },
-                    "to": [{ "key_code": "left_command" }]
-                },
-                {
-                    "from": { "key_code": "right_command" },
-                    "to": [{ "key_code": "right_option" }]
-                },
-                {
-                    "from": { "key_code": "right_option" },
-                    "to": [{ "key_code": "right_command" }]
-                }
-            ],
-            "virtual_hid_keyboard": { "keyboard_type_v2": "ansi" }
+            {
+              "from": { "key_code": "left_control" },
+              "to": [{ "key_code": "left_control" }]
+            }
+          ]
+        },
+        {
+          "identifiers": {
+            "is_keyboard": true,
+            "product_id": 30354,
+            "vendor_id": 3141
+          },
+          "simple_modifications": [
+            {
+              "from": { "key_code": "a" },
+              "to": [{ "key_code": "a" }]
+            }
+          ]
+        },
+        {
+          "identifiers": { "is_keyboard": true },
+          "simple_modifications": [
+            {
+              "from": { "key_code": "caps_lock" },
+              "to": [{ "key_code": "left_control" }]
+            },
+            {
+              "from": { "key_code": "left_command" },
+              "to": [{ "key_code": "left_command" }]
+            },
+            {
+              "from": { "key_code": "left_control" },
+              "to": [{ "key_code": "caps_lock" }]
+            },
+            {
+              "from": { "key_code": "left_option" },
+              "to": [{ "key_code": "left_option" }]
+            },
+            {
+              "from": { "key_code": "right_command" },
+              "to": [{ "key_code": "right_command" }]
+            }
+          ]
+        },
+        {
+          "identifiers": {
+            "is_keyboard": true,
+            "product_id": 620,
+            "vendor_id": 76
+          },
+          "simple_modifications": [
+            {
+              "from": { "key_code": "caps_lock" },
+              "to": [{ "key_code": "left_control" }]
+            },
+            {
+              "from": { "key_code": "left_command" },
+              "to": [{ "key_code": "left_command" }]
+            },
+            {
+              "from": { "key_code": "left_control" },
+              "to": [{ "key_code": "caps_lock" }]
+            },
+            {
+              "from": { "key_code": "left_option" },
+              "to": [{ "key_code": "left_option" }]
+            },
+            {
+              "from": { "key_code": "right_command" },
+              "to": [{ "key_code": "right_command" }]
+            }
+          ]
         }
-    ]
+      ],
+      "name": "Default profile",
+      "selected": true,
+      "simple_modifications": [
+        {
+          "from": { "key_code": "caps_lock" },
+          "to": [{ "key_code": "left_control" }]
+        },
+        {
+          "from": { "key_code": "left_command" },
+          "to": [{ "key_code": "left_option" }]
+        },
+        {
+          "from": { "key_code": "left_control" },
+          "to": [{ "key_code": "caps_lock" }]
+        },
+        {
+          "from": { "key_code": "left_option" },
+          "to": [{ "key_code": "left_command" }]
+        },
+        {
+          "from": { "key_code": "right_command" },
+          "to": [{ "key_code": "right_option" }]
+        },
+        {
+          "from": { "key_code": "right_option" },
+          "to": [{ "key_code": "right_command" }]
+        }
+      ],
+      "virtual_hid_keyboard": { "keyboard_type_v2": "ansi" }
+    }
+  ]
 }

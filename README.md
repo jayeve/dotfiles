@@ -1,5 +1,16 @@
 # J's dotfiles setup for a Ubuntu 22.04 machine
 
+## Shortcuts Events
+
+- MacOS provides a mechanism for creating shortcuts that I can then run with `osascript` and even map to keys using Karabiner
+
+### Workflow
+
+1. create a shortcut in `/Users/jevans/dotfiles/.config/macos-automations/`
+2. create a keymap in `/Users/jevans/dotfiles/.config/karabiner/karabiner.json`, likely using the **Hyperkey**
+3. `stow .` to get that thing installed in the `~/.config` directory of the machine
+4. reboot Karabiner-Elements and manually toggle the new rule off and on in Left Panel >> Complete Modifications >> Toggle Slider
+
 ## TODO
 
 - `create-branch` https://seb.jambor.dev/posts/improving-shell-workflows-with-fzf/
