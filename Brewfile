@@ -132,6 +132,7 @@ brew "speedtest-cli"
 brew "sqlite" # database
 brew "stow" # symlink manager (for dotfiles)
 brew "subversion" # source control
+brew "switchaudio-osx" # for switching audio sources
 brew "tcpdump" # inspect network traffic
 brew "telnet" # ssh 1.0
 brew "tig" # interactive 'git log' cli tool

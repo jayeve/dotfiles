@@ -8,8 +8,9 @@
 
 1. create a shortcut in `/Users/jevans/dotfiles/.config/macos-automations/`
 2. create a keymap in `/Users/jevans/dotfiles/.config/karabiner/karabiner.json`, likely using the **Hyperkey**
-3. `stow .` to get that thing installed in the `~/.config` directory of the machine
-4. reboot Karabiner-Elements and manually toggle the new rule off and on in Left Panel >> Complete Modifications >> Toggle Slider
+3. delete karabiner.json `rm -rf ~/.config/karabiner/karabiner.json`
+4. `stow .` to get that thing installed in the `~/.config` directory of the machine
+5. reboot Karabiner-Elements and manually toggle the new rule off and on in Left Panel >> Complete Modifications >> Toggle Slider
 
 ## TODO
 

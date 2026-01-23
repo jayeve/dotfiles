@@ -23,6 +23,30 @@
             ]
           },
           {
+            "description": "Hyper+S to toggle Sound output source",
+            "manipulators": [
+              {
+                "from": {
+                  "key_code": "s",
+                  "modifiers": {
+                    "mandatory": [
+                      "left_command",
+                      "left_option",
+                      "left_control",
+                      "left_shift"
+                    ]
+                  }
+                },
+                "to": [
+                  {
+                    "shell_command": "/bin/bash /Users/jevans/.config/macos-automations/toggle-output.sh >> /tmp/karabiner.log"
+                  }
+                ],
+                "type": "basic"
+              }
+            ]
+          },
+          {
             "description": "Hyper+V to toggle accessibility keyboard",
             "manipulators": [
               {
