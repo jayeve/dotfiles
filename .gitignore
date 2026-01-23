@@ -7,6 +7,7 @@
 !.config/nvim
 !.config/alacritty
 !.config/karabiner
+!.config/macos-automations
 **/node_modules/**
 *.class
 *.dll
