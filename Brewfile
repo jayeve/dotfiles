@@ -112,6 +112,7 @@ brew "pyenv-virtualenv" # python environment utility
 brew "pylint" # must be installed for vim-ale
 brew "python" # a slow computer programming language
 brew "pv" # monitor progress
+brew "raycast" # a better spotlight
 brew "react-native-cli"
 brew "reattach-to-user-namespace"
 brew "redis" # in-memory cache
@@ -160,7 +161,7 @@ cask "alacritty" # terminal in rust, easier to configure
 cask "amethyst" # a shitty automatic tiling window manager
 cask "android-platform-tools" # android dev tools
 cask "anki" # a notecard app
-cask "hammerspoon" # used with karabiner-elements to print custom elements (like →)
+cask "hammerspoon" # make automations, used with karabiner-elements to print custom elements (like →)
 cask "karabiner-elements" # keyboard key configuration app
 cask "macdown" # Markdown text editor
 cask "mactex" # pdf engine for pandoc

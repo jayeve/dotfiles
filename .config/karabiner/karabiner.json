@@ -6,9 +6,9 @@
           {
             "manipulators": [
               {
-                "description": "Change caps_lock to command+control+option+shift.",
+                "description": "Change right_command to command+control+option+shift.",
                 "from": {
-                  "key_code": "caps_lock",
+                  "key_code": "right_command",
                   "modifiers": { "optional": ["any"] }
                 },
                 "to": [
@@ -18,54 +18,6 @@
                   }
                 ],
                 "to_if_alone": [{ "key_code": "escape" }],
-                "type": "basic"
-              }
-            ]
-          },
-          {
-            "description": "Hyper+S to toggle Sound output source",
-            "manipulators": [
-              {
-                "from": {
-                  "key_code": "s",
-                  "modifiers": {
-                    "mandatory": [
-                      "left_command",
-                      "left_option",
-                      "left_control",
-                      "left_shift"
-                    ]
-                  }
-                },
-                "to": [
-                  {
-                    "shell_command": "/bin/bash /Users/jevans/.config/macos-automations/toggle-output.sh >> /tmp/karabiner.log"
-                  }
-                ],
-                "type": "basic"
-              }
-            ]
-          },
-          {
-            "description": "Hyper+V to toggle accessibility keyboard",
-            "manipulators": [
-              {
-                "from": {
-                  "key_code": "v",
-                  "modifiers": {
-                    "mandatory": [
-                      "left_command",
-                      "left_option",
-                      "left_control",
-                      "left_shift"
-                    ]
-                  }
-                },
-                "to": [
-                  {
-                    "shell_command": "osascript /Users/jevans/.config/macos-automations/ToggleAccessibilityKeyboard.scpt"
-                  }
-                ],
                 "type": "basic"
               }
             ]

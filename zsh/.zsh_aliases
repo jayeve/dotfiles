@@ -4,6 +4,8 @@ function topcommands {
   history | awk '{print $2}' | sort | uniq -c | sort -nr | head -n ${1:-5}
 }
 
+alias hsrst='pkill Hammerspoon && open -a Hammerspoon'
+
 alias v='nvim'
 # some more ls aliases
 alias ll='ls -alF'

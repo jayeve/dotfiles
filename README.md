@@ -1,5 +1,14 @@
 # J's dotfiles setup for a Ubuntu 22.04 machine
 
+## hammerspoon
+
+```bash
+# to see all running apps
+hs -c 'for _, app in ipairs(hs.application.runningApplications()) do
+    print(app:name(), app:bundleID())
+end'
+```
+
 ## Shortcuts Events
 
 - MacOS provides a mechanism for creating shortcuts that I can then run with `osascript` and even map to keys using Karabiner
@@ -23,7 +32,7 @@
 - [macos] Use the `stow` command to set up dotfiles
 
 ```bash
-/Users/jevans/dotfiles$ stow .
+/Users/jevans/dotfiles$ stow . && stow hammerspoon && hsrst
 ```
 
 - [linux] The `personalize` script in coder isn't running `chown` correctly, so you must run manually after jumping on the box
