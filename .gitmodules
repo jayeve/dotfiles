@@ -1,0 +1,3 @@
+[submodule "hammerspoon/.hammerspoon/Spoons/Hammerflow.spoon"]
+	path = hammerspoon/.hammerspoon/Spoons/Hammerflow.spoon
+	url = https://github.com/saml-dev/Hammerflow.spoon.git

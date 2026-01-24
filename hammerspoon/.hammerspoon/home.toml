@@ -1,0 +1,38 @@
+leader_key = "f18"
+leader_key_mods = ""     # keep empty if you use a dedicated leader key
+auto_reload = true
+toast_on_reload = false
+show_ui = true
+key_maps_per_line = 3
+
+f = ["Finder", "finder"]
+w = ["Whatsapp", "whatsapp"]
+d = ["Discord", "discord"]
+c = ["ChatGPT", "gpt"]
+m = ["hs:hs.application.launchOrFocusByBundleID('com.google.Chrome.app.hpfldicfbfomlpcikngkocigghgafkph')", "sms"]
+1 = ["1Password", "1pass"]
+q = ["Quicktime Player", "quicktime"]
+
+[a]
+label = "[...]"
+l = ["Alacritty", "alacritty"]
+k = ["Anki", "anki"]
+
+[g]
+label = "[google..]"
+c = ["Google Chat", "chat"]
+m = ["Google Meet", "meet"]
+g = ["Google Chrome", "chrome"]
+
+[s]
+label = "[...]"
+s = ["Spotify", "spotify"]
+p = ["Spark", "spark"]
+l = ["Slack", "slack"]
+i = ["Signal", "signal"]
+
+[t]
+label = "[translate]"
+
+k = ["https://translate.google.com/?sl=en&tl=ko&op=translate", "한국어"]
+a = ["https://translate.google.com/?sl=en&tl=ar&op=translate", "عربية"]
