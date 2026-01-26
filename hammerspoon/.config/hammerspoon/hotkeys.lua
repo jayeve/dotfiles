@@ -1,26 +1,46 @@
 -- ~/.config/hammerspoon/hotkeys.lua
 local sound = require("sound")
 local profiles = require("profiles")
+local tmux = require("tmux")
 
 -- configured at https://github.com/jayeve/dotfiles/blob/2b1de320aeb019aad64f98fbb3f3863361efb9b3/.config/karabiner/karabiner.json#L9
 local hyper = { "ctrl", "alt", "shift", "cmd" }
 
+hs.hotkey.bind(hyper, "e", function()
+	hs.application.launchOrFocus(Apps.spark)
+end)
+hs.hotkey.bind(hyper, "r", function()
+	hs.application.launchOrFocus(Apps.anki)
+end)
+hs.hotkey.bind(hyper, "w", function()
+	hs.application.launchOrFocus(Apps.whatsapp)
+end)
+hs.hotkey.bind(hyper, "1", function()
+	hs.application.launchOrFocus(Apps.onepassword)
+end)
+hs.hotkey.bind(hyper, "c", function()
+	hs.application.launchOrFocus(Apps.chatgpt)
+end)
 hs.hotkey.bind(hyper, "a", function()
 	hs.application.launchOrFocus(Apps.alacritty)
 end)
--- hs.hotkey.bind(hyper, "k", function()
--- 	hs.application.launchOrFocusByBundleID(PWA_Aps.google_messages)
--- end)
+hs.hotkey.bind(hyper, "g", function()
+	hs.application.launchOrFocus(Apps.chrome)
+end)
+hs.hotkey.bind(hyper, "m", function()
+	hs.application.launchOrFocusByBundleID(PWA_Aps.google_messages)
+end)
 hs.hotkey.bind(hyper, "k", function()
 	hs.application.launchOrFocus(Apps.googlechat)
-
-	-- small delay so the app is actually frontmost before typing
-	hs.timer.doAfter(0.12, function()
-		hs.eventtap.keyStroke({ "cmd", "shift" }, "k", 0)
-	end)
+end)
+hs.hotkey.bind(hyper, "q", function()
+	hs.application.launchOrFocus(Apps.quicktime)
 end)
 hs.hotkey.bind(hyper, "s", function()
 	hs.application.launchOrFocus(Apps.spotify)
+end)
+hs.hotkey.bind(hyper, "d", function()
+	hs.application.launchOrFocus(Apps.discord)
 end)
 
 -- Hotkey: Hyper + I
@@ -29,7 +49,6 @@ hs.hotkey.bind(hyper, "i", sound.pickInputDevice)
 hs.hotkey.bind(hyper, "o", sound.pickOutputDevice)
 
 -- Hotkey to toggle Accessibility (Virtual) Keyboard using existing AppleScript
-
 local home = os.getenv("HOME")
 local scriptPath = home .. "/.config/macos-automations/ToggleAccessibilityKeyboard.scpt"
 
@@ -45,14 +64,18 @@ end)
 -- profiles
 
 -- Hotkey: Hyper + 1 -> work
-hs.hotkey.bind(hyper, "1", function()
+hs.hotkey.bind(hyper, "9", function()
 	profiles.applyProfile("work")
 end)
 -- Hotkey: Hyper + 2 -> study
-hs.hotkey.bind(hyper, "2", function()
+hs.hotkey.bind(hyper, "8", function()
 	profiles.applyProfile("study")
 end)
 -- Hotkey: Hyper + 3 -> play
-hs.hotkey.bind(hyper, "3", function()
+hs.hotkey.bind(hyper, "7", function()
 	profiles.applyProfile("play")
+end)
+
+hs.hotkey.bind(hyper, "f", function()
+	tmux.fzf_tmux_sessions("dotfiles", (os.getenv("HOME") .. "/dotfiles"))
 end)

@@ -19,6 +19,8 @@ alias e='exit'
 
 # make tmux play well with fancy prompt
 alias tmux="TERM=screen-256color-bce tmux"
+# switch to another session, or attach to ~/dotfiles session
+alias fz="session=\$(tmux ls -F '#S' 2>/dev/null | fzf --exit-0) || session='dotfiles'; tmux has-session -t \"\$session\" 2>/dev/null || tmux new-session -d -s \"\$session\" -c ~/dotfiles; [ -n \"\$TMUX\" ] && tmux switch-client -t \"\$session\" || tmux attach -t \"\$session\""
 
 # a few helpful and silly git aliases
 alias getdefault="git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'"

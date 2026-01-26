@@ -59,5 +59,6 @@ save_to_clipboard = true
 semantic_escape_chars = ",│`|:\"' ()[]{}<>\t"
 
 [window]
+dynamic_title = true
 dynamic_padding = true
 option_as_alt = "Both"

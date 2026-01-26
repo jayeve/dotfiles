@@ -11,7 +11,6 @@ Apps = {
 	finder = "Finder",
 	googlechat = "Google Chat",
 	meet = "Google Meet",
-	messages = "Google Messages",
 	onepassword = "1Password",
 	quicktime = "Quicktime Player",
 	spotify = "Spotify",

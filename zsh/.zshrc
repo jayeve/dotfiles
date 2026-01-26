@@ -95,21 +95,16 @@ function ff {
   fi
 }
 
-function tm() {
-  current_directory=$(basename "$PWD")
-  # check if we're currently in a TMUX session
-  if [[ -n $TMUX ]]; then
-    current_session=$(tmux display-message -p '#S')
-    echo "current session" $current_session
-    if [[ "$current_session" == "$current_directory" ]]; then
-      echo "No-op"
-      return
-    fi
+# Logic remains in the function for reliability
+tm() {
+  local s=${PWD:t}
+  if [[ -n $TMUX && $(tmux display-message -p '#S') == "$s" ]]; then
+    echo "Already in $s"
+  else
+    tmux new-session -Ad -s "$s" && {
+      [[ -n $TMUX ]] && tmux switch-client -t "$s" || tmux attach-session -t "$s"
+    }
   fi
-  echo "checking for session" $current_directory
-  tmux has-session -t $current_directory 2>/dev/null && tmux attach-session -t $current_directory || tmux new-session -d -s $current_directory
-  # if we get to this line, we must not have switched sessions
-  tmux switch-client -t $current_directory
 }
 
 gch () {
@@ -122,6 +117,33 @@ gch () {
     xargs git checkout
 }
 
+send_hs_status() {
+  # If $TMUX is set, we are in tmux. Otherwise, we aren't.
+  local tmux_state="NO_TMUX"
+  [[ -n "$TMUX" ]] && tmux_state="IN_TMUX"
+
+  local msg="$$|$1|$tmux_state"
+
+  # Send to Hammerspoon via CLI
+  hs -c "$(printf 'CheckInTmux(%q, %q, %q)' "$$" "active" "$([ -n "$TMUX" ] && echo true || echo false)")"
+}
+function _set_title() {
+  # If in tmux, let tmux manage titles
+  [[ -n "$TMUX" ]] && return
+  # Otherwise set title to something useful (cwd)
+  print -Pn "\e]0;%~\a"
+}
+# change  the alacritty title
+# precmd_functions+=(_set_title)
+precmd() {
+  send_hs_status "IDLE"
+}
+preexec() {
+  send_hs_status "BUSY"
+}
+
+# opencode
+export PATH=/Users/jevans/.opencode/bin:$PATH
 # basic setup
 # allow $(...) in PROMPT
 setopt prompt_subst
@@ -191,5 +213,3 @@ PS2=$' %F{green}|>%f '
 export PATH="$HOME/.cargo/bin:$PATH"
 export PATH="$HOME/.cargo/bin:$PATH"
 
-# opencode
-export PATH=/Users/jevans/.opencode/bin:$PATH
