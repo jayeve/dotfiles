@@ -37,4 +37,5 @@ if spoon.Hammerflow.auto_reload then
 end
 
 require("apps")
+require("locations")
 require("hotkeys")

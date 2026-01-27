@@ -1,49 +1,6 @@
 -- ~/.config/hammerspoon/tmux.lua
 local M = {}
 
--- function OpenAlacrittyTmuxFzf()
---   local appName = "Alacritty"
---
---   -- Launch or focus Alacritty
---   hs.application.launchOrFocus(appName)
---
---   -- Wait briefly so the app/window is actually focused
---   hs.timer.doAfter(0.2, function()
---     local applescript = [[
---       tell application "System Events"
---         tell process "Alacritty"
---           set frontmost to true
---         end tell
---
---         -- Type the tmux + fzf command into the focused terminal
---         keystroke "session=$(tmux ls -F '#S' 2>/dev/null | fzf --exit-0) || session='dotfiles'; tmux has-session -t \"$session\" 2>/dev/null || tmux new-session -d -s \"$session\" -c ~/dotfiles; [ -n \"$TMUX\" ] && tmux switch-client -t \"$session\" || tmux attach -t \"$session\""
---         key code 36 -- Enter
---       end tell
---     ]]
---
---     hs.osascript.applescript(applescript)
---   end)
--- end
-
-local function isFocusedAlacrittyWindowATmuxSession()
-	local win = hs.window.focusedWindow()
-	if win then
-		local title = win:title()
-		if title:sub(1, 5) == "tmux:" then
-			hs.alert.show("in a tmux window", 1)
-		else
-			hs.alert.show("Not in a tmux window", 1)
-		end
-	end
-end
-
--- Hammerspoon: target a tmux session from anywhere, using Alacritty as the UI.
--- Assumptions:
---  - Your tmux title prefix is "tmux:" (e.g. tmux set-titles-string "tmux:#S | #W")
---  - Alacritty has a "new tab" shortcut on Cmd+T (adjust if yours differs)
---  - You are OK with keystroke injection into Alacritty when attaching
--- ---------- helpers ----------
-
 local function shQuote(s)
 	return "'" .. tostring(s):gsub("'", [['"'"']]) .. "'"
 end
@@ -190,7 +147,11 @@ function M.fzf_tmux_sessions(default_session_name, default_session_root)
 	chooser:show()
 end
 
--- target_session(session_name, session_root, default_session_name, default_session_root)
+-- Hammerspoon: target a tmux session from anywhere, using Alacritty as the UI.
+-- Assumptions:
+--  - tmux title prefix is "tmux:" (e.g. tmux set-titles-string "tmux:#S | #W")
+--  - Alacritty has a "new tab" shortcut on Cmd+T (adjust if yours differs)
+--  - You are OK with keystroke injection into Alacritty when attaching
 function M.target_session(session_name, session_root, default_session_name, default_session_root)
 	session_name = session_name or "dotfiles"
 	session_root = session_root or (os.getenv("HOME") .. "/dotfiles")

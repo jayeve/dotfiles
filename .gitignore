@@ -8,6 +8,7 @@
 !.config/alacritty
 !.config/karabiner
 !.config/macos-automations
+hammerspoon/.config/hammerspoon/locations.private.lua
 **/node_modules/**
 *.class
 *.dll
