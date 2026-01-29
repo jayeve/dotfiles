@@ -14,6 +14,7 @@ Apps = {
 	onepassword = "1Password",
 	quicktime = "Quicktime Player",
 	spotify = "Spotify",
+	localsend = "Localsend",
 	whatsapp = "Whatsapp",
 	signal = "Signal",
 	slack = "Slack",

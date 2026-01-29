@@ -7,6 +7,9 @@ local home = os.getenv("HOME")
 -- configured at https://github.com/jayeve/dotfiles/blob/2b1de320aeb019aad64f98fbb3f3863361efb9b3/.config/karabiner/karabiner.json#L9
 local hyper = { "ctrl", "alt", "shift", "cmd" }
 
+hs.hotkey.bind(hyper, "l", function()
+	hs.application.launchOrFocus(Apps.localsend)
+end)
 hs.hotkey.bind(hyper, "h", function()
 	hs.application.launchOrFocus(Apps.googlemeet)
 end)
@@ -45,6 +48,28 @@ hs.hotkey.bind(hyper, "s", function()
 end)
 hs.hotkey.bind(hyper, "d", function()
 	hs.application.launchOrFocus(Apps.discord)
+end)
+hs.hotkey.bind(hyper, "z", function()
+	local url = "https://gitdash.cfdata.org/"
+
+	-- Open URL specifically in Google Chrome
+	hs.urlevent.openURLWithBundle(url, "com.google.Chrome")
+end)
+
+hs.hotkey.bind(hyper, "2", function()
+	local button, text =
+		hs.dialog.textPrompt("Translate to Korean", "Enter text to translate:", "", "Translate", "Cancel")
+
+	if button ~= "Translate" or text == "" then
+		return
+	end
+
+	-- URL encode input
+	local encoded = hs.http.encodeForQuery(text)
+
+	local url = string.format("https://translate.google.com/?sl=auto&tl=ko&text=%s&op=translate", encoded)
+
+	hs.urlevent.openURL(url)
 end)
 
 -- Hotkey: Hyper + I
@@ -107,6 +132,14 @@ local function resetTimer()
 	end
 end
 
+tmuxMode:bind("", "e", function()
+	tmux.target_session(Locations.extractor[1], Locations.extractor[2])
+	tmuxMode:exit()
+end)
+tmuxMode:bind("", "n", function()
+	tmux.target_session(Locations.weekly_notes[1], Locations.weekly_notes[2])
+	tmuxMode:exit()
+end)
 tmuxMode:bind("", "f", function()
 	tmux.target_session(Locations.fl2[1], Locations.fl2[2])
 	tmuxMode:exit()
@@ -120,7 +153,7 @@ tmuxMode:bind("", "o", function()
 	tmuxMode:exit()
 end)
 tmuxMode:bind("", "c", function()
-	tmux.target_session(Locations.cache_indexer[1], Locations.ssl_detector[2])
+	tmux.target_session(Locations.cache_indexer[1], Locations.cache_indexer[2])
 	tmuxMode:exit()
 end)
 tmuxMode:bind("", "s", function()
@@ -133,6 +166,10 @@ tmuxMode:bind("", "d", function()
 end)
 tmuxMode:bind("", "p", function()
 	tmux.target_session(Locations.pingora_origin[1], Locations.pingora_origin[2])
+	tmuxMode:exit()
+end)
+tmuxMode:bind("", "r", function()
+	tmux.target_session(Locations.resources[1], Locations.resources[2])
 	tmuxMode:exit()
 end)
 tmuxMode:bind("", "escape", function()

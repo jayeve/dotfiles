@@ -92,8 +92,8 @@ keymap.set("n", "<leader>k", "<cmd>Telescope frecency<cr>") -- file frecency
 keymap.set("n", "<leader>u", "<cmd>Telescope harpoon marks<cr>") -- harpoon marks
 keymap.set("n", "<leader>M", "<cmd>Telescope metals commands<cr>")
 
--- telescope git commands (not on youtube nvim video)
-keymap.set("n", "<leader>gc", "<cmd>Telescope git_commits<cr>") -- list all git commits (use <cr> to checkout) ["gc" for git commits]
+-- telescope git commands
+keymap.set("n", "<leader>gC", "<cmd>Telescope git_commits<cr>") -- list all git commits (use <cr> to checkout) ["gc" for git commits]
 keymap.set("n", "<leader>gfc", "<cmd>Telescope git_bcommits<cr>") -- list git commits for current file/buffer (use <cr> to checkout) ["gfc" for git file commits]
 keymap.set("n", "<leader>gb", "<cmd>Telescope git_branches<cr>") -- list git branches (use <cr> to checkout) ["gb" for git branch]
 keymap.set("n", "<leader>gs", "<cmd>Telescope git_status<cr>") -- list current changes per file with diff preview ["gs" for git status]
@@ -153,7 +153,9 @@ which_key.add({
 	{ "<leader>N", utils.open_personal_notes, desc = "Open this week's personal notes" },
 	{ "<leader>n", utils.open_notes, desc = "Open this week's weekly notes" },
 	{ "<leader>C", utils.copy_file_path_to_clipboard, desc = "Copy cur buffer filepath" },
-	{ "<leader>gC", utils.open_gitlab_link_for_current_line, desc = "Open gitlab MR or commit" },
+	{ "<leader>gc", utils.open_gitlab_link_for_current_line, desc = "Open gitlab MR or commit" },
+	{ "<leader>gg", utils.open_repo_url, desc = "Open the git repository URL" },
+	{ "<leader>gr", utils.open_repo_url, desc = "Open the git repository URL" },
 	{
 		"<leader>m",
 		function()

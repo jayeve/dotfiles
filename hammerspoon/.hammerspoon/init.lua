@@ -26,7 +26,7 @@ hs.loadSpoon("Hammerflow")
 
 -- Hammerflow searches these in order and loads the first valid TOML.
 spoon.Hammerflow.loadFirstValidTomlFile({ "home.toml", "work.toml" })
-
+--
 if spoon.Hammerflow.auto_reload then
 	hs.loadSpoon("ReloadConfiguration")
 	spoon.ReloadConfiguration.watch_paths = {

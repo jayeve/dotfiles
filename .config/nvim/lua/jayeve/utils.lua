@@ -395,4 +395,36 @@ function M.open_gitlab_link_for_current_line()
 	end
 end
 
+function M.open_repo_url()
+	-- Open the root GitLab or GitHub URL for the current repository
+	local root = M.find_current_buffer_git_root()
+	if not root then
+		vim.notify("Not inside a Git repository", vim.log.levels.ERROR, { title = "jayeve.utils" })
+		return
+	end
+
+	-- Get remote URL
+	local remote = git_remote_url(root)
+	if not remote then
+		vim.notify("Could not find git remote origin", vim.log.levels.ERROR, { title = "jayeve.utils" })
+		return
+	end
+
+	-- Normalize to https URL
+	local base = normalize_gitlab_base(remote)
+	if not base then
+		vim.notify(
+			("Could not parse remote URL: %s"):format(remote),
+			vim.log.levels.ERROR,
+			{ title = "jayeve.utils" }
+		)
+		return
+	end
+
+	-- Copy to clipboard and open
+	vim.fn.setreg("+", base)
+	vim.notify("Opening repository: " .. base, vim.log.levels.INFO, { title = "jayeve.utils" })
+	open_url(base)
+end
+
 return M

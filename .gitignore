@@ -8,7 +8,7 @@
 !.config/alacritty
 !.config/karabiner
 !.config/macos-automations
-hammerspoon/.config/hammerspoon/locations.private.lua
+hammerspoon/.config/hammerspoon/projects.json
 **/node_modules/**
 *.class
 *.dll
@@ -32,3 +32,4 @@ ehthumbs.db
 id_rsa
 id_ed25519
 Brewfile.lock.json
+AGENTS.md
