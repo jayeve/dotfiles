@@ -12,6 +12,9 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 
+# Optional: a shorter alias
+alias lc='alac_lastcmd_clip'
+
 # some cd aliases
 alias ..='cd ..'
 

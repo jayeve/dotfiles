@@ -1,5 +1,5 @@
 [core]
-  excludesfile = ~/.gitignore
+	excludesFile = /Users/jevans/.config/git/ignore
   editor = nvim
 [user]
 	name = J Evans

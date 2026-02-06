@@ -2,6 +2,7 @@
 -- Central place to define app names you launch often.
 
 Apps = {
+	teams = "Microsoft Teams (PWA)",
 	alacritty = "Alacritty",
 	anki = "Anki",
 	code = "Windsurf",

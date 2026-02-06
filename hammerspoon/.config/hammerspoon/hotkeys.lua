@@ -7,6 +7,9 @@ local home = os.getenv("HOME")
 -- configured at https://github.com/jayeve/dotfiles/blob/2b1de320aeb019aad64f98fbb3f3863361efb9b3/.config/karabiner/karabiner.json#L9
 local hyper = { "ctrl", "alt", "shift", "cmd" }
 
+hs.hotkey.bind({}, "pagedown", function()
+	hs.eventtap.keyStroke({ "cmd", "ctrl" }, "q", 0)
+end)
 hs.hotkey.bind(hyper, "l", function()
 	hs.application.launchOrFocus(Apps.localsend)
 end)
@@ -49,6 +52,9 @@ end)
 hs.hotkey.bind(hyper, "d", function()
 	hs.application.launchOrFocus(Apps.discord)
 end)
+hs.hotkey.bind(hyper, "t", function()
+	hs.application.launchOrFocus(Apps.teams)
+end)
 hs.hotkey.bind(hyper, "z", function()
 	local url = "https://gitdash.cfdata.org/"
 
@@ -67,7 +73,28 @@ hs.hotkey.bind(hyper, "2", function()
 	-- URL encode input
 	local encoded = hs.http.encodeForQuery(text)
 
-	local url = string.format("https://translate.google.com/?sl=auto&tl=ko&text=%s&op=translate", encoded)
+	local url = string.format("https://translate.google.com/?sl=en&tl=ko&text=%s&op=translate", encoded)
+
+	hs.urlevent.openURL(url)
+end)
+
+hs.hotkey.bind(hyper, "3", function()
+	local button, text = hs.dialog.textPrompt(
+		"Translate to English (from korean)",
+		"Enter text to translate:",
+		"",
+		"Translate",
+		"Cancel"
+	)
+
+	if button ~= "Translate" or text == "" then
+		return
+	end
+
+	-- URL encode input
+	local encoded = hs.http.encodeForQuery(text)
+
+	local url = string.format("https://translate.google.com/?sl=ko&tl=en&text=%s&op=translate", encoded)
 
 	hs.urlevent.openURL(url)
 end)
@@ -138,6 +165,10 @@ tmuxMode:bind("", "e", function()
 end)
 tmuxMode:bind("", "n", function()
 	tmux.target_session(Locations.weekly_notes[1], Locations.weekly_notes[2])
+	tmuxMode:exit()
+end)
+tmuxMode:bind("", "m", function()
+	tmux.target_session(Locations.personal_notes[1], Locations.personal_notes[2])
 	tmuxMode:exit()
 end)
 tmuxMode:bind("", "f", function()

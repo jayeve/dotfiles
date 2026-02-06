@@ -148,6 +148,14 @@ export PATH=/Users/jevans/.opencode/bin:$PATH
 # allow $(...) in PROMPT
 setopt prompt_subst
 
+# Copy the last executed command (previous history entry) to clipboard
+alac_lastcmd_clip() {
+  # fc -ln -1 prints the most recent history line
+  local cmd
+  cmd="$(fc -ln -1 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+  [[ -n "$cmd" ]] && printf %s "$cmd" | pbcopy
+}
+
 # git_info: command substitution will be evaluated when prompt is shown
 git_info() {
 
