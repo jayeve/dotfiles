@@ -22,19 +22,15 @@ function CheckInTmux(pid, status, tmux)
 	end
 end
 
-hs.loadSpoon("Hammerflow")
+-- hs.loadSpoon("Hammerflow")
 
 -- Hammerflow searches these in order and loads the first valid TOML.
-spoon.Hammerflow.loadFirstValidTomlFile({ "home.toml", "work.toml" })
+-- spoon.Hammerflow.loadFirstValidTomlFile({ "home.toml", "work.toml" })
 --
-if spoon.Hammerflow.auto_reload then
-	hs.loadSpoon("ReloadConfiguration")
-	spoon.ReloadConfiguration.watch_paths = {
-		hs.configdir,
-		home .. "/.config/hammerspoon",
-	}
-	spoon.ReloadConfiguration:start()
-end
+-- Auto-reload config on file changes
+local reload = require("reload")
+
+reload.start()
 
 require("apps")
 require("locations")

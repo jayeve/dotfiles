@@ -105,7 +105,7 @@ hs.hotkey.bind(hyper, "i", sound.pickInputDevice)
 hs.hotkey.bind(hyper, "o", sound.pickOutputDevice)
 
 -- Hotkey to toggle Accessibility (Virtual) Keyboard using existing AppleScript
-local scriptPath = home .. "/.config/macos-automations/ToggleAccessibilityKeyboard.scpt"
+local scriptPath = home .. "/.config/scripts/ToggleAccessibilityKeyboard.scpt"
 
 hs.hotkey.bind(hyper, "v", function()
 	local cmd = string.format('osascript "%s"', scriptPath)

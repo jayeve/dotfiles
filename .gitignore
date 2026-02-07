@@ -1,14 +1,7 @@
-.config/*
-.config/nvim/backups
-.config/nvim/lazy-lock.json
+nvim/.config/nvim/backups
+nvim/.config/nvim/backups/*
+karabiner/automatic_backups
 .bazelrc
-.config/temporalio
-.config/karabiner/automatic_backups
-!.config/git
-!.config/nvim
-!.config/karabiner
-!.config/macos-automations
-!.config/alacritty
 hammerspoon/.config/hammerspoon/projects.json
 **/node_modules/**
 *.class

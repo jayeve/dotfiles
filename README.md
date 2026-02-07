@@ -32,7 +32,8 @@ end'
 - [macos] Use the `stow` command to set up dotfiles
 
 ```bash
-/Users/jevans/dotfiles$ stow . && stow hammerspoon && hsrst
+# from /Users/jevans/dotfiles
+stow alacritty nvim tmux zsh hammerspoon scripts htop karabiner
 ```
 
 - [linux] The `personalize` script in coder isn't running `chown` correctly, so you must run manually after jumping on the box
