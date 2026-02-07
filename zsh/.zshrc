@@ -108,15 +108,20 @@ tm() {
 }
 
 gch () {
-  git recent | \
-    fzf-tmux --ansi --border \
-      --color='info:143,border:240,spinner:108,hl+:red' \
-      --delimiter ' | ' | \
-    sed 's/^[ \t*]*//' | \
-    awk '{print $1}' | \
-    xargs git checkout
+  git for-each-ref refs/heads \
+    --sort=-committerdate \
+    --format='%(refname:short)|%(committerdate:relative)|%(subject)' | \
+  awk -F'|' '{
+    printf "%-15s | \033[38;5;81m%-30s\033[0m | \033[38;5;108m(%s)\033[0m\n", $1, $3, $2
+  }' | \
+  fzf-tmux --ansi --border \
+    --color='info:143,border:240,spinner:108,hl+:red' \
+    --delimiter=' \| ' \
+    --with-nth=1,2,3 | \
+  sed 's/\x1b\[[0-9;]*m//g' | \
+  awk -F' \\| ' '{print $1}' | \
+  xargs -r git checkout
 }
-
 send_hs_status() {
   # If $TMUX is set, we are in tmux. Otherwise, we aren't.
   local tmux_state="NO_TMUX"

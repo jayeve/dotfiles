@@ -1,2 +1,0 @@
--- vim.cmd([[LspStop]])
--- vim.cmd([[CocEnable]])
