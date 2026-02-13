@@ -1,4 +1,4 @@
--- ~/.config/hammerspoon/sound.lua
+-- ~/.config/hammerspoon/audio.lua
 local M = {}
 
 -- Telescope-style output audio picker for Hammerspoon

@@ -45,9 +45,8 @@ telescope.setup({
 			"--line-number",
 			"--column",
 			"--smart-case",
-
-			"--hidden", -- 👈 include hidden files
-			"--glob=!.git/*", -- 👈 but still ignore .git directory
+			"--hidden", -- include hidden files
+			"--glob=!.git/*", -- but still ignore .git directory
 		},
 		layout_strategy = "vertical",
 		layout_config = { height = 0.95 },

@@ -11,6 +11,8 @@ alias v='nvim'
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
+# alias ll='ls -lh'
+# alias la='ls -lha'
 
 # Optional: a shorter alias
 alias lc='alac_lastcmd_clip'
@@ -37,6 +39,12 @@ alias prune="docker system prune --all --force --volumes"
 # remove local git branches that aren't remote
 alias rmgone="git fetch -p && for branch in \$(git for-each-ref --format '%(refname) %(upstream:track)' refs/heads | awk '\$2 == \"[gone]\" {sub(\"refs/heads/\", \"\", \$1); print \$1}'); do git branch -D \$branch; done"
 alias fixup="git commit -a --fixup=HEAD"
+alias gs='git status'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git pull'
+alias gd='git diff'
+
 
 # handy open all files in vim
 # alias vi="/usr/local/Cellar/vim/8.1.0500_1/bin/vim" # use brew's vim because --with-python3
@@ -100,3 +108,18 @@ alias rgg='rg -i'
 alias pre='rg --files | sk --preview="bat {} --color=always"'
 
 dps='docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Status}}\t{{.Ports}}"'
+
+alias lagcheck='
+echo "===== CPU =====";
+top -l 1 -o cpu | head -n 15;
+
+echo "\n===== MEMORY =====";
+memory_pressure;
+sysctl vm.swapusage;
+
+echo "\n===== DISK I/O =====";
+iostat -w 1 -c 3;
+
+echo "\n===== DNS SERVERS =====";
+scutil --dns | grep nameserver | head -n 5;
+'

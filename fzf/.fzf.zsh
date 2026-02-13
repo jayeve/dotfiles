@@ -1,8 +1,13 @@
 # Load fzf keybindings & completion
+# Cache brew --prefix to avoid 0.8s delay on every shell startup
 # Path may differ depending on install method
-if [[ -r "$(brew --prefix 2>/dev/null)/opt/fzf/shell/key-bindings.zsh" ]]; then
-  source "$(brew --prefix)/opt/fzf/shell/key-bindings.zsh"
-  source "$(brew --prefix)/opt/fzf/shell/completion.zsh"
+if [[ -z "$HOMEBREW_PREFIX" ]] && command -v brew >/dev/null 2>&1; then
+  export HOMEBREW_PREFIX="$(brew --prefix)"
+fi
+
+if [[ -r "$HOMEBREW_PREFIX/opt/fzf/shell/key-bindings.zsh" ]]; then
+  source "$HOMEBREW_PREFIX/opt/fzf/shell/key-bindings.zsh"
+  source "$HOMEBREW_PREFIX/opt/fzf/shell/completion.zsh"
 elif [[ -r /usr/share/fzf/key-bindings.zsh ]]; then
   source /usr/share/fzf/key-bindings.zsh
   source /usr/share/fzf/completion.zsh

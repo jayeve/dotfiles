@@ -240,5 +240,127 @@ function M.git_dir_picker(root_dir)
 		:find()
 end
 
+local function read_gitlab_cache()
+	local cache_file = os.getenv("HOME") .. "/.gitlab-projects-cache"
+	local projects = {}
+	local file = io.open(cache_file, "r")
+	
+	if not file then
+		print("Error: GitLab cache not found at " .. cache_file)
+		print("Run 'glprj-refresh' in your shell first")
+		return projects
+	end
+	
+	for line in file:lines() do
+		if line and line ~= "" then
+			table.insert(projects, line)
+		end
+	end
+	file:close()
+	
+	return projects
+end
+
+local function gitlab_prj_helper(full_path)
+	local starting_dir = vim.fn.getcwd()
+	local base = os.getenv("HOME") .. "/cloudflare"
+	
+	-- Strip cloudflare/ prefix if present
+	local relative_path = full_path
+	if vim.startswith(full_path, "cloudflare/") then
+		relative_path = string.sub(full_path, 12) -- Remove "cloudflare/"
+	end
+	
+	local project_dir = base .. "/" .. relative_path
+	local project = vim.fn.fnamemodify(project_dir, ":t")
+	
+	-- Clone if doesn't exist
+	if vim.fn.isdirectory(project_dir) == 0 then
+		vim.fn.mkdir(vim.fn.fnamemodify(project_dir, ":h"), "p")
+		print("Cloning git@gitlab.cfdata.org:" .. full_path .. ".git")
+		os.execute("git clone git@gitlab.cfdata.org:" .. full_path .. ".git " .. project_dir)
+	end
+	
+	-- Check if tmux is running
+	local tmux_running = os.execute("pgrep tmux > /dev/null 2>&1")
+	if vim.env.TMUX == nil and tmux_running ~= 0 then
+		os.execute("tmux new-session -s " .. project .. " -c " .. project_dir)
+		return
+	end
+	
+	-- Check if tmux session exists
+	local session_exists = os.execute("tmux has-session -t=" .. project .. " 2>/dev/null")
+	if session_exists ~= 0 then
+		print("creating session " .. project .. " at " .. project_dir)
+		os.execute("tmux new-session -d -s " .. project .. " -c " .. project_dir)
+	end
+	
+	if vim.env.TMUX == nil then
+		os.execute("tmux attach-session -t " .. project .. " -c " .. project_dir)
+	else
+		os.execute("tmux switch-client -t " .. project)
+	end
+	
+	if session_exists ~= 0 then
+		vim.cmd("cd " .. starting_dir)
+		return 1
+	end
+end
+
+function M.gitlab_project_picker()
+	local tmux_sessions = get_tmux_sessions()
+	local base = os.getenv("HOME") .. "/cloudflare"
+	
+	pickers
+		.new({}, {
+			prompt_title = "GitLab Projects (9,072 repos)",
+			finder = finders.new_table({
+				results = read_gitlab_cache(),
+				entry_maker = function(entry)
+					-- Check if project exists locally
+					local check_path = entry
+					if vim.startswith(entry, "cloudflare/") then
+						check_path = string.sub(entry, 12)
+					end
+					
+					local project_dir = base .. "/" .. check_path
+					local project_name = vim.fn.fnamemodify(project_dir, ":t")
+					local is_local = vim.fn.isdirectory(project_dir) == 1
+					local has_session = contains(tmux_sessions, project_name)
+					
+					local display = entry
+					if is_local then
+						display = "LOCAL  " .. entry
+					else
+						display = "REMOTE " .. entry
+					end
+					
+					if has_session then
+						display = display .. " ●"
+					end
+					
+					return {
+						value = entry,
+						display = display,
+						ordinal = entry,
+					}
+				end,
+			}),
+			sorter = conf.generic_sorter({}),
+			attach_mappings = function(_, map)
+				actions.select_default:replace(function(prompt_bufnr)
+					local selection = action_state.get_selected_entry()
+					actions.close(prompt_bufnr)
+					
+					if selection then
+						gitlab_prj_helper(selection.value)
+					end
+				end)
+				return true
+			end,
+		})
+		:find()
+end
+
 -- TODO export as a telescope extension
 return M

@@ -1,6 +1,8 @@
 # Load colors
 autoload -Uz colors && colors
 
+# setopt globstarshort
+
 # History settings
 HISTFILE=~/.zsh_history
 HISTSIZE=5000
@@ -21,11 +23,16 @@ setopt share_history
 setopt hist_ignore_space
 
 # Completion system (with caching, but faster than OMZ)
+# Only regenerate compdump once per day for faster startup
 autoload -Uz compinit
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path "$HOME/.cache/zsh"
 mkdir -p "$HOME/.cache/zsh"
-compinit -d "$HOME/.cache/zcompdump"
+if [[ -n "$HOME/.cache/zcompdump"(#qN.mh+24) ]]; then
+  compinit -d "$HOME/.cache/zcompdump"
+else
+  compinit -C -d "$HOME/.cache/zcompdump"
+fi
 
 # Editor / pager
 export EDITOR=nvim
@@ -40,17 +47,18 @@ extend_path() { [[ ":$PATH:" != *":$1:"* ]] && PATH="$1:$PATH" }
 extend_path "$HOME/.local/bin"
 extend_path "$HOME/bin"
 
-# Aliases
-alias ll='ls -lh'
-alias la='ls -lha'
-alias gs='git status'
-alias gc='git commit'
-alias gp='git push'
-alias gl='git pull'
+# Source helper for optional files
+source_if_exists() { [[ -f "$1" ]] && source "$1" }
 
-# Useful extras (optional)
-if command -v zoxide >/dev/null 2>&1; then
-  eval "$(zoxide init zsh)"
+# Useful extras (optional) - cache zoxide init for faster startup
+if (( $+commands[zoxide] )); then
+  local zoxide_cache="$HOME/.cache/zsh/zoxide_init.zsh"
+  # Regenerate cache if it doesn't exist or is older than 7 days
+  [[ ! -f "$zoxide_cache" || -n "$zoxide_cache"(#qN.mw+1) ]] && {
+    mkdir -p "${zoxide_cache:h}"
+    zoxide init zsh > "$zoxide_cache" 2>/dev/null
+  }
+  source_if_exists "$zoxide_cache"
 fi
 
 # cross-platform clipboard
@@ -61,6 +69,7 @@ fi
 
 source_if_exists "$HOME/.work_functions.zsh"
 source_if_exists "$HOME/.zsh_aliases"
+source_if_exists "$HOME/.zsh_hotkeys"
 
 # fe [FUZZY PATTERN] - Open the selected file with the default editor
 #   - Bypass fuzzy finder if there's only one match (--select-1)
@@ -79,20 +88,6 @@ fdd() {
   local __file
   local __dir
   __file=$(fzf +m -q "$1") && __dir=$(dirname "$__file") && cd "$__dir"
-}
-
-function ff {
-  result=$(rg --ignore-case --color=always --line-number --no-heading "$@" |
-    fzf --ansi \
-        --color 'hl:-1:underline,hl+:-1:underline:reverse' \
-        --delimiter ':' \
-        --preview "bat --color=always {1} --theme='Solarized (light)' --highlight-line {2}" \
-        --preview-window 'up,60%,border-bottom,+{2}+3/3,~3')
-  file=${result%%:*}
-  linenumber=$(echo "${result}" | cut -d: -f2)
-  if [[ -n "$file" ]]; then
-          $EDITOR +"${linenumber}" "$file"
-  fi
 }
 
 # Logic remains in the function for reliability
@@ -122,6 +117,26 @@ gch () {
   awk -F' \\| ' '{print $1}' | \
   xargs -r git checkout
 }
+
+# Hammerspoon integration for shell status (optimized with caching)
+# Cache Hammerspoon running state to avoid slow pgrep on every command
+_hs_running_cache=""
+_hs_cache_time=0
+
+_is_hammerspoon_running() {
+  local now=$(date +%s)
+  # Cache for 5 seconds to avoid repeated pgrep calls (~267ms each!)
+  if [[ -z "$_hs_cache_time" ]] || (( now - _hs_cache_time > 5 )); then
+    if pgrep -x Hammerspoon >/dev/null 2>&1; then
+      _hs_running_cache="yes"
+    else
+      _hs_running_cache="no"
+    fi
+    _hs_cache_time=$now
+  fi
+  [[ "$_hs_running_cache" == "yes" ]]
+}
+
 send_hs_status() {
   # If $TMUX is set, we are in tmux. Otherwise, we aren't.
   local tmux_state="NO_TMUX"
@@ -129,22 +144,27 @@ send_hs_status() {
 
   local msg="$$|$1|$tmux_state"
 
-  # Send to Hammerspoon via CLI
-  hs -c "$(printf 'CheckInTmux(%q, %q, %q)' "$$" "active" "$([ -n "$TMUX" ] && echo true || echo false)")"
+  # Send to Hammerspoon via CLI (suppress errors for speed)
+  hs -c "$(printf 'CheckInTmux(%q, %q, %q)' "$$" "active" "$([ -n "$TMUX" ] && echo true || echo false)")" 2>/dev/null
 }
+
 function _set_title() {
   # If in tmux, let tmux manage titles
   [[ -n "$TMUX" ]] && return
   # Otherwise set title to something useful (cwd)
   print -Pn "\e]0;%~\a"
 }
-# change  the alacritty title
-# precmd_functions+=(_set_title)
+
+# Hammerspoon shell status notifications (with caching to reduce lag)
+precmd_functions+=(_set_title)
 precmd() {
-  send_hs_status "IDLE"
+  # Only send status if Hammerspoon is running (uses 5-second cache)
+  _is_hammerspoon_running && send_hs_status "IDLE"
 }
 preexec() {
-  send_hs_status "BUSY"
+  # Clear git cache if running a git command
+  # Only send status if Hammerspoon is running (uses 5-second cache)
+  _is_hammerspoon_running && send_hs_status "BUSY"
 }
 
 # opencode
@@ -161,7 +181,12 @@ alac_lastcmd_clip() {
   [[ -n "$cmd" ]] && printf %s "$cmd" | pbcopy
 }
 
-# git_info: command substitution will be evaluated when prompt is shown
+zle -N gch
+zle -N glprj
+
+bindkey '^G' gch
+bindkey '^F' glprj
+
 git_info() {
 
   # Exit if not inside a Git repository
@@ -225,4 +250,3 @@ PROMPT=$'%F{red}┌─%(?,,%F{red}[%F{red}%B✗%b%f%F{red}]─)[%F{cyan}%~%f%F{r
 PS2=$' %F{green}|>%f '
 export PATH="$HOME/.cargo/bin:$PATH"
 export PATH="$HOME/.cargo/bin:$PATH"
-

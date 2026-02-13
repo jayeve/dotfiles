@@ -200,13 +200,39 @@ function M.open_notes()
 end
 
 -- Define a function to copy the file path to the clipboard
-function M.copy_file_path_to_clipboard()
+function M.copy_file_path_to_clipboard(show_line_number, use_fully_qualified_name)
 	-- Get the current buffer's file path
-	local file_path = vim.fn.expand("%:p")
+	local file_path
+	if use_fully_qualified_name then
+		file_path = vim.fn.expand("%:p") -- Full path
+	else
+		file_path = vim.fn.expand("%:t") -- Just filename
+	end
+
+	-- Optionally append line number
+	if show_line_number then
+		local line_number = vim.api.nvim_win_get_cursor(0)[1]
+		file_path = file_path .. ":" .. line_number
+	end
 
 	-- Copy the file path to the system clipboard
 	vim.fn.setreg("+", file_path)
 	vim.notify("File path copied to clipboard: " .. file_path, vim.log.levels.INFO, {
+		title = "jayeve.utils",
+	})
+end
+
+-- Define a function to copy the directory of the current buffer to the clipboard
+function M.copy_directory_to_clipboard()
+	-- Get the current buffer's file path
+	local file_path = vim.fn.expand("%:p")
+
+	-- Extract the directory
+	local directory = vim.fn.fnamemodify(file_path, ":h")
+
+	-- Copy the directory to the system clipboard
+	vim.fn.setreg("+", directory)
+	vim.notify("Directory copied to clipboard: " .. directory, vim.log.levels.INFO, {
 		title = "jayeve.utils",
 	})
 end

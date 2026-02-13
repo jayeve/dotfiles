@@ -21,6 +21,8 @@ local function reload_config(files)
 	end
 	
 	if should_reload then
+		-- Stop all watchers before reloading to prevent leaks
+		reload.stop()
 		hs.reload()
 	end
 end

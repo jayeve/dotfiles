@@ -39,11 +39,6 @@ italic      = { family = "JetBrainsMono Nerd Font Mono", style = "Light Italic" 
 bold_italic = { family = "JetBrainsMono Nerd Font Mono", style = "Italic" }
 
 [[keyboard.bindings]]
-chars = "gch\n"
-key = "F"
-mods = "Control"
-
-[[keyboard.bindings]]
 chars = "\u001E"
 key = "Key6"
 mods = "Control"

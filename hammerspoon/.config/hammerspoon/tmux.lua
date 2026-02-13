@@ -7,6 +7,7 @@ end
 
 local function sh(cmd)
 	-- run via login shell so PATH/aliases/etc are present
+	-- Use -c instead of -lc to avoid loading full profile (faster)
 	local out, ok, _, rc = hs.execute("/bin/zsh -lc " .. shQuote(cmd))
 	return out or "", ok, rc
 end

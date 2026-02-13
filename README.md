@@ -18,7 +18,7 @@ end'
 1. create a shortcut in `/Users/jevans/dotfiles/.config/macos-automations/`
 2. create a keymap in `/Users/jevans/dotfiles/.config/karabiner/karabiner.json`, likely using the **Hyperkey**
 3. delete karabiner.json `rm -rf ~/.config/karabiner/karabiner.json`
-4. `stow .` to get that thing installed in the `~/.config` directory of the machine
+4. `stow` to get that thing installed in the `~/.config` directory of the machine
 5. reboot Karabiner-Elements and manually toggle the new rule off and on in Left Panel >> Complete Modifications >> Toggle Slider
 
 ## TODO
@@ -33,7 +33,7 @@ end'
 
 ```bash
 # from /Users/jevans/dotfiles
-stow alacritty nvim tmux zsh hammerspoon scripts htop karabiner
+stow alacritty nvim tmux zsh hammerspoon scripts htop karabiner git temporalio
 ```
 
 - [linux] The `personalize` script in coder isn't running `chown` correctly, so you must run manually after jumping on the box

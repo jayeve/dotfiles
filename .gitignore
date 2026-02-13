@@ -1,3 +1,4 @@
+temporalio/
 nvim/.config/nvim/backups
 nvim/.config/nvim/backups/*
 karabiner/automatic_backups
@@ -27,3 +28,7 @@ id_rsa
 id_ed25519
 Brewfile.lock.json
 AGENTS.md
+
+# Local environment files (secrets)
+.zshenv.local
+.zshrc.local

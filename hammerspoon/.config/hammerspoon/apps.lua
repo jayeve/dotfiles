@@ -2,7 +2,6 @@
 -- Central place to define app names you launch often.
 
 Apps = {
-	teams = "Microsoft Teams (PWA)",
 	alacritty = "Alacritty",
 	anki = "Anki",
 	code = "Windsurf",
@@ -11,15 +10,17 @@ Apps = {
 	discord = "Discord",
 	finder = "Finder",
 	googlechat = "Google Chat",
+	googlemaps = "Google Maps",
 	googlemeet = "Google Meet",
+	localsend = "Localsend",
 	onepassword = "1Password",
 	quicktime = "Quicktime Player",
-	spotify = "Spotify",
-	localsend = "Localsend",
-	whatsapp = "Whatsapp",
 	signal = "Signal",
 	slack = "Slack",
 	spark = "Spark",
+	spotify = "Spotify",
+	teams = "Microsoft Teams (PWA)",
+	whatsapp = "Whatsapp",
 }
 
 -- these are typically chrome extensions

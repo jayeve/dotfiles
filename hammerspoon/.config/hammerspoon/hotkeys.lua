@@ -1,11 +1,44 @@
 -- ~/.config/hammerspoon/hotkeys.lua
-local sound = require("sound")
+local audio = require("audio")
+local window_manager = require("window_manager")
 local profiles = require("profiles")
 local tmux = require("tmux")
 local home = os.getenv("HOME")
 
 -- configured at https://github.com/jayeve/dotfiles/blob/2b1de320aeb019aad64f98fbb3f3863361efb9b3/.config/karabiner/karabiner.json#L9
 local hyper = { "ctrl", "alt", "shift", "cmd" }
+
+-- replaces Rectangle
+hs.hotkey.bind({ "ctrl", "alt" }, "h", function()
+	window_manager.snapLeft()
+end)
+
+hs.hotkey.bind({ "ctrl", "alt" }, "l", function()
+	window_manager.snapRight()
+end)
+
+hs.hotkey.bind({ "ctrl", "alt" }, "j", function()
+	window_manager.snapBottom()
+end)
+
+hs.hotkey.bind({ "ctrl", "alt" }, "k", function()
+	window_manager.snapTop()
+end)
+
+hs.hotkey.bind({ "ctrl", "alt" }, "u", window_manager.snapTopLeft)
+hs.hotkey.bind({ "ctrl", "alt" }, "i", window_manager.snapTopRight)
+hs.hotkey.bind({ "ctrl", "alt" }, "n", window_manager.snapBottomLeft)
+hs.hotkey.bind({ "ctrl", "alt" }, "m", window_manager.snapBottomRight)
+
+hs.hotkey.bind({ "ctrl", "alt" }, "return", function()
+	local win = hs.window.focusedWindow()
+	if not win then
+		return
+	end
+
+	local f = win:screen():frame()
+	win:setFrame(f, 0) -- 0 = no animation
+end)
 
 hs.hotkey.bind({}, "pagedown", function()
 	hs.eventtap.keyStroke({ "cmd", "ctrl" }, "q", 0)
@@ -55,6 +88,9 @@ end)
 hs.hotkey.bind(hyper, "t", function()
 	hs.application.launchOrFocus(Apps.teams)
 end)
+hs.hotkey.bind(hyper, "x", function()
+	hs.application.launchOrFocus(Apps.googlemaps)
+end)
 hs.hotkey.bind(hyper, "z", function()
 	local url = "https://gitdash.cfdata.org/"
 
@@ -99,10 +135,78 @@ hs.hotkey.bind(hyper, "3", function()
 	hs.urlevent.openURL(url)
 end)
 
--- Hotkey: Hyper + I
-hs.hotkey.bind(hyper, "i", sound.pickInputDevice)
--- Bind to Hyper+O
-hs.hotkey.bind(hyper, "o", sound.pickOutputDevice)
+-- Audio hotkeys
+hs.hotkey.bind(hyper, "i", audio.pickInputDevice)
+
+-- Audio output modal
+-- Hyper+O enters an "audio output" layer; next key chooses an output device.
+local outputMode = hs.hotkey.modal.new(hyper, "o")
+
+function outputMode:entered()
+	-- auto-exit after 2s idle
+	self._timer = hs.timer.doAfter(2, function()
+		outputMode:exit()
+	end)
+end
+
+function outputMode:exited()
+	if self._timer then
+		self._timer:stop()
+		self._timer = nil
+	end
+end
+
+local function resetOutputTimer()
+	if outputMode._timer then
+		outputMode._timer:stop()
+		outputMode._timer = hs.timer.doAfter(2, function()
+			outputMode:exit()
+		end)
+	end
+end
+
+-- Example output device mappings (customize these with your actual device names)
+outputMode:bind("", "h", function()
+	local dev = hs.audiodevice.findOutputByName("output_screen_recording_plugged_headphones")
+	if dev then
+		dev:setDefaultOutputDevice()
+		hs.alert.show("🔊 Blackhole + Headphones", 0.8)
+	else
+		hs.alert.show("❌ Headphones not found", 1.0)
+	end
+	outputMode:exit()
+end)
+outputMode:bind("", "j", function()
+	local dev = hs.audiodevice.findOutputByName("External Headphones")
+	if dev then
+		dev:setDefaultOutputDevice()
+		hs.alert.show("🔊 External Headphones", 0.8)
+	else
+		hs.alert.show("❌ Headphones not found", 1.0)
+	end
+	outputMode:exit()
+end)
+outputMode:bind("", "s", function()
+	-- Example: Switch to built-in speakers
+	-- Replace with your actual speaker device name
+	local dev = hs.audiodevice.findOutputByName("MacBook Pro Speakers")
+	if dev then
+		dev:setDefaultOutputDevice()
+		hs.alert.show("🔊 Speakers", 0.8)
+	else
+		hs.alert.show("❌ Speakers not found", 1.0)
+	end
+	outputMode:exit()
+end)
+outputMode:bind("", "tab", function()
+	-- Open the full chooser list
+	audio.pickOutputDevice()
+	outputMode:exit()
+end)
+outputMode:bind("", "escape", function()
+	resetOutputTimer()
+	outputMode:exit()
+end)
 
 -- Hotkey to toggle Accessibility (Virtual) Keyboard using existing AppleScript
 local scriptPath = home .. "/.config/scripts/ToggleAccessibilityKeyboard.scpt"
@@ -118,21 +222,7 @@ end)
 
 -- profiles
 
--- Hotkey: Hyper + 1 -> work
-hs.hotkey.bind(hyper, "9", function()
-	profiles.applyProfile("work")
-end)
--- Hotkey: Hyper + 2 -> study
-hs.hotkey.bind(hyper, "8", function()
-	profiles.applyProfile("study")
-end)
--- Hotkey: Hyper + 3 -> play
-hs.hotkey.bind(hyper, "7", function()
-	profiles.applyProfile("play")
-end)
-
 -- Tmux hotkeys
-
 -- Hyper+T enters a "tmux sessions" layer; next key chooses a session.
 local tmuxMode = hs.hotkey.modal.new(hyper, "f")
 

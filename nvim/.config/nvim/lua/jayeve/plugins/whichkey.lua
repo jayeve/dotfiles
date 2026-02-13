@@ -83,11 +83,9 @@ keymap.set("n", "<leader>r", "<cmd>Telescope live_grep<cr>") -- find string in c
 keymap.set("n", "<leader>c", "<cmd>Telescope grep_string<cr>") -- find string under cursor in current working directory
 keymap.set("n", "<leader>o", "<cmd>Telescope buffers<cr>") -- list open buffers in current neovim instance
 keymap.set("n", "<leader>N", "<cmd>Telescope help_tags<cr>") -- list available help tags
-keymap.set("n", "<leader>h", "<cmd>Telescope oldfiles<cr>") -- list previously opened files
 keymap.set("n", "<leader>L", "<cmd>Telescope jumplist<cr>") -- list of previous cursor positions
 keymap.set("n", "<leader>j", "<cmd>Telescope zoxide list<cr>") -- list projects by recentcy, using zoxide
-keymap.set("n", "<leader>y", "<cmd>Telescope neoclip<cr>") -- list yank history
-keymap.set("n", "<leader>f", "<cmd>Telescope file_browser<cr>") -- open file file_browser switch to folder browser with ctrl-f
+-- keymap.set("n", "<leader>f", "<cmd>Telescope file_browser<cr>") -- open file file_browser switch to folder browser with ctrl-f
 keymap.set("n", "<leader>k", "<cmd>Telescope frecency<cr>") -- file frecency
 keymap.set("n", "<leader>u", "<cmd>Telescope harpoon marks<cr>") -- harpoon marks
 keymap.set("n", "<leader>M", "<cmd>Telescope metals commands<cr>")
@@ -97,7 +95,6 @@ keymap.set("n", "<leader>gC", "<cmd>Telescope git_commits<cr>") -- list all git 
 keymap.set("n", "<leader>gfc", "<cmd>Telescope git_bcommits<cr>") -- list git commits for current file/buffer (use <cr> to checkout) ["gfc" for git file commits]
 keymap.set("n", "<leader>gb", "<cmd>Telescope git_branches<cr>") -- list git branches (use <cr> to checkout) ["gb" for git branch]
 keymap.set("n", "<leader>gs", "<cmd>Telescope git_status<cr>") -- list current changes per file with diff preview ["gs" for git status]
-keymap.set("n", "<leader>d", "<cmd>Telescope command_history<cr>")
 
 local which_key = safeCall("which-key")
 local gitlinker = safeCall("gitlinker")
@@ -115,6 +112,34 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 which_key.add({
+	{
+		"<leader>hc",
+		function()
+			vim.cmd("Telescope command_history")
+		end,
+		desc = "command history",
+	},
+	{
+		"<leader>hy",
+		function()
+			vim.cmd("Telescope neoclip")
+		end,
+		desc = "yank history",
+	},
+	{
+		"<leader>hf",
+		function()
+			vim.cmd("Telescope oldfiles")
+		end,
+		desc = "file history",
+	},
+	{
+		"<leader>ww",
+		function()
+			vim.cmd("noautocmd write")
+		end,
+		desc = "write file without triggering auto commmands",
+	},
 	{
 		",a",
 		function()
@@ -152,7 +177,38 @@ which_key.add({
 	{ ",<leader>", extractor.SetDifference, desc = "set difference for clip audio (extractor)" },
 	{ "<leader>N", utils.open_personal_notes, desc = "Open this week's personal notes" },
 	{ "<leader>n", utils.open_notes, desc = "Open this week's weekly notes" },
-	{ "<leader>C", utils.copy_file_path_to_clipboard, desc = "Copy cur buffer filepath" },
+	{
+		"<leader>l",
+		function()
+			-- copy_file_path_to_clipboard(include_line, include_full_path)
+			utils.copy_file_path_to_clipboard(true, true)
+		end,
+		desc = "Copy full file path at current line",
+	},
+	{
+		"<leader>f",
+		function()
+			-- copy_file_path_to_clipboard(include_line, include_full_path)
+			utils.copy_file_path_to_clipboard(false, true)
+		end,
+		desc = "Copy full file path",
+	},
+	{
+		"<leader>p",
+		function()
+			prj.gitlab_project_picker()
+		end,
+		desc = "GitLab project picker (~9K repos)",
+	},
+	{
+		"<leader>b",
+		function()
+			-- copy_file_path_to_clipboard(include_line, include_full_path)
+			utils.copy_file_path_to_clipboard(false, false)
+		end,
+		desc = "Copy file name",
+	},
+	{ "<leader>d", utils.copy_directory_to_clipboard, desc = "Copy current buffer directory" },
 	{ "<leader>gc", utils.open_gitlab_link_for_current_line, desc = "Open gitlab MR or commit" },
 	{ "<leader>gg", utils.open_repo_url, desc = "Open the git repository URL" },
 	{ "<leader>gr", utils.open_repo_url, desc = "Open the git repository URL" },
@@ -162,14 +218,6 @@ which_key.add({
 			prj.tmux_session_picker()
 		end,
 		desc = "switch tmux session",
-	},
-	{
-		"<leader>p",
-		function()
-			local base = os.getenv("HOME") .. "/cloudflare"
-			prj.git_dir_picker(base)
-		end,
-		desc = "open CF project in tmux",
 	},
 	{ "<leader>P", togglePurple, desc = "Toggle Purple Display" },
 	{
@@ -284,7 +332,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 				desc = "rename variable",
 			},
 			{
-				"<leader>F",
+				",F",
 				function()
 					vim.lsp.buf.format({ async = true })
 				end,
