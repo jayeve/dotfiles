@@ -305,7 +305,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		keymap.set("n", "<leader>wa", "<cmd> lua vim.lsp.buf.add_workspace_folder()<cr>", opts)
 		keymap.set("n", "<leader>wr", "<cmd> lua vim.lsp.buf.remove_workspace_folder()<cr>", opts)
 		keymap.set("n", "<space>D", "<cmd> lua vim.lsp.buf.type_definition()<cr>", opts)
-		-- keymap.set("n", ",rn", "<cmd> lua vim.lsp.buf.rename<cr>()", opts)
+		keymap.set("n", ",n", "<cmd> lua vim.lsp.buf.rename<cr>()", opts)
 		keymap.set({ "n", "v" }, ",ca", "<cmd> lua vim.lsp.buf.code_action()<cr>", opts)
 		keymap.set("n", "gR", "<cmd> lua vim.lsp.buf.references()<cr>", opts)
 		keymap.set("n", ",rs", ":LspRestart<cr>")

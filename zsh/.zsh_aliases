@@ -44,6 +44,7 @@ alias gc='git commit'
 alias gp='git push'
 alias gl='git pull'
 alias gd='git diff'
+alias gco="git checkout"
 
 
 # handy open all files in vim
