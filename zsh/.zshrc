@@ -78,7 +78,7 @@ fe() {
   local __files
   OLDIFS=$IFS
   IFS=$'\n' __files=($(fzf-tmux --query="$1" --multi --select-1 --exit-0))
-  [[ -n "$__files" ]] && ${EDITOR:-vim} "${__files[@]}" && IFS=$OLDIFS || IFS=$OLDIFS
+  [[ -n "$__files" ]] && ${EDITOR:-nvim} "${__files[@]}" && IFS=$OLDIFS || IFS=$OLDIFS
 }
 
 # fd [FUZZY PATTERN] - Open the selected folder
@@ -249,4 +249,72 @@ PROMPT=$'%F{red}┌─%(?,,%F{red}[%F{red}%B✗%b%f%F{red}]─)[%F{cyan}%~%f%F{r
 # PS2 (continuation prompt)
 PS2=$' %F{green}|>%f '
 export PATH="$HOME/.cargo/bin:$PATH"
-export PATH="$HOME/.cargo/bin:$PATH"
+
+# Interactive hotkey reference with fzf
+hotkeys() {
+  local dotfiles_dir="$HOME/dotfiles"
+  local hotkey_file="$dotfiles_dir/HOTKEYS.md"
+  
+  if [[ ! -f "$hotkey_file" ]]; then
+    echo "Error: Hotkey reference not found at $hotkey_file"
+    return 1
+  fi
+  
+  # Check for argument to determine mode
+  if [[ "$1" == "full" ]] || [[ "$1" == "-f" ]]; then
+    # Full document view
+    if command -v bat &> /dev/null; then
+      bat --paging=always --style=plain "$hotkey_file"
+    else
+      less "$hotkey_file"
+    fi
+  else
+    # Interactive searchable mode using grep and sed (more portable than zsh regex)
+    local temp_file=$(mktemp)
+    local current_section=""
+    
+    # Use awk for more reliable parsing
+    awk '
+      /^## [^#]/ { 
+        section = $0
+        gsub(/^## /, "", section)
+        gsub(/ /, "_", section)
+      }
+      /^- \*\*.*\*\*.*-/ {
+        line = $0
+        gsub(/^- \*\*/, "", line)
+        split(line, parts, /\*\*/)
+        if (length(parts) >= 2) {
+          hotkey = parts[1]
+          desc = parts[2]
+          gsub(/^ *- */, "", desc)
+          printf "[%s] %s → %s\n", section, hotkey, desc
+        }
+      }
+    ' "$hotkey_file" > "$temp_file"
+    
+    # Use fzf to search through hotkeys
+    if [[ -s "$temp_file" ]]; then
+      cat "$temp_file" | \
+        fzf --ansi \
+            --header="Search Hotkeys (Enter to view full doc, Esc to quit)" \
+            --preview="echo {} | cut -d']' -f2- | sed 's/^[[:space:]]*//' | fold -w 80" \
+            --preview-window=up:30%:wrap \
+            --bind='enter:execute(bat --paging=always --style=plain '"$hotkey_file"')+abort' \
+            --height=100%
+    else
+      echo "No hotkeys found. Showing full document..."
+      if command -v bat &> /dev/null; then
+        bat --paging=always --style=plain "$hotkey_file"
+      else
+        less "$hotkey_file"
+      fi
+    fi
+    
+    rm -f "$temp_file"
+  fi
+}
+
+# Aliases for quick access
+alias hk='hotkeys'          # Interactive search
+alias hkf='hotkeys full'    # Full document view

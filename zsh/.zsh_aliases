@@ -20,7 +20,8 @@ alias lc='alac_lastcmd_clip'
 # some cd aliases
 alias ..='cd ..'
 
-alias e='exit'
+alias x='exit'
+alias e='nvim'
 
 # make tmux play well with fancy prompt
 alias tmux="TERM=screen-256color-bce tmux"

@@ -439,11 +439,7 @@ function M.open_repo_url()
 	-- Normalize to https URL
 	local base = normalize_gitlab_base(remote)
 	if not base then
-		vim.notify(
-			("Could not parse remote URL: %s"):format(remote),
-			vim.log.levels.ERROR,
-			{ title = "jayeve.utils" }
-		)
+		vim.notify(("Could not parse remote URL: %s"):format(remote), vim.log.levels.ERROR, { title = "jayeve.utils" })
 		return
 	end
 

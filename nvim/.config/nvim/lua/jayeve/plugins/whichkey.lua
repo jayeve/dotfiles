@@ -32,166 +32,210 @@ local function togglePurple()
 	end
 end
 
-local keymap = vim.keymap -- for conciseness
+local which_key = safeCall("which-key")
+local gitlinker = safeCall("gitlinker")
+local actions = safeCall("gitlinker.actions")
 
 ---------------------
 -- General Keymaps
 ---------------------
 
--- use jk to exit insert mode
-keymap.set("i", "jk", "<ESC>")
+which_key.add({
+	-- Insert mode keybindings
+	{ "jk", "<ESC>", desc = "exit insert mode", mode = "i" },
 
--- clear search highlights
-keymap.set("n", ";", function()
-	vim.cmd("nohlsearch")
-end)
+	-- Normal mode general keybindings
+	{
+		";",
+		function()
+			vim.cmd("nohlsearch")
+		end,
+		desc = "clear search highlights",
+		mode = "n",
+	},
+	{ "x", '"_x', desc = "delete char without yanking", mode = "n" },
+	{ "<leader><leader>", "/", desc = "search", mode = "n" },
 
--- delete single character without copying into register
-keymap.set("n", "x", '"_x')
+	-- Increment/decrement numbers
+	{ "<leader>+", "<C-a>", desc = "increment number", mode = "n" },
+	{ "<leader>-", "<C-x>", desc = "decrement number", mode = "n" },
 
--- search with double tap of space bar
-keymap.set("n", "<leader><leader>", "/")
+	-- Window management
+	{ "<leader>s", group = "split/session" },
+	{ "<leader>sv", "<C-w>v", desc = "split window vertically", mode = "n" },
+	{ "<leader>sh", "<C-w>s", desc = "split window horizontally", mode = "n" },
+	{ "<leader>se", "<C-w>=", desc = "make split windows equal", mode = "n" },
+	{ "<leader>sx", ":close<CR>", desc = "close current split window", mode = "n" },
+	{ "<leader>sm", ":MaximizerToggle<CR>", desc = "toggle split window maximization", mode = "n" },
 
--- increment/decrement numbers
-keymap.set("n", "<leader>+", "<C-a>") -- increment
-keymap.set("n", "<leader>-", "<C-x>") -- decrement
+	-- Tab management
+	{ "<leader>t", group = "tab" },
+	{ "<leader>to", ":tabnew<CR>", desc = "open new tab", mode = "n" },
+	{ "<leader>tx", ":tabclose<CR>", desc = "close current tab", mode = "n" },
+	{ "<leader>tn", ":tabn<CR>", desc = "go to next tab", mode = "n" },
+	{ "<leader>tp", ":tabp<CR>", desc = "go to previous tab", mode = "n" },
 
--- window management
-keymap.set("n", "<leader>sv", "<C-w>v") -- split window vertically
-keymap.set("n", "<leader>sh", "<C-w>s") -- split window horizontally
-keymap.set("n", "<leader>se", "<C-w>=") -- make split windows equal width & height
-keymap.set("n", "<leader>sx", ":close<CR>") -- close current split window
+	-- NvimTree
+	{ "<leader>e", ":NvimTreeToggle<CR>", desc = "toggle file explorer", mode = "n" },
 
-keymap.set("n", "<leader>to", ":tabnew<CR>") -- open new tab
-keymap.set("n", "<leader>tx", ":tabclose<CR>") -- close current tab
-keymap.set("n", "<leader>tn", ":tabn<CR>") --  go to next tab
-keymap.set("n", "<leader>tp", ":tabp<CR>") --  go to previous tab
+	-- Telescope
+	{
+		"<leader><tab>",
+		"<cmd>Telescope find_files find_command=rg,--files,--hidden,--glob,!.git/*<cr>",
+		desc = "find files (hidden, respects .gitignore)",
+		mode = "n",
+	},
+	{ "<leader>r", "<cmd>Telescope live_grep<cr>", desc = "live grep", mode = "n" },
+	{ "<leader>c", "<cmd>Telescope grep_string<cr>", desc = "grep string under cursor", mode = "n" },
+	{ "<leader>o", "<cmd>Telescope buffers<cr>", desc = "list open buffers", mode = "n" },
+	{ "<leader>L", "<cmd>Telescope jumplist<cr>", desc = "jumplist", mode = "n" },
+	{ "<leader>j", "<cmd>Telescope zoxide list<cr>", desc = "zoxide projects list", mode = "n" },
+	{ "<leader>k", "<cmd>Telescope frecency<cr>", desc = "file frecency", mode = "n" },
+	{ "<leader>u", "<cmd>Telescope harpoon marks<cr>", desc = "harpoon marks", mode = "n" },
+	{ "<leader>M", "<cmd>Telescope metals commands<cr>", desc = "metals commands", mode = "n" },
 
-----------------------
--- Plugin Keybinds
-----------------------
-
--- vim-maximizer
-keymap.set("n", "<leader>sm", ":MaximizerToggle<CR>") -- toggle split window maximization
-
--- nvim-tree
-keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>") -- toggle file explorer
-
--- telescope
-keymap.set("n", "<leader><tab>", "<cmd>Telescope find_files find_command=rg,--files,--hidden,--glob,!.git/*<cr>") -- find files within current working directory, respects .gitignore
-keymap.set("n", "<leader>r", "<cmd>Telescope live_grep<cr>") -- find string in current working directory as you type
-keymap.set("n", "<leader>c", "<cmd>Telescope grep_string<cr>") -- find string under cursor in current working directory
-keymap.set("n", "<leader>o", "<cmd>Telescope buffers<cr>") -- list open buffers in current neovim instance
-keymap.set("n", "<leader>N", "<cmd>Telescope help_tags<cr>") -- list available help tags
-keymap.set("n", "<leader>L", "<cmd>Telescope jumplist<cr>") -- list of previous cursor positions
-keymap.set("n", "<leader>j", "<cmd>Telescope zoxide list<cr>") -- list projects by recentcy, using zoxide
--- keymap.set("n", "<leader>f", "<cmd>Telescope file_browser<cr>") -- open file file_browser switch to folder browser with ctrl-f
-keymap.set("n", "<leader>k", "<cmd>Telescope frecency<cr>") -- file frecency
-keymap.set("n", "<leader>u", "<cmd>Telescope harpoon marks<cr>") -- harpoon marks
-keymap.set("n", "<leader>M", "<cmd>Telescope metals commands<cr>")
-
--- telescope git commands
-keymap.set("n", "<leader>gC", "<cmd>Telescope git_commits<cr>") -- list all git commits (use <cr> to checkout) ["gc" for git commits]
-keymap.set("n", "<leader>gfc", "<cmd>Telescope git_bcommits<cr>") -- list git commits for current file/buffer (use <cr> to checkout) ["gfc" for git file commits]
-keymap.set("n", "<leader>gb", "<cmd>Telescope git_branches<cr>") -- list git branches (use <cr> to checkout) ["gb" for git branch]
-keymap.set("n", "<leader>gs", "<cmd>Telescope git_status<cr>") -- list current changes per file with diff preview ["gs" for git status]
-
-local which_key = safeCall("which-key")
-local gitlinker = safeCall("gitlinker")
-local actions = safeCall("gitlinker.actions")
+	-- Telescope git commands
+	{ "<leader>g", group = "git" },
+	{ "<leader>gC", "<cmd>Telescope git_commits<cr>", desc = "git commits", mode = "n" },
+	{ "<leader>gfc", "<cmd>Telescope git_bcommits<cr>", desc = "git file commits", mode = "n" },
+	{ "<leader>gb", "<cmd>Telescope git_branches<cr>", desc = "git branches", mode = "n" },
+	{ "<leader>gs", "<cmd>Telescope git_status<cr>", desc = "git status", mode = "n" },
+	{ "<leader>gwc", "<cmd>Telescope git_worktree create_git_worktree<cr>", desc = "create git worktree", mode = "n" },
+	{
+		"<leader>gwl",
+		"<cmd>Telescope git_worktree git_worktrees<cr>",
+		desc = "switch and delete git worktree",
+		mode = "n",
+	},
+	-- Telescope history commands
+	{ "<leader>h", group = "history" },
+	{ "<leader>hc", "<cmd>Telescope command_history<cr>", desc = "command history", mode = "n" },
+	{ "<leader>hy", "<cmd>Telescope neoclip<cr>", desc = "yank history", mode = "n" },
+	{ "<leader>hf", "<cmd>Telescope oldfiles<cr>", desc = "file history", mode = "n" },
+})
 
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "csv",
 	callback = function()
 		which_key.add({
-			",j",
-			extractor.play_clip,
-			desc = "Play audio clip for current line",
+			-- Extractor audio clip controls
+			{
+				",j",
+				extractor.play_clip,
+				desc = "play audio clip for current line",
+				mode = "n",
+			},
+			{
+				",a",
+				function()
+					extractor.subtract_seconds_from_start(0.25)
+				end,
+				desc = "subtract 0.25s from START of clip",
+				mode = "n",
+			},
+			{
+				",s",
+				function()
+					extractor.add_seconds_to_start(0.25)
+				end,
+				desc = "add 0.25s to START of clip",
+				mode = "n",
+			},
+			{
+				",d",
+				function()
+					extractor.subtract_seconds_from_end(0.25)
+				end,
+				desc = "subtract 0.25s from END of clip",
+				mode = "n",
+			},
+			{
+				",f",
+				function()
+					extractor.add_seconds_to_end(0.25)
+				end,
+				desc = "add 0.25s to END of clip",
+				mode = "n",
+			},
+			{
+				",q",
+				extractor.SubtractSecondsFromStart,
+				desc = "subtract custom time from START of clip",
+				mode = "n",
+			},
+			{
+				",w",
+				extractor.AddSecondsToStart,
+				desc = "add custom time to START of clip",
+				mode = "n",
+			},
+			{
+				",e",
+				extractor.SubtractSecondsFromEnd,
+				desc = "subtract custom time from END of clip",
+				mode = "n",
+			},
+			{
+				",r",
+				extractor.AddSecondsToEnd,
+				desc = "add custom time to END of clip",
+				mode = "n",
+			},
+			{
+				",,",
+				extractor.SetStartTime,
+				desc = "set start time for clip",
+				mode = "n",
+			},
+			{
+				",<leader>",
+				extractor.SetDifference,
+				desc = "set difference for clip audio",
+				mode = "n",
+			},
 		})
 	end,
 })
 
 which_key.add({
-	{
-		"<leader>hc",
-		function()
-			vim.cmd("Telescope command_history")
-		end,
-		desc = "command history",
-	},
-	{
-		"<leader>hy",
-		function()
-			vim.cmd("Telescope neoclip")
-		end,
-		desc = "yank history",
-	},
-	{
-		"<leader>hf",
-		function()
-			vim.cmd("Telescope oldfiles")
-		end,
-		desc = "file history",
-	},
+	-- History
+	-- Write
+	{ "<leader>w", group = "write/workspace" },
 	{
 		"<leader>ww",
 		function()
 			vim.cmd("noautocmd write")
 		end,
-		desc = "write file without triggering auto commmands",
+		desc = "write file without triggering auto commands",
+		mode = "n",
 	},
-	{
-		",a",
-		function()
-			extractor.subtract_seconds_from_start(0.25)
-		end,
-		desc = "SUBTRACT 0.25 seconds from START of clip (extractor)",
-	},
-	{
-		",s",
-		function()
-			extractor.add_seconds_to_start(0.25)
-		end,
-		desc = "ADD 0.25 seconds to START of clip (extractor)",
-	},
-	{
-		",d",
-		function()
-			extractor.subtract_seconds_from_end(0.25)
-		end,
-		desc = "SUBTRACT 0.25 seconds END of clip (extractor)",
-	},
-	{
-		",f",
-		function()
-			extractor.add_seconds_to_end(0.25)
-		end,
-		desc = "ADD 0.25 seconds to END of clip (extractor)",
-	},
-	{ ",q", extractor.SubtractSecondsFromStart, desc = "SUBTRACT xx time from START of clip (extractor)" },
-	{ ",w", extractor.AddSecondsToStart, desc = "ADD xx time to START of clip (extractor)" },
-	{ ",e", extractor.SubtractSecondsFromEnd, desc = "SUBTRACT xx time from END of clip (extractor)" },
-	{ ",r", extractor.AddSecondsToEnd, desc = "ADD xx time to END of clip (extractor)" },
-	{ ",,", extractor.SetStartTime, desc = "Set start time for clip (extractor)" },
 
-	{ ",<leader>", extractor.SetDifference, desc = "set difference for clip audio (extractor)" },
-	{ "<leader>N", utils.open_personal_notes, desc = "Open this week's personal notes" },
-	{ "<leader>n", utils.open_notes, desc = "Open this week's weekly notes" },
+	-- Utility keybindings
+	{
+		"<leader>H",
+		function()
+			vim.cmd("edit ~/dotfiles/HOTKEYS.md")
+		end,
+		desc = "open hotkey reference",
+		mode = "n",
+	},
+	{ "<leader>N", utils.open_personal_notes, desc = "open this week's personal notes", mode = "n" },
+	{ "<leader>n", utils.open_notes, desc = "open this week's weekly notes", mode = "n" },
 	{
 		"<leader>l",
 		function()
-			-- copy_file_path_to_clipboard(include_line, include_full_path)
 			utils.copy_file_path_to_clipboard(true, true)
 		end,
-		desc = "Copy full file path at current line",
+		desc = "copy full file path at current line",
+		mode = "n",
 	},
 	{
 		"<leader>f",
 		function()
-			-- copy_file_path_to_clipboard(include_line, include_full_path)
 			utils.copy_file_path_to_clipboard(false, true)
 		end,
-		desc = "Copy full file path",
+		desc = "copy full file path",
+		mode = "n",
 	},
 	{
 		"<leader>p",
@@ -199,57 +243,51 @@ which_key.add({
 			prj.gitlab_project_picker()
 		end,
 		desc = "GitLab project picker (~9K repos)",
+		mode = "n",
 	},
 	{
 		"<leader>b",
 		function()
-			-- copy_file_path_to_clipboard(include_line, include_full_path)
 			utils.copy_file_path_to_clipboard(false, false)
 		end,
-		desc = "Copy file name",
+		desc = "copy file name",
+		mode = "n",
 	},
-	{ "<leader>d", utils.copy_directory_to_clipboard, desc = "Copy current buffer directory" },
-	{ "<leader>gc", utils.open_gitlab_link_for_current_line, desc = "Open gitlab MR or commit" },
-	{ "<leader>gg", utils.open_repo_url, desc = "Open the git repository URL" },
-	{ "<leader>gr", utils.open_repo_url, desc = "Open the git repository URL" },
+	{ "<leader>d", utils.copy_directory_to_clipboard, desc = "copy current buffer directory", mode = "n" },
+
+	-- Git operations (additional)
+	{ "<leader>gc", utils.open_gitlab_link_for_current_line, desc = "open gitlab MR or commit", mode = "n" },
+	{ "<leader>gg", utils.open_repo_url, desc = "open the git repository URL", mode = "n" },
+	{ "<leader>gr", utils.open_repo_url, desc = "open the git repository URL", mode = "n" },
+	{ "<leader>g.", utils.cd_to_git_root, desc = "cd into cur buf's git root", mode = "n" },
+
+	-- Tmux & Sessions
 	{
 		"<leader>m",
 		function()
 			prj.tmux_session_picker()
 		end,
 		desc = "switch tmux session",
+		mode = "n",
 	},
-	{ "<leader>P", togglePurple, desc = "Toggle Purple Display" },
+
+	-- Display & UI
+	{ "<leader>P", togglePurple, desc = "toggle purple display", mode = "n" },
 	{
 		"<leader>a",
 		function()
 			vim.api.nvim_call_function("ToggleRTL", {})
 		end,
-		desc = "Toggle Arabic (Left -> Right) mode",
-	},
-	{ "<leader>ia", harpoon_mark.add_file, desc = "add file to harpoon" },
-	{ "<leader>ir", harpoon_mark.remove_file, desc = "remove file from harpoon" },
-	{ "<leader>il", harpoon_ui.toggle_quick_menu, desc = "Toggle quick menu" },
-	{
-		"<leader>q",
-		function()
-			vim.cmd("bdelete")
-		end,
-		desc = "close current buffer",
-	},
-	{
-		"<leader>B",
-		function()
-			gitlinker.get_repo_url({ action_callback = actions.open_in_browser })
-		end,
-		desc = "open ref link in browser",
+		desc = "toggle Arabic (left -> right) mode",
+		mode = "n",
 	},
 	{
 		"<leader>z",
 		function()
 			vim.cmd("ZenMode")
 		end,
-		desc = "Zen mode",
+		desc = "zen mode",
+		mode = "n",
 	},
 	{
 		"<leader>=",
@@ -257,23 +295,7 @@ which_key.add({
 			vim.api.nvim_input("<C-w>=")
 		end,
 		desc = "equalize windows",
-	},
-	{ "<leader>g.", utils.cd_to_git_root, desc = "cd into cur buf's git root" },
-	{ "<leader>.", utils.cd_to_current_buf_directory, desc = "cd into cur buf's dir" },
-	{ "<c-g>", utils.show_cur_location, desc = "show current location" },
-	{
-		"]q",
-		function()
-			vim.cmd("cnext")
-		end,
-		desc = "Next in quickfix list",
-	},
-	{
-		"[q",
-		function()
-			vim.cmd("cprev")
-		end,
-		desc = "Prev in quickfix list",
+		mode = "n",
 	},
 	{
 		"<leader>I",
@@ -281,6 +303,53 @@ which_key.add({
 			vim.cmd("IBLToggle")
 		end,
 		desc = "toggle indent marker lines",
+		mode = "n",
+	},
+
+	-- Harpoon
+	{ "<leader>i", group = "harpoon" },
+	{ "<leader>ia", harpoon_mark.add_file, desc = "add file to harpoon", mode = "n" },
+	{ "<leader>ir", harpoon_mark.remove_file, desc = "remove file from harpoon", mode = "n" },
+	{ "<leader>il", harpoon_ui.toggle_quick_menu, desc = "toggle quick menu", mode = "n" },
+
+	-- Buffer operations
+	{
+		"<leader>q",
+		function()
+			vim.cmd("bdelete")
+		end,
+		desc = "close current buffer",
+		mode = "n",
+	},
+	{
+		"<leader>B",
+		function()
+			gitlinker.get_repo_url({ action_callback = actions.open_in_browser })
+		end,
+		desc = "open ref link in browser",
+		mode = "n",
+	},
+
+	-- Directory navigation
+	{ "<leader>.", utils.cd_to_current_buf_directory, desc = "cd into cur buf's dir", mode = "n" },
+	{ "<c-g>", utils.show_cur_location, desc = "show current location", mode = "n" },
+
+	-- Quickfix navigation
+	{
+		"]q",
+		function()
+			vim.cmd("cnext")
+		end,
+		desc = "next in quickfix list",
+		mode = "n",
+	},
+	{
+		"[q",
+		function()
+			vim.cmd("cprev")
+		end,
+		desc = "prev in quickfix list",
+		mode = "n",
 	},
 })
 
@@ -292,37 +361,131 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		-- Enable completion triggered by <c-x><c-o>
 		vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
 
-		-- Buffer local mappings.
-		-- See `:help vim.lsp.*` for documentation on any of the below functions
-		local opts = { buffer = ev.buf }
-		keymap.set("n", ",qi", "<cmd>lua vim.lsp.buf.incoming_calls()<cr>", opts)
-		keymap.set("n", ",qo", "<cmd>lua vim.lsp.buf.outgoing_calls()<cr>", opts)
-		keymap.set("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<cr>", opts)
-		keymap.set("n", "gd", "<cmd> lua vim.lsp.buf.definition()<cr>", opts)
-		keymap.set("n", "K", "<cmd> lua vim.lsp.buf.hover()<cr>", opts)
-		keymap.set("n", "gI", "<cmd> lua vim.lsp.buf.implementation()<cr>", opts)
-		keymap.set("n", "<C-m>", "<cmd> lua vim.lsp.buf.signature_help()<cr>", opts)
-		keymap.set("n", "<leader>wa", "<cmd> lua vim.lsp.buf.add_workspace_folder()<cr>", opts)
-		keymap.set("n", "<leader>wr", "<cmd> lua vim.lsp.buf.remove_workspace_folder()<cr>", opts)
-		keymap.set("n", "<space>D", "<cmd> lua vim.lsp.buf.type_definition()<cr>", opts)
-		keymap.set("n", ",n", "<cmd> lua vim.lsp.buf.rename<cr>()", opts)
-		keymap.set({ "n", "v" }, ",ca", "<cmd> lua vim.lsp.buf.code_action()<cr>", opts)
-		keymap.set("n", "gR", "<cmd> lua vim.lsp.buf.references()<cr>", opts)
-		keymap.set("n", ",rs", ":LspRestart<cr>")
+		-- Buffer local mappings
 		which_key.add({
+			-- LSP call hierarchy
 			{
-				"]d",
+				",qi",
 				function()
-					vim.diagnostic.jump({ count = 1, float = true })
+					vim.lsp.buf.incoming_calls()
 				end,
-				desc = "next diagnostic message",
+				desc = "incoming calls",
+				mode = "n",
+				buffer = ev.buf,
 			},
 			{
-				"[d",
+				",qo",
 				function()
-					vim.diagnostic.jump({ count = -1, float = true })
+					vim.lsp.buf.outgoing_calls()
 				end,
-				desc = "prev diagnostic message",
+				desc = "outgoing calls",
+				mode = "n",
+				buffer = ev.buf,
+			},
+
+			-- LSP navigation
+			{
+				"gD",
+				function()
+					vim.lsp.buf.declaration()
+				end,
+				desc = "go to declaration",
+				mode = "n",
+				buffer = ev.buf,
+			},
+			{
+				"gd",
+				function()
+					vim.lsp.buf.definition()
+				end,
+				desc = "go to definition",
+				mode = "n",
+				buffer = ev.buf,
+			},
+			{
+				"K",
+				function()
+					vim.lsp.buf.hover()
+				end,
+				desc = "hover documentation",
+				mode = "n",
+				buffer = ev.buf,
+			},
+			{
+				"gI",
+				function()
+					vim.lsp.buf.implementation()
+				end,
+				desc = "go to implementation",
+				mode = "n",
+				buffer = ev.buf,
+			},
+			{
+				"<C-m>",
+				function()
+					vim.lsp.buf.signature_help()
+				end,
+				desc = "signature help",
+				mode = "n",
+				buffer = ev.buf,
+			},
+			{
+				"<space>D",
+				function()
+					vim.lsp.buf.type_definition()
+				end,
+				desc = "type definition",
+				mode = "n",
+				buffer = ev.buf,
+			},
+			{
+				"gR",
+				function()
+					vim.lsp.buf.references()
+				end,
+				desc = "go to references",
+				mode = "n",
+				buffer = ev.buf,
+			},
+
+			-- LSP workspace management
+			{
+				"<leader>wa",
+				function()
+					vim.lsp.buf.add_workspace_folder()
+				end,
+				desc = "add workspace folder",
+				mode = "n",
+				buffer = ev.buf,
+			},
+			{
+				"<leader>wr",
+				function()
+					vim.lsp.buf.remove_workspace_folder()
+				end,
+				desc = "remove workspace folder",
+				mode = "n",
+				buffer = ev.buf,
+			},
+			{
+				"<leader>wl",
+				function()
+					print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+				end,
+				desc = "list workspace folders",
+				mode = "n",
+				buffer = ev.buf,
+			},
+
+			-- LSP refactoring
+			{
+				",n",
+				function()
+					vim.lsp.buf.rename()
+				end,
+				desc = "rename (LSP)",
+				mode = "n",
+				buffer = ev.buf,
 			},
 			{
 				",rn",
@@ -330,23 +493,53 @@ vim.api.nvim_create_autocmd("LspAttach", {
 					vim.lsp.buf.rename()
 				end,
 				desc = "rename variable",
+				mode = "n",
+				buffer = ev.buf,
+			},
+			{
+				",ca",
+				function()
+					vim.lsp.buf.code_action()
+				end,
+				desc = "code action",
+				mode = { "n", "v" },
+				buffer = ev.buf,
 			},
 			{
 				",F",
 				function()
 					vim.lsp.buf.format({ async = true })
 				end,
-				desc = "Foramt buffer (async)",
-				buffer = ev.buf,
+				desc = "format buffer (async)",
 				mode = "n",
+				buffer = ev.buf,
 			},
 			{
-				"<leader>wl",
-				function()
-					print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-				end,
-				desc = "list workspace folder",
+				",rs",
+				":LspRestart<cr>",
+				desc = "restart LSP",
 				mode = "n",
+				buffer = ev.buf,
+			},
+
+			-- Diagnostic navigation
+			{
+				"]d",
+				function()
+					vim.diagnostic.jump({ count = 1, float = true })
+				end,
+				desc = "next diagnostic message",
+				mode = "n",
+				buffer = ev.buf,
+			},
+			{
+				"[d",
+				function()
+					vim.diagnostic.jump({ count = -1, float = true })
+				end,
+				desc = "prev diagnostic message",
+				mode = "n",
+				buffer = ev.buf,
 			},
 		})
 	end,

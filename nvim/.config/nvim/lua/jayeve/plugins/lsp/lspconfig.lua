@@ -1,11 +1,3 @@
--- import lspconfig plugin safely
-local lspconfig_status, lspconfig = pcall(require, "lspconfig")
-if not lspconfig_status then
-	local info = debug.getinfo(1, "S").short_src
-	print(info, "failed to load")
-	return
-end
-
 -- import cmp-nvim-lsp plugin safely
 local cmp_nvim_lsp_status, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
 if not cmp_nvim_lsp_status then
@@ -21,7 +13,7 @@ local capabilities = cmp_nvim_lsp.default_capabilities()
 
 -- Change the Diagnostic symbols in the sign column (gutter)
 -- (not in youtube nvim video)
-local signs = { Error = " ", Warn = " ", Hint = "? ", Info = " " }
+local signs = { Error = " ", Warn = " ", Hint = "? ", Info = " " }
 for type, icon in pairs(signs) do
 	local hl = "DiagnosticSign" .. type
 	vim.diagnostic.config({
@@ -33,15 +25,20 @@ for type, icon in pairs(signs) do
 end
 
 -- configure html server
-lspconfig["html"].setup({
+vim.lsp.config.html = {
+	cmd = { "vscode-html-language-server", "--stdio" },
+	filetypes = { "html" },
+	root_markers = { ".git" },
 	capabilities = capabilities,
-})
+}
 
 -- make bash-lsp work with zsh (nvim builtin-lsp)
-lspconfig["bashls"].setup({
-	-- completion = ...,
+vim.lsp.config.bashls = {
+	cmd = { "bash-language-server", "start" },
 	filetypes = { "sh", "zsh", "bash" },
-})
+	root_markers = { ".git" },
+	capabilities = capabilities,
+}
 
 -- lspconfig.yamlls.setup({
 -- 	settings = {
@@ -51,6 +48,7 @@ lspconfig["bashls"].setup({
 -- 		},
 -- 	},
 -- })
+
 vim.filetype.add({
 	extension = {
 		zsh = "sh",
@@ -62,26 +60,26 @@ vim.filetype.add({
 	},
 })
 
--- confgure golong
-lspconfig.gopls.setup({
+-- confgure golang
+vim.lsp.config.gopls = {
 	capabilities = capabilities,
 	cmd = { "gopls" },
 	filetypes = { "go", "gomod", "goworkd", "gotmpl" },
-	root_dir = require("lspconfig.util").root_pattern("go.work", "go.mod", ".git"),
+	root_markers = { "go.work", "go.mod", ".git" },
 	settings = {
 		gopls = {
 			completeUnimported = true,
 			usePlaceholders = true,
 		},
 	},
-})
+}
 
--- -- confgure golong when programming in ere go code
--- lspconfig.gopls.setup({
+-- -- confgure golang when programming in ere go code
+-- vim.lsp.config.gopls = {
 -- 	capabilities = capabilities,
 -- 	cmd = { "gopls" },
 -- 	filetypes = { "go", "gomod", "goworkd", "gotmpl" },
--- 	root_dir = require("lspconfig.util").root_pattern("go.work", "go.mod", ".git"),
+-- 	root_markers = { "go.work", "go.mod", ".git" },
 -- 	settings = {
 -- 		gopls = {
 -- 			completeUnimported = true,
@@ -98,20 +96,29 @@ lspconfig.gopls.setup({
 -- 			},
 -- 		},
 -- 	},
--- })
---
+-- }
+
 -- configure css server
-lspconfig["cssls"].setup({
+vim.lsp.config.cssls = {
+	cmd = { "vscode-css-language-server", "--stdio" },
+	filetypes = { "css", "scss", "less" },
+	root_markers = { ".git" },
 	capabilities = capabilities,
-})
+}
 
 -- configure tailwindcss server
-lspconfig["tailwindcss"].setup({
+vim.lsp.config.tailwindcss = {
+	cmd = { "tailwindcss-language-server", "--stdio" },
+	filetypes = { "html", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact" },
+	root_markers = { "tailwind.config.js", "tailwind.config.ts", ".git" },
 	capabilities = capabilities,
-})
+}
 
 -- configure lua server (with special settings)
-lspconfig["lua_ls"].setup({
+vim.lsp.config.lua_ls = {
+	cmd = { "lua-language-server" },
+	filetypes = { "lua" },
+	root_markers = { ".git" },
 	capabilities = capabilities,
 	settings = { -- custom settings for lua
 		Lua = {
@@ -128,22 +135,39 @@ lspconfig["lua_ls"].setup({
 			},
 		},
 	},
-})
+}
 
-lspconfig["clangd"].setup({})
+vim.lsp.config.clangd = {
+	cmd = { "clangd" },
+	filetypes = { "c", "cpp", "objc", "objcpp" },
+	root_markers = { ".git", "compile_commands.json" },
+	capabilities = capabilities,
+}
 
-lspconfig["intelephense"].setup({})
+vim.lsp.config.intelephense = {
+	cmd = { "intelephense", "--stdio" },
+	filetypes = { "php" },
+	root_markers = { "composer.json", ".git" },
+	capabilities = capabilities,
+}
 
--- lspconfig.ruff_lsp.setup({
+-- vim.lsp.config.ruff_lsp = {
+-- 	cmd = { "ruff-lsp" },
+-- 	filetypes = { "python" },
+-- 	root_markers = { ".git" },
 -- 	init_options = {
 -- 		settings = {
 -- 			-- Any extra CLI arguments for `ruff` go here.
 -- 			args = {},
 -- 		},
 -- 	},
--- })
---
-lspconfig.rust_analyzer.setup({
+-- }
+
+vim.lsp.config.rust_analyzer = {
+	cmd = { "rust-analyzer" },
+	filetypes = { "rust" },
+	root_markers = { "Cargo.toml", ".git" },
+	capabilities = capabilities,
 	settings = {
 		["rust-analyzer"] = {
 			cargo = {
@@ -152,9 +176,13 @@ lspconfig.rust_analyzer.setup({
 			},
 		},
 	},
-})
---
-lspconfig.pyright.setup({
+}
+
+vim.lsp.config.pyright = {
+	cmd = { "pyright-langserver", "--stdio" },
+	filetypes = { "python" },
+	root_markers = { "pyrightconfig.json", "pyproject.toml", "setup.py", ".git" },
+	capabilities = capabilities,
 	settings = {
 		pyright = { autoImportCompletion = true },
 		python = {
@@ -166,4 +194,4 @@ lspconfig.pyright.setup({
 			},
 		},
 	},
-})
+}

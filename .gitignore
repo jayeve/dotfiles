@@ -1,9 +1,10 @@
-temporalio/
+nvim/.config/nvim/lazy-lock.json
 nvim/.config/nvim/backups
 nvim/.config/nvim/backups/*
 karabiner/automatic_backups
-.bazelrc
 hammerspoon/.config/hammerspoon/projects.json
+temporalio/
+.bazelrc
 **/node_modules/**
 *.class
 *.dll
