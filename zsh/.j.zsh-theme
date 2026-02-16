@@ -1,16 +1,22 @@
 #!/usr/bin/env zsh
 
-# Worktree indicator - shows [wt] if in a bare repo with worktrees OR in a worktree
-worktree_info() {
-  # Lavender color matching tmux theme (#9b7fbf)
-  local LAVENDER="\033[38;2;155;127;191m"
+# Gruvbox + Lavender color scheme (matching tmux theme)
+# - 237 (gray) - Brackets and borders (Gruvbox gray #3c3836)
+# - 108 (aqua) - Path (Gruvbox aqua #8ec07c)
+# - 140 (lavender) - Branch name and wt indicator (#9966cc close to #9b7fbf)
+# - 183 (light lavender) - Time/date (#d2aef5)
+# - 136 (gold) - Jobs count (#a17e1f)
+# - 142 (green) - Username (Gruvbox green #b8bb26)
+# - 220 (yellow) - Prompt symbol (Gruvbox yellow #fabd2f)
+# - 167 (red) - Error and modified files (Gruvbox red #fb4934)
 
+# Worktree indicator - shows wt if in a bare repo with .git suffix OR in a worktree
+worktree_info() {
   # Check if we're in a bare repo
   if git rev-parse --is-bare-repository > /dev/null 2>&1 && [[ "$(git rev-parse --is-bare-repository 2>/dev/null)" == "true" ]]; then
-    # Check if this bare repo has worktrees
-    local git_dir="$(git rev-parse --git-dir 2> /dev/null)"
-    if [[ -d "$git_dir/worktrees" ]]; then
-      echo "%{$fg[red]%}-[%{${LAVENDER}%}%B wt%b%{$reset_color%}%{$fg[red]%}]%{$reset_color%}%{$fg[red]%}"
+    # Check if directory name ends with .git (worktree convention)
+    if [[ "$(basename $(pwd))" == *.git ]]; then
+      echo "%F{140}%B wt%b%f"
     fi
     return
   fi
@@ -23,11 +29,11 @@ worktree_info() {
 
   # If git-common-dir differs from git-dir, we're in a worktree
   if [[ -n "$git_common_dir" ]] && [[ -n "$git_dir" ]] && [[ "$git_common_dir" != "$git_dir" ]]; then
-    echo "%{$fg[red]%}-[%{${LAVENDER}%}%B wt%b%{$reset_color%}%{$fg[red]%}]%{$reset_color%}%{$fg[red]%}"
+    echo "%F{140}%B wt%b%f"
   fi
 }
 
-git_info() {
+branch_info() {
 
   # Check if we're in a bare repo - if so, skip git info entirely
   if git rev-parse --is-bare-repository > /dev/null 2>&1 && [[ "$(git rev-parse --is-bare-repository 2>/dev/null)" == "true" ]]; then
@@ -40,12 +46,12 @@ git_info() {
   # Git branch/tag, or name-rev if on detached head
   local GIT_LOCATION=${$(git symbolic-ref -q HEAD || git name-rev --name-only --no-undefined --always HEAD)#(refs/heads/|tags/)}
 
-  local AHEAD="%{$fg[yellow]%}⇡NUM%{$reset_color%}"
-  local BEHIND="%{$fg[cyan]%}⇣NUM%{$reset_color%}"
-  local MERGING="%{$fg[magenta]%}⚡%{$reset_color%}"
-  local UNTRACKED="%{$fg[red]%}●%{$reset_color%}"
-  local MODIFIED="%{$fg[red]%}●%{$reset_color%}"
-  local STAGED="%{$fg[green]%}●%{$reset_color%}"
+  local AHEAD="%F{220}⇡NUM%f"
+  local BEHIND="%F{108}⇣NUM%f"
+  local MERGING="%F{140}⚡%f"
+  local UNTRACKED="%F{167}●%f"
+  local MODIFIED="%F{167}●%f"
+  local STAGED="%F{142}●%f"
 
   local -a DIVERGENCES
   local -a FLAGS
@@ -76,17 +82,29 @@ git_info() {
     FLAGS+=( "$STAGED" )
   fi
 
-  # Lavender color matching tmux theme (#9b7fbf)
-  local LAVENDER="\033[38;2;155;127;191m"
-
   local -a GIT_INFO
   [ -n "$GIT_STATUS" ] && GIT_INFO+=( "$GIT_STATUS" )
   [[ ${#DIVERGENCES[@]} -ne 0 ]] && GIT_INFO+=( "${(j::)DIVERGENCES}" )
   [[ ${#FLAGS[@]} -ne 0 ]] && GIT_INFO+=( "${(j::)FLAGS}" )
-  GIT_INFO+=( "${LAVENDER} %B$GIT_LOCATION%b%{$reset_color%}" )
-  echo "$fg[red]-%{$reset_color%}$fg[red][${(j: :)GIT_INFO}$fg[red]]"
+  GIT_INFO+=( "%F{140}%B $GIT_LOCATION%b%f" )
+  echo "${(j: :)GIT_INFO}"
 }
 
-PROMPT=$'%{$fg[red]%}┌─%(?,,%{$fg[red]%}[%{$fg_bold[red]%}✗%{$reset_color%}%{$fg[red]%}]─)[%{$fg[cyan]%}%~%{$reset_color%}%{$fg[red]%}]%{$(worktree_info)%}%{$(git_info)%}-[$fg[cyan]%W-%@$fg[red]]-[$fg[green]jobs: %j$fg[red]]
-%{$fg[red]%}└───[%{$fg_bold[green]%}%n%{$reset_color%}%{$fg[red]%}]╼ %{$fg_bold[yellow]%}%(!.#.$)%{$reset_color%} '
-PS2=$' %{$fg[green]%}|>%{$reset_color%} '
+# Combined git and worktree info in single brackets
+git_info() {
+  local wt_info="$(worktree_info)"
+  local branch_info_str="$(branch_info)"
+
+  # If we have either worktree or git info, wrap in brackets
+  if [[ -n "$wt_info" || -n "$branch_info_str" ]]; then
+    echo -n "%F{237}-["
+    [[ -n "$wt_info" ]] && echo -n "$wt_info"
+    [[ -n "$wt_info" && -n "$branch_info_str" ]] && echo -n " "
+    [[ -n "$branch_info_str" ]] && echo -n "$branch_info_str"
+    echo "%F{237}]%f"
+  fi
+}
+
+PROMPT=$'%F{237}┌─%(?,,%F{237}[%F{167}%B✗%b%f%F{237}]─)[%F{108}%~%f%F{237}]$(git_info)
+%F{237}└───[%F{136}%B%n%b%f%F{237}]╼ %F{136}%B%(!.#.$)%b%f '
+PS2=$' %F{142}|>%f '
