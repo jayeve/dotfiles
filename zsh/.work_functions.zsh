@@ -170,7 +170,7 @@ glprj() {
   projects_list=$(cat "$cache_file" | while IFS= read -r project_path; do
     local check_path="$project_path"
     [[ "$project_path" == "cloudflare/"* ]] && check_path="${project_path#cloudflare/}"
-    
+
     if [[ -d "$base/$check_path" ]]; then
       echo "LOCAL  $project_path"
     else
@@ -225,6 +225,127 @@ glprj() {
     tmux attach-session -t "$project" -c "$project_dir"
   else
     tmux switch-client -t "$project"
+  fi
+
+  cd "$starting_dir"
+}
+
+# Bare repo version of glprj for git-worktree workflow
+glprj-bare() {
+  local base=$HOME/cloudflare
+  local gitlab_url="git@gitlab.cfdata.org"
+  local cache_file="$HOME/.gitlab-projects-cache"
+
+  # Check if cache exists
+  if [[ ! -f "$cache_file" ]]; then
+    echo "Error: Project cache not found at $cache_file"
+    echo "Run 'glprj-init' to create it, or manually create the file with project paths."
+    return 1
+  fi
+
+  # Build list combining local (with marker) and remote projects
+  local projects_list
+  projects_list=$(cat "$cache_file" | while IFS= read -r project_path; do
+    local check_path="$project_path"
+    [[ "$project_path" == "cloudflare/"* ]] && check_path="${project_path#cloudflare/}"
+
+    if [[ -d "$base/$check_path.git" ]]; then
+      echo "LOCAL  $project_path"
+    else
+      echo "REMOTE $project_path"
+    fi
+  done)
+
+  local selected
+  selected=$(echo "$projects_list" | \
+    fzf --height 40% --reverse --border \
+        --prompt "GitLab Project (bare): " \
+        --preview 'echo {2}' \
+        --preview-window right:40% \
+        --header 'LOCAL = already cloned | REMOTE = will clone as bare')
+
+  if [[ -z "$selected" ]]; then
+    return 0
+  fi
+
+  # Extract just the project path (remove LOCAL/REMOTE prefix)
+  local full_path=$(echo "$selected" | awk '{print $2}')
+  local project=$(basename "$full_path")
+  
+  # For cloudflare/* projects, strip the cloudflare/ prefix since base is already ~/cloudflare
+  local relative_path="$full_path"
+  if [[ "$full_path" == "cloudflare/"* ]]; then
+    relative_path="${full_path#cloudflare/}"
+  fi
+  
+  local bare_dir="$base/$relative_path.git"
+
+  # Clone as bare if doesn't exist locally
+  if [[ ! -d "$bare_dir" ]]; then
+    mkdir -p "$(dirname "$bare_dir")"
+    echo "Cloning ${gitlab_url}:${full_path}.git as bare repo"
+    git clone --bare "${gitlab_url}:${full_path}.git" "$bare_dir" || return 1
+    echo "Bare repo created at: $bare_dir"
+    echo "Use 'git worktree add' to create working directories"
+  fi
+
+  # Check if there are any worktrees
+  local worktrees
+  worktrees=$(cd "$bare_dir" && git worktree list --porcelain 2>/dev/null | grep "^worktree " | sed 's/^worktree //')
+  
+  if [[ -z "$worktrees" ]]; then
+    echo "No worktrees found. Create one with:"
+    echo "  cd $bare_dir && git worktree add ../$(basename "$bare_dir" .git)/main main"
+    return 0
+  fi
+
+  # Select or create worktree
+  local worktree_choice
+  worktree_choice=$(echo "$worktrees\n+ Create new worktree" | \
+    fzf --height 40% --reverse --border \
+        --prompt "Select worktree: " \
+        --header 'Choose existing worktree or create new one')
+
+  if [[ -z "$worktree_choice" ]]; then
+    return 0
+  fi
+
+  local target_dir
+  if [[ "$worktree_choice" == "+ Create new worktree" ]]; then
+    # Prompt for branch name
+    echo -n "Enter branch name for new worktree: "
+    read branch_name
+    if [[ -z "$branch_name" ]]; then
+      echo "No branch name provided, aborting"
+      return 1
+    fi
+    
+    target_dir="$base/$relative_path/$branch_name"
+    mkdir -p "$(dirname "$target_dir")"
+    
+    (cd "$bare_dir" && git worktree add "$target_dir" "$branch_name") || return 1
+    echo "Created worktree: $target_dir"
+  else
+    target_dir="$worktree_choice"
+  fi
+
+  # Open in tmux
+  local session_name="${project}-$(basename "$target_dir")"
+  local starting_dir=$PWD
+
+  if [[ -z $TMUX ]] && ! pgrep -x tmux &>/dev/null; then
+    tmux new-session -s "$session_name" -c "$target_dir"
+    return 0
+  fi
+
+  if ! tmux has-session -t "$session_name" 2>/dev/null; then
+    tmux new-session -d -s "$session_name" -c "$target_dir"
+  fi
+
+  if [[ -z $TMUX ]]; then
+    tmux attach-session -t "$session_name" -c "$target_dir"
+  else
+    tmux switch-client -t "$session_name"
   fi
 
   cd "$starting_dir"

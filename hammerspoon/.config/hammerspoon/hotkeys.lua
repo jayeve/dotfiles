@@ -261,7 +261,9 @@ local function targetLocation(locationName)
 		hs.alert.show("Error: Location '" .. locationName .. "' not found in config", 2)
 		return
 	end
-	tmux.target_session(location[1], location[2])
+	-- Replace underscores with dashes in session name
+	local sessionName = location[1]:gsub("_", "-")
+	tmux.target_session(sessionName, location[2])
 end
 
 tmuxMode:bind("", "e", function()
