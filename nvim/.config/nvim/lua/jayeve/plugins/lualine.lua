@@ -66,6 +66,14 @@ nightfly.inactive.a.fg = dark_pastel.fg_light
 nightfly.inactive.b.bg = dark_pastel.gray
 nightfly.inactive.b.fg = dark_pastel.fg_light
 
+local function worktree_name()
+	local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
+	if not git_root or git_root == "" then
+		return ""
+	end
+	return vim.fn.fnamemodify(git_root, ":t")
+end
+
 -- setup lualine
 lualine.setup({
 	options = {
@@ -77,7 +85,7 @@ lualine.setup({
 	sections = {
 		lualine_a = { "mode" },
 		lualine_b = { "branch", "diff" },
-		lualine_c = { "filename" },
+		lualine_c = { "worktree_name", "filename" },
 		lualine_x = { "encoding", "fileformat", "filetype" },
 		lualine_y = { "progress" },
 		lualine_z = { "location" },

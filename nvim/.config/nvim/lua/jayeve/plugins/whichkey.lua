@@ -85,22 +85,87 @@ which_key.add({
 		desc = "find files (hidden, respects .gitignore)",
 		mode = "n",
 	},
-	{ "<leader>r", "<cmd>Telescope live_grep<cr>", desc = "live grep", mode = "n" },
-	{ "<leader>c", "<cmd>Telescope grep_string<cr>", desc = "grep string under cursor", mode = "n" },
-	{ "<leader>o", "<cmd>Telescope buffers<cr>", desc = "list open buffers", mode = "n" },
-	{ "<leader>L", "<cmd>Telescope jumplist<cr>", desc = "jumplist", mode = "n" },
-	{ "<leader>j", "<cmd>Telescope zoxide list<cr>", desc = "zoxide projects list", mode = "n" },
-	{ "<leader>k", "<cmd>Telescope frecency<cr>", desc = "file frecency", mode = "n" },
-	{ "<leader>u", "<cmd>Telescope harpoon marks<cr>", desc = "harpoon marks", mode = "n" },
-	{ "<leader>M", "<cmd>Telescope metals commands<cr>", desc = "metals commands", mode = "n" },
+	{
+		"<leader>r",
+		"<cmd>Telescope live_grep<cr>",
+		desc = "live grep",
+		mode = "n",
+	},
+	{
+		"<leader>c",
+		"<cmd>Telescope grep_string<cr>",
+		desc = "grep string under cursor",
+		mode = "n",
+	},
+	{
+		"<leader>o",
+		"<cmd>Telescope buffers<cr>",
+		desc = "list open buffers",
+		mode = "n",
+	},
+	{
+		"<leader>L",
+		"<cmd>Telescope jumplist<cr>",
+		desc = "jumplist",
+		mode = "n",
+	},
+	{
+		"<leader>j",
+		"<cmd>Telescope zoxide list<cr>",
+		desc = "zoxide projects list",
+		mode = "n",
+	},
+	{
+		"<leader>k",
+		"<cmd>Telescope frecency<cr>",
+		desc = "file frecency",
+		mode = "n",
+	},
+	{
+		"<leader>u",
+		"<cmd>Telescope harpoon marks<cr>",
+		desc = "harpoon marks",
+		mode = "n",
+	},
+	{
+		"<leader>M",
+		"<cmd>Telescope metals commands<cr>",
+		desc = "metals commands",
+		mode = "n",
+	},
 
 	-- Telescope git commands
 	{ "<leader>g", group = "git" },
-	{ "<leader>gC", "<cmd>Telescope git_commits<cr>", desc = "git commits", mode = "n" },
-	{ "<leader>gfc", "<cmd>Telescope git_bcommits<cr>", desc = "git file commits", mode = "n" },
-	{ "<leader>gb", "<cmd>Telescope git_branches<cr>", desc = "git branches", mode = "n" },
-	{ "<leader>gs", "<cmd>Telescope git_status<cr>", desc = "git status", mode = "n" },
-	{ "<leader>gwc", "<cmd>Telescope git_worktree create_git_worktree<cr>", desc = "create git worktree", mode = "n" },
+	{
+		"<leader>gC",
+		"<cmd>Telescope git_commits<cr>",
+		desc = "git commits",
+		mode = "n",
+	},
+	{
+		"<leader>gfc",
+		"<cmd>Telescope git_bcommits<cr>",
+		desc = "git file commits",
+		mode = "n",
+	},
+	{
+		"<leader>gb",
+		"<cmd>Telescope git_branches<cr>",
+		desc = "git branches",
+		mode = "n",
+	},
+	{
+		"<leader>gs",
+		"<cmd>Telescope git_status<cr>",
+		desc = "git status",
+		mode = "n",
+	},
+	{
+		"<leader>gwc",
+		"<cmd>Telescope git_worktree create_git_worktree<cr>",
+		desc = "create git worktree",
+		mode = "n",
+	},
 	{
 		"<leader>gwl",
 		"<cmd>Telescope git_worktree git_worktrees<cr>",
@@ -108,10 +173,9 @@ which_key.add({
 		mode = "n",
 	},
 	-- Telescope history commands
-	{ "<leader>h", group = "history" },
-	{ "<leader>hc", "<cmd>Telescope command_history<cr>", desc = "command history", mode = "n" },
-	{ "<leader>hy", "<cmd>Telescope neoclip<cr>", desc = "yank history", mode = "n" },
-	{ "<leader>hf", "<cmd>Telescope oldfiles<cr>", desc = "file history", mode = "n" },
+	{ "<leader>w", "<cmd>Telescope command_history<cr>", desc = "command history", mode = "n" },
+	{ "<leader>Y", "<cmd>Telescope neoclip<cr>", desc = "yank history", mode = "n" },
+	{ "<leader>h", "<cmd>Telescope oldfiles<cr>", desc = "file history", mode = "n" },
 })
 
 vim.api.nvim_create_autocmd("FileType", {
@@ -198,23 +262,11 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 which_key.add({
-	-- History
-	-- Write
-	{ "<leader>w", group = "write/workspace" },
-	{
-		"<leader>ww",
-		function()
-			vim.cmd("noautocmd write")
-		end,
-		desc = "write file without triggering auto commands",
-		mode = "n",
-	},
-
 	-- Utility keybindings
 	{
 		"<leader>H",
 		function()
-			vim.cmd("edit ~/dotfiles/HOTKEYS.md")
+			vim.cmd("edit ~/dotfiles.git/master/HOTKEYS.md")
 		end,
 		desc = "open hotkey reference",
 		mode = "n",

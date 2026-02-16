@@ -5,12 +5,14 @@ This document consolidates all hotkeys across your system configuration.
 ## How to Access This Reference
 
 ### Interactive Terminal Search
+
 ```bash
 hotkeys       # or: hk     - Interactive fzf search through all hotkeys
 hotkeys full  # or: hkf    - View full document with bat/less
 ```
 
 ### In Neovim
+
 ```
 <Leader>H     - Open this hotkey reference
 ```
@@ -18,9 +20,11 @@ hotkeys full  # or: hkf    - View full document with bat/less
 ---
 
 ## Karabiner (System-wide Key Remapping)
-**Config**: `/Users/jevans/dotfiles/karabiner/.config/karabiner/karabiner.json`
+
+**Config**: `/Users/jevans/dotfiles.git/master/karabiner/.config/karabiner/karabiner.json`
 
 ### Global Remappings
+
 - **Caps Lock** → Left Control
 - **Left Control** → Caps Lock
 - **Left Command** → Left Option
@@ -31,15 +35,18 @@ hotkeys full  # or: hkf    - View full document with bat/less
 - **Shift+Semicolon** → Semicolon
 
 ### Special Keys
+
 - **Right Command** (tap) → F18
 - **Right Command** (hold) → Hyper (Ctrl+Alt+Cmd+Shift)
 
 ---
 
 ## Hammerspoon (macOS Automation)
-**Config**: `/Users/jevans/dotfiles/hammerspoon/.config/hammerspoon/hotkeys.lua`
+
+**Config**: `/Users/jevans/dotfiles.git/master/hammerspoon/.config/hammerspoon/hotkeys.lua`
 
 ### Window Management (Ctrl+Alt)
+
 - **Ctrl+Alt+H** - Snap window to left half
 - **Ctrl+Alt+L** - Snap window to right half
 - **Ctrl+Alt+J** - Snap window to bottom half
@@ -51,6 +58,7 @@ hotkeys full  # or: hkf    - View full document with bat/less
 - **Ctrl+Alt+Return** - Maximize window (fullscreen)
 
 ### Application Launchers (Hyper+Key)
+
 - **Hyper+A** - Launch/Focus Alacritty
 - **Hyper+G** - Launch/Focus Chrome
 - **Hyper+E** - Launch/Focus Spark (Email)
@@ -70,6 +78,7 @@ hotkeys full  # or: hkf    - View full document with bat/less
 - **Hyper+Z** - Open GitDash in Chrome
 
 ### Audio Management (Hyper)
+
 - **Hyper+I** - Pick audio input device
 - **Hyper+O** - Enter audio output mode (2s timeout)
   - **H** - Switch to Blackhole + Headphones
@@ -79,6 +88,7 @@ hotkeys full  # or: hkf    - View full document with bat/less
   - **Esc** - Exit audio output mode
 
 ### Tmux Session Switcher (Hyper+F)
+
 - **Hyper+F** - Enter tmux session mode (2s timeout)
   - **E** - Switch to extractor session
   - **N** - Switch to weekly notes session
@@ -94,6 +104,7 @@ hotkeys full  # or: hkf    - View full document with bat/less
   - **Esc** - Exit tmux session mode
 
 ### Quick Actions (Hyper)
+
 - **Hyper+5** - Jump to dotfiles tmux session
 - **Hyper+Tab** - FZF tmux session picker (in dotfiles)
 - **Hyper+V** - Toggle Accessibility (Virtual) Keyboard
@@ -101,29 +112,35 @@ hotkeys full  # or: hkf    - View full document with bat/less
 - **Hyper+3** - Translate Korean text to English (prompt dialog)
 
 ### System
+
 - **Page Down** - Send Cmd+Ctrl+Q (lock screen)
 
 ---
 
 ## Tmux (Terminal Multiplexer)
-**Config**: `/Users/jevans/dotfiles/tmux/.tmux.conf`
+
+**Config**: `/Users/jevans/dotfiles.git/master/tmux/.tmux.conf`
 
 ### Prefix Key
+
 - **Ctrl+A** - Tmux prefix (instead of default Ctrl+B)
 
 ### Window Management
+
 - **Ctrl+N** - Next window
 - **Ctrl+P** - Previous window
 - **Prefix+A** - FZF session picker (popup)
 - **Space** - Switch to last client
 
 ### Pane Navigation (Vim-aware)
+
 - **Ctrl+H** - Select left pane (or send to vim/fzf)
 - **Ctrl+J** - Select pane below (or send to vim/fzf)
 - **Ctrl+K** - Select pane above (or send to vim/fzf)
 - **Ctrl+L** - Select right pane (or send to vim/fzf)
 
 ### Pane/Window Management (with Prefix)
+
 - **Prefix+V** - Split pane vertically
 - **Prefix+S** - Split pane horizontally
 - **Prefix+=** - Even horizontal layout
@@ -134,12 +151,15 @@ hotkeys full  # or: hkf    - View full document with bat/less
 ---
 
 ## Neovim (Text Editor)
-**Config**: `/Users/jevans/dotfiles/nvim/.config/nvim/lua/jayeve/plugins/whichkey.lua`
+
+**Config**: `/Users/jevans/dotfiles.git/master/nvim/.config/nvim/lua/jayeve/plugins/whichkey.lua`
 
 ### Leader Key
+
 - **Space** - Leader key
 
 ### General Editing
+
 - **jk** - Exit insert mode
 - **;** - Clear search highlights
 - **x** - Delete character (no register)
@@ -148,6 +168,7 @@ hotkeys full  # or: hkf    - View full document with bat/less
 - **Leader -** - Decrement number
 
 ### Window Management
+
 - **Leader sv** - Split vertically
 - **Leader sh** - Split horizontally
 - **Leader se** - Equal window sizes
@@ -156,12 +177,14 @@ hotkeys full  # or: hkf    - View full document with bat/less
 - **Leader =** - Equalize windows
 
 ### Tab Management
+
 - **Leader to** - New tab
 - **Leader tx** - Close tab
 - **Leader tn** - Next tab
 - **Leader tp** - Previous tab
 
 ### File Navigation (Telescope)
+
 - **Leader Tab** - Find files (respects .gitignore)
 - **Leader r** - Live grep (search in files)
 - **Leader c** - Find string under cursor
@@ -172,6 +195,7 @@ hotkeys full  # or: hkf    - View full document with bat/less
 - **Leader e** - Toggle file explorer (NvimTree)
 
 ### History & Navigation
+
 - **Leader hc** - Command history
 - **Leader hy** - Yank history
 - **Leader hf** - File history (old files)
@@ -180,6 +204,7 @@ hotkeys full  # or: hkf    - View full document with bat/less
 - **Leader M** - Metals commands
 
 ### Git Operations (Telescope)
+
 - **Leader gC** - Git commits
 - **Leader gfc** - Git commits for current file
 - **Leader gb** - Git branches
@@ -192,39 +217,47 @@ hotkeys full  # or: hkf    - View full document with bat/less
 - **Leader .** - cd to current buffer directory
 
 ### File & Path Operations
+
 - **Leader l** - Copy full file path with line number
 - **Leader f** - Copy full file path
 - **Leader b** - Copy file name only
 - **Leader d** - Copy current directory
 
 ### Project & Session Management
+
 - **Leader p** - GitLab project picker (~9K repos)
 - **Leader m** - Switch tmux session
 
 ### Buffer Management
+
 - **Leader q** - Close current buffer
 - **Leader ww** - Write file (no autocommands)
 
 ### Special Modes
+
 - **Leader P** - Toggle purple colorscheme
 - **Leader a** - Toggle Arabic (RTL) mode
 - **Leader z** - Zen mode
 - **Leader I** - Toggle indent marker lines
 
 ### Harpoon
+
 - **Leader ia** - Add file to harpoon
 - **Leader ir** - Remove file from harpoon
 - **Leader il** - Toggle harpoon quick menu
 
 ### Notes
+
 - **Leader n** - Open weekly notes
 - **Leader N** - Open personal notes
 
 ### Quickfix Navigation
+
 - **]q** - Next in quickfix list
 - **[q** - Previous in quickfix list
 
 ### Extractor-specific (CSV files only)
+
 - **,j** - Play audio clip for current line
 - **,a** - Subtract 0.25s from start
 - **,s** - Add 0.25s to start
@@ -238,6 +271,7 @@ hotkeys full  # or: hkf    - View full document with bat/less
 - **,Leader** - Set difference for clip audio
 
 ### LSP (Language Server, when attached)
+
 - **gD** - Go to declaration
 - **gd** - Go to definition
 - **gI** - Go to implementation
@@ -256,31 +290,38 @@ hotkeys full  # or: hkf    - View full document with bat/less
 - **[d** - Previous diagnostic
 
 ### LSP Workspace
+
 - **Leader wa** - Add workspace folder
 - **Leader wr** - Remove workspace folder
 - **Leader wl** - List workspace folders
 
 ### Utilities
+
 - **Ctrl+G** - Show current location
 
 ---
 
 ## Zsh (Shell)
-**Config**: `/Users/jevans/dotfiles/zsh/.zshrc:187`
+
+**Config**: `/Users/jevans/dotfiles.git/master/zsh/.zshrc:187`
 
 ### Shell Hotkeys
+
 - **Ctrl+G** - Git checkout recent branch (fzf)
 - **Ctrl+F** - GitLab project picker (fzf)
 
 ---
 
 ## Alacritty (Terminal Emulator)
-**Config**: `/Users/jevans/dotfiles/alacritty/.config/alacritty/alacritty.toml`
+
+**Config**: `/Users/jevans/dotfiles.git/master/alacritty/.config/alacritty/alacritty.toml`
 
 ### Terminal Bindings
+
 - **Ctrl+6** - Send \u001E (Ctrl+^)
 
 ### Terminal Options
+
 - **Option key** - Acts as Alt (both left and right)
 
 ---
@@ -288,35 +329,39 @@ hotkeys full  # or: hkf    - View full document with bat/less
 ## Quick Reference by Category
 
 ### Most Used Application Launchers
-| App | Hotkey |
-|-----|--------|
+
+| App                  | Hotkey  |
+| -------------------- | ------- |
 | Alacritty (Terminal) | Hyper+A |
-| Chrome | Hyper+G |
-| Email (Spark) | Hyper+E |
-| ChatGPT | Hyper+C |
-| 1Password | Hyper+1 |
+| Chrome               | Hyper+G |
+| Email (Spark)        | Hyper+E |
+| ChatGPT              | Hyper+C |
+| 1Password            | Hyper+1 |
 
 ### Most Used Window Management
-| Action | Hotkey |
-|--------|--------|
-| Left half | Ctrl+Alt+H |
-| Right half | Ctrl+Alt+L |
-| Maximize | Ctrl+Alt+Return |
+
+| Action     | Hotkey          |
+| ---------- | --------------- |
+| Left half  | Ctrl+Alt+H      |
+| Right half | Ctrl+Alt+L      |
+| Maximize   | Ctrl+Alt+Return |
 
 ### Most Used Neovim
-| Action | Hotkey |
-|--------|--------|
-| Find files | Leader Tab |
-| Search in files | Leader r |
-| File explorer | Leader e |
-| Close buffer | Leader q |
+
+| Action          | Hotkey     |
+| --------------- | ---------- |
+| Find files      | Leader Tab |
+| Search in files | Leader r   |
+| File explorer   | Leader e   |
+| Close buffer    | Leader q   |
 
 ### Most Used Tmux
-| Action | Hotkey |
-|--------|--------|
-| Session picker | Hyper+Tab |
-| Next window | Ctrl+N |
-| Previous window | Ctrl+P |
+
+| Action          | Hotkey    |
+| --------------- | --------- |
+| Session picker  | Hyper+Tab |
+| Next window     | Ctrl+N    |
+| Previous window | Ctrl+P    |
 
 ---
 

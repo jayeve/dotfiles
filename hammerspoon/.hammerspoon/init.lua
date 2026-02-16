@@ -8,12 +8,11 @@ hs.alert.show("Hammerspoon config loaded")
 -- Allow require("foo") to load ~/.config/hammerspoon/foo.lua
 package.path = package.path .. ";" .. home .. "/.config/hammerspoon/?.lua"
 
+-- quite Hacky but it works :)
 -- Table structure: term_info[pid] = { status = "IDLE", tmux = "IN_TMUX" }
 local term_info = {}
 
 function CheckInTmux(pid, status, tmux)
-	-- hs.alert.show(string.format("pid=%s\nstatus=%s\ntmux=%s", tostring(pid), tostring(status), tostring(tmux)), 1)
-
 	if pid then
 		term_info[tonumber(pid)] = {
 			status = status,
@@ -22,16 +21,9 @@ function CheckInTmux(pid, status, tmux)
 	end
 end
 
--- hs.loadSpoon("Hammerflow")
-
--- Hammerflow searches these in order and loads the first valid TOML.
--- spoon.Hammerflow.loadFirstValidTomlFile({ "home.toml", "work.toml" })
---
 -- Auto-reload config on file changes
 local reload = require("reload")
-
 reload.start()
 
 require("apps")
-require("locations")
 require("hotkeys")

@@ -1,9 +1,9 @@
 -- ~/.config/hammerspoon/hotkeys.lua
 local audio = require("audio")
 local window_manager = require("window_manager")
-local profiles = require("profiles")
 local tmux = require("tmux")
 local home = os.getenv("HOME")
+local dotfiles_repo = home .. "/dotfiles.git"
 
 -- configured at https://github.com/jayeve/dotfiles/blob/2b1de320aeb019aad64f98fbb3f3863361efb9b3/.config/karabiner/karabiner.json#L9
 local hyper = { "ctrl", "alt", "shift", "cmd" }
@@ -224,6 +224,7 @@ end)
 
 -- Tmux hotkeys
 -- Hyper+T enters a "tmux sessions" layer; next key chooses a session.
+-- projects located at /Users/jevans/.config/project-hotkeys.json
 local tmuxMode = hs.hotkey.modal.new(hyper, "f")
 
 function tmuxMode:entered()
@@ -249,48 +250,62 @@ local function resetTimer()
 	end
 end
 
+-- Load locations from config file
+local locations_module = require("locations")
+local Locations = locations_module.load(home .. "/.config/project-hotkeys.json")
+
+-- Helper function to safely access location and show error if missing
+local function targetLocation(locationName)
+	local location = Locations[locationName]
+	if not location then
+		hs.alert.show("Error: Location '" .. locationName .. "' not found in config", 2)
+		return
+	end
+	tmux.target_session(location[1], location[2])
+end
+
 tmuxMode:bind("", "e", function()
-	tmux.target_session(Locations.extractor[1], Locations.extractor[2])
+	targetLocation("extractor")
 	tmuxMode:exit()
 end)
 tmuxMode:bind("", "n", function()
-	tmux.target_session(Locations.weekly_notes[1], Locations.weekly_notes[2])
+	targetLocation("weekly_notes")
 	tmuxMode:exit()
 end)
 tmuxMode:bind("", "m", function()
-	tmux.target_session(Locations.personal_notes[1], Locations.personal_notes[2])
+	targetLocation("personal_notes")
 	tmuxMode:exit()
 end)
 tmuxMode:bind("", "f", function()
-	tmux.target_session(Locations.fl2[1], Locations.fl2[2])
+	targetLocation("fl2")
 	tmuxMode:exit()
 end)
 tmuxMode:bind("", "x", function()
-	tmux.target_session(Locations.scratch[1], Locations.scratch[2])
+	targetLocation("scratch")
 	tmuxMode:exit()
 end)
 tmuxMode:bind("", "o", function()
-	tmux.target_session(Locations.opencode[1], Locations.opencode[2])
+	targetLocation("opencode")
 	tmuxMode:exit()
 end)
 tmuxMode:bind("", "c", function()
-	tmux.target_session(Locations.cache_indexer[1], Locations.cache_indexer[2])
+	targetLocation("cache_indexer")
 	tmuxMode:exit()
 end)
 tmuxMode:bind("", "s", function()
-	tmux.target_session(Locations.ssl_detector[1], Locations.ssl_detector[2])
+	targetLocation("ssl_detector")
 	tmuxMode:exit()
 end)
 tmuxMode:bind("", "d", function()
-	tmux.target_session(Locations.dotfiles[1], Locations.dotfiles[2])
+	targetLocation("dotfiles")
 	tmuxMode:exit()
 end)
 tmuxMode:bind("", "p", function()
-	tmux.target_session(Locations.pingora_origin[1], Locations.pingora_origin[2])
+	targetLocation("pingora_origin")
 	tmuxMode:exit()
 end)
 tmuxMode:bind("", "r", function()
-	tmux.target_session(Locations.resources[1], Locations.resources[2])
+	targetLocation("resources")
 	tmuxMode:exit()
 end)
 tmuxMode:bind("", "escape", function()
@@ -299,8 +314,8 @@ tmuxMode:bind("", "escape", function()
 end)
 
 hs.hotkey.bind(hyper, "5", function()
-	tmux.target_session(Locations.dotfiles[1], Locations.dotfiles[2])
+	targetLocation("dotfiles")
 end)
 hs.hotkey.bind(hyper, "tab", function()
-	tmux.fzf_tmux_sessions("dotfiles", (home .. "/dotfiles"))
+	tmux.fzf_tmux_sessions("dotfiles", dotfiles_repo)
 end)

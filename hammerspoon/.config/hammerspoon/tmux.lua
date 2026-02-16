@@ -7,8 +7,9 @@ end
 
 local function sh(cmd)
 	-- run via login shell so PATH/aliases/etc are present
-	-- Use -c instead of -lc to avoid loading full profile (faster)
-	local out, ok, _, rc = hs.execute("/bin/zsh -lc " .. shQuote(cmd))
+	-- Set PATH to include Homebrew before executing
+	local fullCmd = "export PATH=/opt/homebrew/bin:/opt/homebrew/sbin:$PATH; " .. cmd
+	local out, ok, _, rc = hs.execute("/bin/zsh -c " .. shQuote(fullCmd))
 	return out or "", ok, rc
 end
 
@@ -86,10 +87,6 @@ local function switchAllClientsToSession(clients, session_name)
 	end
 end
 
--- Hammerspoon chooser-based tmux session picker.
--- Assumes you already have:
---   target_session(session_name, session_root, default_session_name, default_session_root)
-
 local function trim(s)
 	return (s or ""):gsub("^%s+", ""):gsub("%s+$", "")
 end
@@ -154,10 +151,11 @@ end
 --  - Alacritty has a "new tab" shortcut on Cmd+T (adjust if yours differs)
 --  - You are OK with keystroke injection into Alacritty when attaching
 function M.target_session(session_name, session_root, default_session_name, default_session_root)
+	local dotfiles_repo = os.getenv("HOME") .. "/dotfiles.git"
 	session_name = session_name or "dotfiles"
-	session_root = session_root or (os.getenv("HOME") .. "/dotfiles")
+	session_root = session_root or dotfiles_repo
 	default_session_name = default_session_name or "dotfiles"
-	default_session_root = default_session_root or (os.getenv("HOME") .. "/dotfiles")
+	default_session_root = default_session_root or dotfiles_repo
 
 	-- Inspect tmux clients
 	local clients = tmuxClients()

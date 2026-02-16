@@ -111,14 +111,12 @@ telescope.setup({
 	},
 })
 
-telescope.load_extension("fzf")
-telescope.load_extension("zoxide")
-telescope.load_extension("neoclip")
-telescope.load_extension("git_worktree")
-telescope.load_extension("gh")
-telescope.load_extension("file_browser")
-telescope.load_extension("frecency")
-telescope.load_extension("ag")
+-- telescope.load_extension("fzf")
+-- telescope.load_extension("zoxide")
+-- telescope.load_extension("neoclip")
+-- telescope.load_extension("git_worktree")
+-- telescope.load_extension("gh")
+-- telescope.load_extension("frecency")
 -- project is maybe usefule but takes too long to load
 -- nvim --startuptime startuptime.log
 -- telescope.load_extension("project")
