@@ -40,14 +40,6 @@ M.define_augroups({
 		{ "BufNewFile", "*", "setlocal formatoptions-=c formatoptions-=r formatoptions-=o" },
 		-- { "VimLeavePre", "*", "set title set titleold=" },
 	},
-	-- _solidity = {
-	--     {'BufWinEnter', '.sol', 'setlocal filetype=solidity'}, {'BufRead', '*.sol', 'setlocal filetype=solidity'},
-	--     {'BufNewFile', '*.sol', 'setlocal filetype=solidity'}
-	-- },
-	-- _gemini = {
-	--     {'BufWinEnter', '.gmi', 'setlocal filetype=markdown'}, {'BufRead', '*.gmi', 'setlocal filetype=markdown'},
-	--     {'BufNewFile', '*.gmi', 'setlocal filetype=markdown'}
-	-- },
 	_markdown = { { "FileType", "markdown", "setlocal wrap" }, { "FileType", "markdown", "setlocal spell" } },
 	_auto_resize = {
 		-- will cause split windows to be resized evenly if main window is resized
@@ -57,17 +49,6 @@ M.define_augroups({
 		-- will cause split windows to be resized evenly if main window is resized
 		{ "FileType", "qf", "set nobuflisted" },
 	},
-	-- _fterm_lazygit = {
-	--   -- will cause esc key to exit lazy git
-	--   {"TermEnter", "*", "call LazyGitNativation()"}
-	-- },
-	-- _mode_switching = {
-	--   -- will switch between absolute and relative line numbers depending on mode
-	--   {'InsertEnter', '*', 'if &relativenumber | let g:ms_relativenumberoff = 1 | setlocal number norelativenumber | endif'},
-	--   {'InsertLeave', '*', 'if exists("g:ms_relativenumberoff") | setlocal relativenumber | endif'},
-	--   {'InsertEnter', '*', 'if &cursorline | let g:ms_cursorlineoff = 1 | setlocal nocursorline | endif'},
-	--   {'InsertLeave', '*', 'if exists("g:ms_cursorlineoff") | setlocal cursorline | endif'},
-	-- },
 })
 
 vim.cmd([[
@@ -118,10 +99,37 @@ function M.file_exists(name)
 	end
 end
 
-function M.cd_to_git_root()
-	local git_root = M.find_current_buffer_git_root()
+function M.find_current_buffer_git_worktree_root()
+	-- For worktrees, .git is a file (not a directory) containing "gitdir: <path>"
+	-- For normal repos, .git is a directory
+	-- This function returns the worktree root directory in both cases
+	local dot_git_path = vim.fn.findfile(".git", ".;")
+	if dot_git_path == "" then
+		dot_git_path = vim.fn.finddir(".git", ".;")
+	end
+
+	if dot_git_path == "" then
+		return nil
+	end
+
+	-- Get the absolute path to .git
+	local dot_git_abs = vim.fn.fnamemodify(dot_git_path, ":p")
+	-- Remove trailing slash if present (for directories)
+	dot_git_abs = dot_git_abs:gsub("/$", "")
+	-- Get the parent directory
+	local git_root = vim.fn.fnamemodify(dot_git_abs, ":h")
+	return git_root
+end
+
+-- Universal version that works in both regular repos and worktrees
+function M.cd_to_git_root_universal()
+	local git_root = M.find_current_buffer_git_worktree_root()
 	if git_root then
 		vim.cmd.cd(git_root)
+		vim.fn.setreg("+", git_root)
+		vim.notify("cur dir → " .. git_root .. " copied to clipboard", vim.log.levels.INFO, {
+			title = "jayeve.utils",
+		})
 	else
 		vim.notify("Git root not found.", vim.log.levels.ERROR, { title = "jayeve.utils" })
 	end
@@ -334,6 +342,31 @@ local function blame_commit_sha(absfile, lnum)
 	return sha, nil
 end
 
+local function blame_commit_sha_universal(absfile, lnum)
+	local current_buf_git_root = M.find_current_buffer_git_worktree_root()
+	-- Use porcelain blame so the commit is predictable to parse
+	local out, err = syslist({
+		"git",
+		"-C",
+		current_buf_git_root,
+		"blame",
+		"-L",
+		("%d,%d"):format(lnum, lnum),
+		"--porcelain",
+		"--",
+		absfile,
+	})
+	if not out then
+		return nil, ("git blame failed: %s"):format(err or "unknown")
+	end
+	-- First line starts with "<sha> <orig-lineno> <lineno> <numlines>"
+	local sha = out[1] and out[1]:match("^([0-9a-f]+) ")
+	if sha == "0000000000000000000000000000000000000000" then
+		return nil, "Line is not committed yet"
+	end
+	return sha, nil
+end
+
 local function commit_body(sha)
 	local out = syslist({ "git", "show", "-s", "--format=%B", sha })
 	if not out then
@@ -421,32 +454,70 @@ function M.open_gitlab_link_for_current_line()
 	end
 end
 
-function M.open_repo_url()
-	-- Open the root GitLab or GitHub URL for the current repository
-	local root = M.find_current_buffer_git_root()
+-- Universal version that works in both regular repos and worktrees
+function M.open_gitlab_link_for_current_line_universal()
+	-- Preconditions: inside a git repo, file tracked
+	local root = M.find_current_buffer_git_worktree_root()
 	if not root then
 		vim.notify("Not inside a Git repository", vim.log.levels.ERROR, { title = "jayeve.utils" })
 		return
 	end
 
-	-- Get remote URL
+	local bufnr = vim.api.nvim_get_current_buf()
+	local file = vim.api.nvim_buf_get_name(bufnr)
+	if file == "" then
+		vim.notify("Buffer has no name", vim.log.levels.ERROR, { title = "jayeve.utils" })
+		return
+	end
+
+	-- Get line number (1-based)
+	local lnum = vim.api.nvim_win_get_cursor(0)[1]
+
+	-- Find introducing commit
+	local sha, err = blame_commit_sha_universal(file, lnum)
+	if not sha then
+		vim.notify(err or "Failed to find blame commit", vim.log.levels.ERROR, { title = "jayeve.utils" })
+		return
+	end
+
+	-- Build GitLab base URL from remote
 	local remote = git_remote_url(root)
-	if not remote then
-		vim.notify("Could not find git remote origin", vim.log.levels.ERROR, { title = "jayeve.utils" })
-		return
-	end
-
-	-- Normalize to https URL
 	local base = normalize_gitlab_base(remote)
-	if not base then
-		vim.notify(("Could not parse remote URL: %s"):format(remote), vim.log.levels.ERROR, { title = "jayeve.utils" })
+	if not base or not base:match("gitlab") then
+		-- Fallback: just echo the commit
+		vim.notify(
+			("Commit %s (remote not GitLab?): %s"):format(sha, remote or "nil"),
+			vim.log.levels.WARN,
+			{ title = "jayeve.utils" }
+		)
 		return
 	end
 
-	-- Copy to clipboard and open
-	vim.fn.setreg("+", base)
-	vim.notify("Opening repository: " .. base, vim.log.levels.INFO, { title = "jayeve.utils" })
-	open_url(base)
+	-- Try to detect MR number in commit body (e.g., "See merge request !123")
+	local body = commit_body(sha)
+	local mr = body:match("!([0-9]+)")
+	vim.notify(body, vim.log.levels.INFO, { title = "jayeve.utils" })
+
+	if mr then
+		local mr_url = ("%s/-/merge_requests/%s"):format(base, mr)
+		vim.notify(("Opening MR !%s (commit %s)"):format(mr, sha), vim.log.levels.INFO, { title = "jayeve.utils" })
+		open_url(mr_url)
+	else
+		-- Open a search page scoped to merge requests for this SHA (works in many setups)
+		local search_url = ("%s/-/commit/%s"):format(base, sha)
+		vim.fn.setreg("+", search_url)
+		-- optional: notify user
+		vim.notify("Copied to clipboard: " .. search_url, vim.log.levels.INFO, { title = "jayeve.utils" })
+		vim.notify(
+			("Opening commit (no MR tag found). Commit: %s"):format(sha),
+			vim.log.levels.INFO,
+			{ title = "jayeve.utils" }
+		)
+		-- Prefer MR search; if your instance is private, at least commit URL is useful:
+		open_url(search_url)
+		-- Uncomment to also open the specific commit page:
+		-- open_url(commit_url)
+	end
 end
 
 return M

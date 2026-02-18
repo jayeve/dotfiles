@@ -308,10 +308,53 @@ which_key.add({
 	{ "<leader>d", utils.copy_directory_to_clipboard, desc = "copy current buffer directory", mode = "n" },
 
 	-- Git operations (additional)
-	{ "<leader>gc", utils.open_gitlab_link_for_current_line, desc = "open gitlab MR or commit", mode = "n" },
-	{ "<leader>gg", utils.open_repo_url, desc = "open the git repository URL", mode = "n" },
-	{ "<leader>gr", utils.open_repo_url, desc = "open the git repository URL", mode = "n" },
-	{ "<leader>g.", utils.cd_to_git_root, desc = "cd into cur buf's git root", mode = "n" },
+	{ "<leader>gc", utils.open_gitlab_link_for_current_line_universal, desc = "open gitlab MR or commit", mode = "n" },
+	{
+		"<leader>g.",
+		utils.cd_to_git_root_universal,
+		desc = "cd into cur buf's git root and copy to clipboard",
+		mode = "n",
+	},
+	{
+		"<leader>gy",
+		function()
+			gitlinker.get_buf_range_url("n", {})
+		end,
+		desc = "copy current git location to clipboard",
+		mode = "n",
+	},
+	{
+		"<leader>gy",
+		function()
+			gitlinker.get_buf_range_url("v", {})
+		end,
+		desc = "copy current git location to clipboard",
+		mode = "v",
+	},
+	{
+		"<leader>gb",
+		function()
+			gitlinker.get_buf_range_url("n", { action_callback = actions.open_in_browser })
+		end,
+		desc = "open current location in browser",
+		mode = "n",
+	},
+	{
+		"<leader>gb",
+		function()
+			gitlinker.get_buf_range_url("v", { action_callback = actions.open_in_browser })
+		end,
+		desc = "open git link visual selection in browswer",
+		mode = "v",
+	},
+	{
+		"<leader>gg",
+		function()
+			gitlinker.get_repo_url({ action_callback = actions.open_in_browser })
+		end,
+		desc = "open the git repository URL",
+		mode = "n",
+	},
 
 	-- Tmux & Sessions
 	{
@@ -373,15 +416,6 @@ which_key.add({
 		desc = "close current buffer",
 		mode = "n",
 	},
-	{
-		"<leader>B",
-		function()
-			gitlinker.get_repo_url({ action_callback = actions.open_in_browser })
-		end,
-		desc = "open ref link in browser",
-		mode = "n",
-	},
-
 	-- Directory navigation
 	{ "<leader>.", utils.cd_to_current_buf_directory, desc = "cd into cur buf's dir", mode = "n" },
 	{ "<c-g>", utils.show_cur_location, desc = "show current location", mode = "n" },
