@@ -70,7 +70,7 @@ hotkeys full  # or: hkf    - View full document with bat/less
 - **Hyper+L** - Launch/Focus LocalSend
 - **Hyper+R** - Launch/Focus Anki
 - **Hyper+Q** - Launch/Focus QuickTime
-- **Hyper+S** - Launch/Focus Spotify
+- **Hyper+P** - Launch/Focus Spotify
 - **Hyper+D** - Launch/Focus Discord
 - **Hyper+T** - Launch/Focus Teams
 - **Hyper+X** - Launch/Focus Google Maps
@@ -79,13 +79,10 @@ hotkeys full  # or: hkf    - View full document with bat/less
 
 ### Audio Management (Hyper)
 
-- **Hyper+I** - Pick audio input device
-- **Hyper+O** - Enter audio output mode (2s timeout)
-  - **H** - Switch to Blackhole + Headphones
-  - **J** - Switch to External Headphones
-  - **S** - Switch to MacBook Pro Speakers
-  - **Tab** - Open full output device chooser
-  - **Esc** - Exit audio output mode
+- **Hyper+I** - Audio input device selector (fzf in floating window)
+- **Hyper+O** - Audio output device selector (fzf in floating window)
+
+Opens a floating terminal with fzf showing all available audio devices. Current device is marked with ●. Select with arrow keys and Enter.
 
 ### Tmux Session Switcher (Hyper+F)
 
@@ -102,6 +99,18 @@ hotkeys full  # or: hkf    - View full document with bat/less
   - **P** - Switch to pingora_origin session
   - **R** - Switch to resources session
   - **Esc** - Exit tmux session mode
+
+### Script Runner (Hyper+S)
+
+- **Hyper+S** - Enter script runner mode (2s timeout)
+  - **T** - Terminal scripts (~/scripts/terminal)
+  - **D** - Dotfiles scripts (~/dotfiles.git/master/scripts/.config/scripts)
+  - **C** - Cloudflare scripts (~/scripts/cloudflare)
+  - **P** - Personal scripts (~/scripts/personal)
+  - **K** - Kubernetes scripts (~/scripts/k8s)
+  - **Esc** - Exit script runner mode
+  
+Opens a floating terminal with fzf selector showing scripts from the selected directory. Scripts execute immediately and window auto-closes. Configure mappings in `~/.config/script-runner-hotkeys.json`.
 
 ### Quick Actions (Hyper)
 
@@ -362,6 +371,14 @@ hotkeys full  # or: hkf    - View full document with bat/less
 | Session picker  | Hyper+Tab |
 | Next window     | Ctrl+N    |
 | Previous window | Ctrl+P    |
+
+### Most Used Hammerspoon Modes
+
+| Feature         | Hotkey  | Description                          |
+| --------------- | ------- | ------------------------------------ |
+| Script Runner   | Hyper+S | Launch scripts with fzf selector     |
+| Tmux Switcher   | Hyper+F | Quick switch between tmux sessions   |
+| Audio Output    | Hyper+O | Switch audio output device           |
 
 ---
 

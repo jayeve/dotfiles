@@ -135,7 +135,7 @@ end)
 hs.hotkey.bind(hyper, "q", function()
 	hs.application.launchOrFocus(Apps.quicktime)
 end)
-hs.hotkey.bind(hyper, "s", function()
+hs.hotkey.bind(hyper, "p", function()
 	hs.application.launchOrFocus(Apps.spotify)
 end)
 hs.hotkey.bind(hyper, "d", function()
@@ -192,78 +192,7 @@ hs.hotkey.bind(hyper, "3", function()
 	hs.urlevent.openURL(url)
 end)
 
--- Audio hotkeys
-hs.hotkey.bind(hyper, "i", audio.pickInputDevice)
-
--- Audio output modal
--- Hyper+O enters an "audio output" layer; next key chooses an output device.
-local outputMode = hs.hotkey.modal.new(hyper, "o")
-
-function outputMode:entered()
-	-- auto-exit after 2s idle
-	self._timer = hs.timer.doAfter(2, function()
-		outputMode:exit()
-	end)
-end
-
-function outputMode:exited()
-	if self._timer then
-		self._timer:stop()
-		self._timer = nil
-	end
-end
-
-local function resetOutputTimer()
-	if outputMode._timer then
-		outputMode._timer:stop()
-		outputMode._timer = hs.timer.doAfter(2, function()
-			outputMode:exit()
-		end)
-	end
-end
-
--- Example output device mappings (customize these with your actual device names)
-outputMode:bind("", "h", function()
-	local dev = hs.audiodevice.findOutputByName("output_screen_recording_plugged_headphones")
-	if dev then
-		dev:setDefaultOutputDevice()
-		hs.alert.show("🔊 Blackhole + Headphones", 0.8)
-	else
-		hs.alert.show("❌ Headphones not found", 1.0)
-	end
-	outputMode:exit()
-end)
-outputMode:bind("", "j", function()
-	local dev = hs.audiodevice.findOutputByName("External Headphones")
-	if dev then
-		dev:setDefaultOutputDevice()
-		hs.alert.show("🔊 External Headphones", 0.8)
-	else
-		hs.alert.show("❌ Headphones not found", 1.0)
-	end
-	outputMode:exit()
-end)
-outputMode:bind("", "s", function()
-	-- Example: Switch to built-in speakers
-	-- Replace with your actual speaker device name
-	local dev = hs.audiodevice.findOutputByName("MacBook Pro Speakers")
-	if dev then
-		dev:setDefaultOutputDevice()
-		hs.alert.show("🔊 Speakers", 0.8)
-	else
-		hs.alert.show("❌ Speakers not found", 1.0)
-	end
-	outputMode:exit()
-end)
-outputMode:bind("", "tab", function()
-	-- Open the full chooser list
-	audio.pickOutputDevice()
-	outputMode:exit()
-end)
-outputMode:bind("", "escape", function()
-	resetOutputTimer()
-	outputMode:exit()
-end)
+-- Audio hotkeys moved below after script_runner is loaded
 
 -- Hotkey to toggle Accessibility (Virtual) Keyboard using existing AppleScript
 local scriptPath = home .. "/.config/scripts/ToggleAccessibilityKeyboard.scpt"
@@ -483,4 +412,62 @@ hs.hotkey.bind(hyper, "4", function()
 	ankiChooser:choices(choices)
 	ankiChooser:placeholderText("Select a card…")
 	ankiChooser:show()
+end)
+
+-- Script Runner modal (Hyper+S)
+local script_runner = require("script_runner")
+
+-- Initialize the script runner (starts window watcher)
+script_runner.init()
+
+local scriptMode = hs.hotkey.modal.new(hyper, "s")
+
+function scriptMode:entered()
+	hs.alert.show("Script Runner Mode", 0.5)
+	-- auto-exit after 2s idle
+	self._timer = hs.timer.doAfter(2, function()
+		scriptMode:exit()
+	end)
+end
+
+function scriptMode:exited()
+	if self._timer then
+		self._timer:stop()
+		self._timer = nil
+	end
+end
+
+local function resetScriptTimer()
+	if scriptMode._timer then
+		scriptMode._timer:stop()
+		scriptMode._timer = hs.timer.doAfter(2, function()
+			scriptMode:exit()
+		end)
+	end
+end
+
+-- Load script directory mappings from config
+local scriptConfig = script_runner.loadConfig()
+
+-- Dynamically bind keys from config
+for key, config in pairs(scriptConfig) do
+	scriptMode:bind("", key, function()
+		script_runner.launchScriptRunner(config.path, config.name, config.description)
+		scriptMode:exit()
+	end)
+end
+
+-- Escape to exit
+scriptMode:bind("", "escape", function()
+	resetScriptTimer()
+	scriptMode:exit()
+end)
+
+-- Audio device selectors using fzf (now that script_runner is loaded)
+hs.hotkey.bind(hyper, "i", function()
+	script_runner.launchAudioInputSelector()
+end)
+
+hs.hotkey.bind(hyper, "o", function()
+	script_runner.launchAudioOutputSelector()
 end)
