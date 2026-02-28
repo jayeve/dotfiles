@@ -33,8 +33,6 @@ local function togglePurple()
 end
 
 local which_key = safeCall("which-key")
-local gitlinker = safeCall("gitlinker")
-local actions = safeCall("gitlinker.actions")
 
 ---------------------
 -- General Keymaps
@@ -110,6 +108,12 @@ which_key.add({
 		mode = "n",
 	},
 	{
+		"<leader>w",
+		"<cmd>noautocmd write<cr>",
+		desc = "write with no autocommands",
+		mode = "n",
+	},
+	{
 		"<leader>j",
 		"<cmd>Telescope zoxide list<cr>",
 		desc = "zoxide projects list",
@@ -172,8 +176,17 @@ which_key.add({
 		desc = "switch and delete git worktree",
 		mode = "n",
 	},
+	{
+		"<leader>gd",
+		function()
+			local git_root = utils.find_current_buffer_git_worktree_root()
+			utils.telescope_find_directories(git_root)
+		end,
+		desc = "cd to a directory in this git repo",
+		mode = "n",
+	},
 	-- Telescope history commands
-	{ "<leader>w", "<cmd>Telescope command_history<cr>", desc = "command history", mode = "n" },
+	{ "<leader><leader>", "<cmd>Telescope command_history<cr>", desc = "command history", mode = "n" },
 	{ "<leader>Y", "<cmd>Telescope neoclip<cr>", desc = "yank history", mode = "n" },
 	{ "<leader>h", "<cmd>Telescope oldfiles<cr>", desc = "file history", mode = "n" },
 })
@@ -317,40 +330,37 @@ which_key.add({
 	},
 	{
 		"<leader>gy",
-		function()
-			gitlinker.get_buf_range_url("n", {})
-		end,
+		"<cmd>GitLink<cr>",
 		desc = "copy current git location to clipboard",
 		mode = "n",
 	},
 	{
 		"<leader>gy",
-		function()
-			gitlinker.get_buf_range_url("v", {})
-		end,
+		"<cmd>GitLink<cr>",
 		desc = "copy current git location to clipboard",
 		mode = "v",
 	},
 	{
 		"<leader>gb",
-		function()
-			gitlinker.get_buf_range_url("n", { action_callback = actions.open_in_browser })
-		end,
+		"<cmd>GitLink!<cr>",
 		desc = "open current location in browser",
 		mode = "n",
 	},
 	{
 		"<leader>gb",
-		function()
-			gitlinker.get_buf_range_url("v", { action_callback = actions.open_in_browser })
-		end,
+		"<cmd>GitLink!<cr>",
 		desc = "open git link visual selection in browswer",
 		mode = "v",
 	},
 	{
 		"<leader>gg",
 		function()
-			gitlinker.get_repo_url({ action_callback = actions.open_in_browser })
+			-- Open repo root in browser
+			local repo_url = vim.fn.system("git config --get remote.origin.url"):gsub("\n", "")
+			-- Convert SSH to HTTPS
+			repo_url = repo_url:gsub("git@(.-):", "https://%1/")
+			repo_url = repo_url:gsub("%.git$", "")
+			vim.fn.system("open " .. vim.fn.shellescape(repo_url))
 		end,
 		desc = "open the git repository URL",
 		mode = "n",
@@ -536,7 +546,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
 			-- LSP workspace management
 			{
-				"<leader>wa",
+				"<leader>Wa",
 				function()
 					vim.lsp.buf.add_workspace_folder()
 				end,
@@ -545,7 +555,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 				buffer = ev.buf,
 			},
 			{
-				"<leader>wr",
+				"<leader>Wr",
 				function()
 					vim.lsp.buf.remove_workspace_folder()
 				end,
@@ -554,7 +564,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 				buffer = ev.buf,
 			},
 			{
-				"<leader>wl",
+				"<leader>Wl",
 				function()
 					print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
 				end,

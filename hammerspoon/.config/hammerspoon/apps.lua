@@ -23,7 +23,11 @@ Apps = {
 	whatsapp = "Whatsapp",
 }
 
--- these are typically chrome extensions
+-- these are typically chrome extensions bundle ids
+-- hs -c 'for _, app in ipairs(hs.application.runningApplications()) do
+--   print(app:name(), app:bundleID())
+-- end'
 PWA_Aps = {
 	google_messages = "com.google.Chrome.app.hpfldicfbfomlpcikngkocigghgafkph",
+	google_maps = "com.google.Chrome.app.mnhkaebcjjhencmpkapnbdaogjamfbcj",
 }

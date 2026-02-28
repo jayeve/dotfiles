@@ -44,6 +44,7 @@ brew "gh" # github command line extension
 brew "git" # the most important
 brew "git-crypt" # transparent file encryption in Git
 brew "git-delta" # for prettier `git diff`
+brew "glab" # gitlab cli to see pull requests
 brew "glances" # a prettier 'top' command (not as pretty as `htop` or `btop`)
 brew "gnu-sed" # gsed, a GNU implementation of the stream editor ('sed' command)
 brew "go" # the language, go-lang
@@ -72,6 +73,7 @@ brew "libpq" # postgres tools
 brew "loc" # lines of code
 # brew "localsend" # like airdrop
 brew "lolcat" # prettier 'cat' command
+brew "lspmux" # LSP multiplexor
 brew "lua-language-server" # LSP for Lua
 brew "martensson/tpm/tpm" # tmux plugin manager
 brew "masscan" # more aggressive network scanner (for hacking)

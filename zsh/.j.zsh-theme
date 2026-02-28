@@ -56,12 +56,64 @@ branch_info() {
   local -a DIVERGENCES
   local -a FLAGS
 
-  local NUM_AHEAD="$(git log --oneline @{u}.. 2> /dev/null | wc -l | tr -d ' ')"
+  # Try to use upstream first, otherwise fall back to default branch
+  local NUM_AHEAD=0
+  local NUM_BEHIND=0
+  local CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+  
+  # Check if upstream is configured
+  local UPSTREAM_REMOTE=$(git config --get branch.$CURRENT_BRANCH.remote 2>/dev/null)
+  local UPSTREAM_MERGE=$(git config --get branch.$CURRENT_BRANCH.merge 2>/dev/null | sed 's@^refs/heads/@@')
+  
+  if [ -n "$UPSTREAM_REMOTE" ] && [ -n "$UPSTREAM_MERGE" ]; then
+    # Upstream is configured, try to use it
+    # First check if @{u} works (handles both regular repos and worktrees with remote tracking)
+    if git rev-parse --abbrev-ref @{u} > /dev/null 2>&1; then
+      # Use @{u} - works for regular repos and worktrees with refs/remotes
+      NUM_AHEAD="$(git log --oneline @{u}.. 2> /dev/null | wc -l | tr -d ' ')"
+      NUM_BEHIND="$(git log --oneline ..@{u} 2> /dev/null | wc -l | tr -d ' ')"
+    else
+      # @{u} doesn't work, likely a bare repo worktree without refs/remotes
+      # Check if we're in a worktree (git-common-dir differs from git-dir)
+      local git_dir="$(git rev-parse --git-dir 2>/dev/null)"
+      local git_common_dir="$(git rev-parse --git-common-dir 2>/dev/null)"
+      
+      if [ -n "$git_dir" ] && [ -n "$git_common_dir" ] && [ "$git_dir" != "$git_common_dir" ]; then
+        # We're in a worktree, compare against the branch in the bare repo
+        if [ -f "$git_common_dir/refs/heads/$UPSTREAM_MERGE" ]; then
+          NUM_AHEAD="$(git log --oneline $UPSTREAM_MERGE.. 2> /dev/null | wc -l | tr -d ' ')"
+          NUM_BEHIND="$(git log --oneline ..$UPSTREAM_MERGE 2> /dev/null | wc -l | tr -d ' ')"
+        fi
+      fi
+    fi
+  else
+    # No upstream configured, find default branch
+    # First try origin/HEAD (works in regular repos)
+    local DEFAULT_BRANCH="$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')"
+    local COMPARE_REF=""
+    
+    if [ -n "$DEFAULT_BRANCH" ] && git show-ref --verify --quiet "refs/remotes/origin/$DEFAULT_BRANCH"; then
+      # Regular repo with origin/main or origin/master
+      COMPARE_REF="origin/$DEFAULT_BRANCH"
+    else
+      # Worktree or bare repo - try main/master directly in refs/heads
+      if git show-ref --verify --quiet refs/heads/main; then
+        COMPARE_REF="main"
+      elif git show-ref --verify --quiet refs/heads/master; then
+        COMPARE_REF="master"
+      fi
+    fi
+    
+    if [ -n "$COMPARE_REF" ]; then
+      NUM_AHEAD="$(git log --oneline $COMPARE_REF.. 2> /dev/null | wc -l | tr -d ' ')"
+      NUM_BEHIND="$(git log --oneline ..$COMPARE_REF 2> /dev/null | wc -l | tr -d ' ')"
+    fi
+  fi
+
   if [ "$NUM_AHEAD" -gt 0 ]; then
     DIVERGENCES+=( "${AHEAD//NUM/$NUM_AHEAD}" )
   fi
 
-  local NUM_BEHIND="$(git log --oneline ..@{u} 2> /dev/null | wc -l | tr -d ' ')"
   if [ "$NUM_BEHIND" -gt 0 ]; then
     DIVERGENCES+=( "${BEHIND//NUM/$NUM_BEHIND}" )
   fi

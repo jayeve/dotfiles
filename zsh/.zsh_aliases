@@ -15,10 +15,13 @@ alias l='ls -CF'
 # alias la='ls -lha'
 
 # Optional: a shorter alias
-alias lc='alac_lastcmd_clip'
+alias ylc='alac_lastcmd_clip'
 
 # some cd aliases
 alias ..='cd ..'
+
+# yank pwd
+alias yd='pwd|pbcopy'
 
 alias x='exit'
 alias e='nvim .'
@@ -31,6 +34,7 @@ alias tmux="TERM=screen-256color-bce tmux"
 alias fz="session=\$(tmux ls -F '#S' 2>/dev/null | fzf --exit-0) || session='dotfiles'; tmux has-session -t \"\$session\" 2>/dev/null || tmux new-session -d -s \"\$session\" -c ~/dotfiles.git; [ -n \"\$TMUX\" ] && tmux switch-client -t \"\$session\" || tmux attach -t \"\$session\""
 
 # a few helpful and silly git aliases
+alias gwt="git worktree"
 alias getdefault="git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'"
 alias setdefault="git remote set-head origin --auto"
 alias g='git'

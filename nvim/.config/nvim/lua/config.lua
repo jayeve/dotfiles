@@ -197,7 +197,7 @@ lazy.setup({
 
 	-- git integration
 	{ "lewis6991/gitsigns.nvim" }, -- show line modifications on left hand side
-	{ "ruifm/gitlinker.nvim", dependencies = "nvim-lua/plenary.nvim" },
+	{ "linrongbin16/gitlinker.nvim", dependencies = "nvim-lua/plenary.nvim" },
 
 	-- vim-abolish: change snake-case to underscore_case or camelCase
 	{ "tpope/vim-abolish" },

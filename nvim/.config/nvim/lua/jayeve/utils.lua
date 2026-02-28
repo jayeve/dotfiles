@@ -207,6 +207,10 @@ function M.open_notes()
 	open_or_create_file(path)
 end
 
+function M.cd_fzf(path)
+	-- implement me
+end
+
 -- Define a function to copy the file path to the clipboard
 function M.copy_file_path_to_clipboard(show_line_number, use_fully_qualified_name)
 	-- Get the current buffer's file path
@@ -518,6 +522,41 @@ function M.open_gitlab_link_for_current_line_universal()
 		-- Uncomment to also open the specific commit page:
 		-- open_url(commit_url)
 	end
+end
+
+-- Telescope picker to fuzzy find and cd into directories
+function M.telescope_find_directories(path)
+	local pickers = require("telescope.pickers")
+	local finders = require("telescope.finders")
+	local conf = require("telescope.config").values
+	local actions = require("telescope.actions")
+	local action_state = require("telescope.actions.state")
+
+	-- Default to current directory if no path provided
+	local search_path = path or vim.fn.getcwd()
+
+	pickers
+		.new({}, {
+			prompt_title = "Find Directories",
+			finder = finders.new_oneshot_job({ "fd", "--type", "d", "--hidden", "--exclude", ".git" }, {
+				cwd = search_path,
+			}),
+			sorter = conf.generic_sorter({}),
+			previewer = conf.file_previewer({}),
+			attach_mappings = function(prompt_bufnr, map)
+				actions.select_default:replace(function()
+					actions.close(prompt_bufnr)
+					local selection = action_state.get_selected_entry()
+					if selection then
+						local dir = search_path .. "/" .. selection[1]
+						vim.cmd.cd(dir)
+						vim.notify("Changed directory to: " .. dir, vim.log.levels.INFO, { title = "jayeve.utils" })
+					end
+				end)
+				return true
+			end,
+		})
+		:find()
 end
 
 return M

@@ -1,0 +1,127 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "tools": {
+    "cf-portal_gitlab-mcp-server_*emoji*": false,
+    "cf-portal_gitlab-mcp-server_list_merge_request_discussions*": false,
+    "cf-portal_gitlab-mcp-server_add*": false,
+    "cf-portal_gitlab-mcp-server_update*": false
+  },
+  "mcp": {
+    "cf-portal": {
+      "type": "remote",
+      "url": "https://portal.mcp.cfdata.org/mcp?optimize_context=minimize_tools",
+      "enabled": true
+    },
+    "context7": {
+      "enabled": false
+    },
+    "sourcegraph": {
+      "type": "local",
+      "command": ["/Users/jevans/cloudflare/aberglund/srch-cli", "--mcp"],
+      "enabled": true
+    }
+  },
+  "plugin": [
+    "@franlol/opencode-md-table-formatter@0.0.3",
+    "@mathew-cf/opencode-terminal-notifier@0.1.3"
+  ],
+  "lsp": {
+    "rust": {
+      "command": ["lspmux", "client", "--server-path", "rust-analyzer"],
+      "extensions": [".rs"]
+    },
+    "gopls": {
+      "command": ["lspmux", "client", "--server-path", "gopls"],
+      "extensions": [".go"]
+    }
+  },
+  "permission": {
+    "doom_loop": "ask",
+    "bash": {
+      "*": "ask",
+      "awk *": "allow",
+      "basename *": "allow",
+      "cat *": "allow",
+      "column *": "allow",
+      "cut *": "allow",
+      "date": "allow",
+      "date *": "allow",
+      "df *": "allow",
+      "diff *": "allow",
+      "dig *": "allow",
+      "dirname *": "allow",
+      "du *": "allow",
+      "echo *": "allow",
+      "env": "allow",
+      "cargo test *": "allow",
+      "fd *": "allow",
+      "file *": "allow",
+      "find *": "allow",
+      "git blame *": "allow",
+      "git branch": "allow",
+      "git branch --contains *": "allow",
+      "git branch --format *": "allow",
+      "git branch --list": "allow",
+      "git branch --list *": "allow",
+      "git branch --show-current": "allow",
+      "git branch -a": "allow",
+      "git branch -l": "allow",
+      "git branch -r": "allow",
+      "git describe": "allow",
+      "git describe *": "allow",
+      "git diff": "allow",
+      "git diff *": "allow",
+      "git grep *": "allow",
+      "git log": "allow",
+      "git log *": "allow",
+      "git ls-files": "allow",
+      "git ls-files *": "allow",
+      "git remote -v": "allow",
+      "git remote show *": "allow",
+      "git rev-parse *": "allow",
+      "git show": "allow",
+      "git show *": "allow",
+      "git show-ref": "allow",
+      "git show-ref *": "allow",
+      "git status": "allow",
+      "git status *": "allow",
+      "git tag": "allow",
+      "git tag --contains *": "allow",
+      "git tag --list": "allow",
+      "git tag --list *": "allow",
+      "git tag -l": "allow",
+      "git worktree *": "allow",
+      "grep *": "allow",
+      "rg *": "allow",
+      "head *": "allow",
+      "ls": "allow",
+      "ls *": "allow",
+      "printf *": "allow",
+      "ps *": "allow",
+      "pwd": "allow",
+      "rg *": "allow",
+      "sed *": "allow",
+      "sed --in-place": "ask",
+      "sed --in-place *": "ask",
+      "sed -i": "ask",
+      "sed -i *": "ask",
+      "sort *": "allow",
+      "stat *": "allow",
+      "strings *": "allow",
+      "tail *": "allow",
+      "test": "allow",
+      "test *": "allow",
+      "tr *": "allow",
+      "uniq *": "allow",
+      "wc *": "allow",
+      "which *": "allow",
+      "whoami": "allow"
+    },
+    "read": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow"
+    }
+  }
+}

@@ -39,9 +39,6 @@ export EDITOR=nvim
 export PAGER=less
 export LESS='-F -g -i -M -R -S -w -X -z-4'
 
-# load fzf
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
 # PATH extension helper
 extend_path() { [[ ":$PATH:" != *":$1:"* ]] && PATH="$1:$PATH" }
 extend_path "$HOME/.local/bin"
@@ -67,6 +64,7 @@ if which xclip > /dev/null; then
   alias pbpaste='xclip -selection clipboard -o'
 fi
 
+source_if_exists "$HOME/.fzf.zsh"
 source_if_exists "$HOME/.work_functions.zsh"
 source_if_exists "$HOME/.zsh_aliases"
 source_if_exists "$HOME/.zsh_hotkeys"
@@ -74,20 +72,27 @@ source_if_exists "$HOME/.zsh_hotkeys"
 # fe [FUZZY PATTERN] - Open the selected file with the default editor
 #   - Bypass fuzzy finder if there's only one match (--select-1)
 #   - Exit if there's no match (--exit-0)
+#   - Preview files with bat
 fe() {
   local __files
   OLDIFS=$IFS
-  IFS=$'\n' __files=($(fzf-tmux --query="$1" --multi --select-1 --exit-0))
+  IFS=$'\n' __files=($(fzf-tmux --query="$1" --multi --select-1 --exit-0 --preview 'bat --color=always --style=numbers --line-range=:500 {}'))
   [[ -n "$__files" ]] && ${EDITOR:-nvim} "${__files[@]}" && IFS=$OLDIFS || IFS=$OLDIFS
 }
 
-# fd [FUZZY PATTERN] - Open the selected folder
-#   - Bypass fuzzy finder if there's only one match (--select-1)
-#   - Exit if there's no match (--exit-0)
+# fdd [FUZZY PATTERN] - Fuzzy find and cd into a directory
+#   - Searches all directories recursively from current location
 fdd() {
-  local __file
   local __dir
-  __file=$(fzf +m -q "$1") && __dir=$(dirname "$__file") && cd "$__dir"
+  __dir=$(fd --type d --hidden --exclude .git | fzf +m -q "$1" --preview 'ls -la {}') && cd "$__dir"
+  return 0
+}
+
+# yank git branch to clipboard
+ygb() {
+  local branch
+  branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null || git rev-parse --short HEAD)
+  printf "%s" "$branch" | pbcopy
 }
 
 # Logic remains in the function for reliability

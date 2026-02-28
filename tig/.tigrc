@@ -414,3 +414,5 @@
 color cursor			black	blue	bold
 color title-focus		white	default bold
 color title-blur		white	default bold
+bind main Y !sh -c "git rev-parse %(commit) | pbcopy"
+bind generic Y !sh -c "git rev-parse %(commit) | pbcopy"

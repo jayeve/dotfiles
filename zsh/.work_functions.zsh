@@ -13,6 +13,29 @@ jopen() {
   open "$url"
 }
 
+jc() {
+  if [[ $# -ne 1 ]]; then
+    echo "Usage: open cache jira CACHE-xxxxx"
+    echo "This attempts to open the URL https://jira.cfdata.org/browse/CACHE-xxxxx"
+    return 1
+  fi
+
+  local url="https://jira.cfdata.org/browse/CACHE-$1"
+  echo "Opening $url"
+  open "$url"
+}
+ji() {
+  if [[ $# -ne 1 ]]; then
+    echo "Usage: open incident jira INCIDENT-xxxxx"
+    echo "This attempts to open the URL https://jira.cfdata.org/browse/INCIDENT-xxxxx"
+    return 1
+  fi
+
+  local url="https://jira.cfdata.org/browse/INCIDENT-$1"
+  echo "Opening $url"
+  open "$url"
+}
+
 # ---------- FUZZY FILE OPEN ----------
 ff() {
   local result file linenumber
@@ -171,7 +194,7 @@ glprj() {
     local check_path="$project_path"
     [[ "$project_path" == "cloudflare/"* ]] && check_path="${project_path#cloudflare/}"
 
-    if [[ -d "$base/$check_path" ]]; then
+    if [[ -d "$base/$check_path.git" ]]; then
       echo "LOCAL  $project_path"
     else
       echo "REMOTE $project_path"
@@ -184,7 +207,7 @@ glprj() {
         --prompt "GitLab Project (LOCAL/REMOTE): " \
         --preview 'echo {2}' \
         --preview-window right:40% \
-        --header 'LOCAL = already cloned | REMOTE = will clone')
+        --header 'LOCAL = already cloned | REMOTE = will clone as bare repo')
 
   if [[ -z "$selected" ]]; then
     return 0
@@ -193,38 +216,107 @@ glprj() {
   # Extract just the project path (remove LOCAL/REMOTE prefix)
   local full_path=$(echo "$selected" | awk '{print $2}')
   local project=$(basename "$full_path")
-  
+
   # For cloudflare/* projects, strip the cloudflare/ prefix since base is already ~/cloudflare
   local relative_path="$full_path"
   if [[ "$full_path" == "cloudflare/"* ]]; then
     relative_path="${full_path#cloudflare/}"
   fi
-  
-  local project_dir="$base/$relative_path"
 
-  # Clone if doesn't exist locally
-  if [[ ! -d "$project_dir" ]]; then
+  local bare_dir="$base/$relative_path.git"
+
+  # Clone as bare if doesn't exist locally
+  if [[ ! -d "$bare_dir" ]]; then
+    mkdir -p "$(dirname "$bare_dir")"
+    echo "Cloning ${gitlab_url}:${full_path}.git as bare repo"
+    git clone --bare "${gitlab_url}:${full_path}.git" "$bare_dir" || return 1
+
+    # Configure fetch refspec for remote tracking (needed for @{u} to work in worktrees)
+    (cd "$bare_dir" && git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*')
+
+    echo "Bare repo created at: $bare_dir"
+  fi
+
+  # Check if there are any worktrees
+  local worktrees
+  worktrees=$(cd "$bare_dir" && git worktree list --porcelain 2>/dev/null | grep "^worktree " | sed 's/^worktree //')
+
+  if [[ -z "$worktrees" ]]; then
+    # No worktrees exist, create default one from main/master branch
+    local default_branch=$(cd "$bare_dir" && git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
+    if [[ -z "$default_branch" ]]; then
+      # Fallback: try main, then master
+      if cd "$bare_dir" && git show-ref --verify --quiet refs/heads/main; then
+        default_branch="main"
+      elif cd "$bare_dir" && git show-ref --verify --quiet refs/heads/master; then
+        default_branch="master"
+      else
+        default_branch="main"  # Default fallback
+      fi
+    fi
+
+    local project_dir="$base/$relative_path/$default_branch"
     mkdir -p "$(dirname "$project_dir")"
-    echo "Cloning ${gitlab_url}:${full_path}.git"
-    git clone "${gitlab_url}:${full_path}.git" "$project_dir" || return 1
+    echo "Creating default worktree for branch: $default_branch"
+    (cd "$bare_dir" && git worktree add "$project_dir" "$default_branch") || return 1
+    target_dir="$project_dir"
+  else
+    # Select or create worktree
+    local worktree_choice
+    worktree_choice=$(echo "$worktrees\n+ Create new worktree" | \
+      fzf --height 40% --reverse --border \
+          --prompt "Select worktree: " \
+          --header 'Choose existing worktree or create new one')
+
+    if [[ -z "$worktree_choice" ]]; then
+      return 0
+    fi
+
+    if [[ "$worktree_choice" == "+ Create new worktree" ]]; then
+      # Prompt for branch name
+      echo -n "Enter branch name for new worktree: "
+      read branch_name
+      if [[ -z "$branch_name" ]]; then
+        echo "No branch name provided, aborting"
+        return 1
+      fi
+
+      target_dir="$base/$relative_path/$branch_name"
+      mkdir -p "$(dirname "$target_dir")"
+
+      (cd "$bare_dir" && git worktree add "$target_dir" "$branch_name") || return 1
+      echo "Created worktree: $target_dir"
+    else
+      target_dir="$worktree_choice"
+    fi
   fi
 
   # Open in tmux
+  # Session name: use project name, if exists add parent directory prefix
+  local session_name="$project"
+  if tmux has-session -t "$session_name" 2>/dev/null; then
+    # Session exists, use parent directory as prefix
+    local parent_dir=$(dirname "$relative_path")
+    if [[ "$parent_dir" != "." ]]; then
+      session_name="${parent_dir##*/}_${project}"
+    fi
+  fi
+
   local starting_dir=$PWD
 
   if [[ -z $TMUX ]] && ! pgrep -x tmux &>/dev/null; then
-    tmux new-session -s "$project" -c "$project_dir"
+    tmux new-session -s "$session_name" -c "$target_dir"
     return 0
   fi
 
-  if ! tmux has-session -t "$project" 2>/dev/null; then
-    tmux new-session -d -s "$project" -c "$project_dir"
+  if ! tmux has-session -t "$session_name" 2>/dev/null; then
+    tmux new-session -d -s "$session_name" -c "$target_dir"
   fi
 
   if [[ -z $TMUX ]]; then
-    tmux attach-session -t "$project" -c "$project_dir"
+    tmux attach-session -t "$session_name" -c "$target_dir"
   else
-    tmux switch-client -t "$project"
+    tmux switch-client -t "$session_name"
   fi
 
   cd "$starting_dir"
@@ -271,13 +363,13 @@ glprj-bare() {
   # Extract just the project path (remove LOCAL/REMOTE prefix)
   local full_path=$(echo "$selected" | awk '{print $2}')
   local project=$(basename "$full_path")
-  
+
   # For cloudflare/* projects, strip the cloudflare/ prefix since base is already ~/cloudflare
   local relative_path="$full_path"
   if [[ "$full_path" == "cloudflare/"* ]]; then
     relative_path="${full_path#cloudflare/}"
   fi
-  
+
   local bare_dir="$base/$relative_path.git"
 
   # Clone as bare if doesn't exist locally
@@ -285,6 +377,10 @@ glprj-bare() {
     mkdir -p "$(dirname "$bare_dir")"
     echo "Cloning ${gitlab_url}:${full_path}.git as bare repo"
     git clone --bare "${gitlab_url}:${full_path}.git" "$bare_dir" || return 1
+
+    # Configure fetch refspec for remote tracking (needed for @{u} to work in worktrees)
+    (cd "$bare_dir" && git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*')
+
     echo "Bare repo created at: $bare_dir"
     echo "Use 'git worktree add' to create working directories"
   fi
@@ -292,7 +388,7 @@ glprj-bare() {
   # Check if there are any worktrees
   local worktrees
   worktrees=$(cd "$bare_dir" && git worktree list --porcelain 2>/dev/null | grep "^worktree " | sed 's/^worktree //')
-  
+
   if [[ -z "$worktrees" ]]; then
     echo "No worktrees found. Create one with:"
     echo "  cd $bare_dir && git worktree add ../$(basename "$bare_dir" .git)/main main"
@@ -319,10 +415,10 @@ glprj-bare() {
       echo "No branch name provided, aborting"
       return 1
     fi
-    
+
     target_dir="$base/$relative_path/$branch_name"
     mkdir -p "$(dirname "$target_dir")"
-    
+
     (cd "$bare_dir" && git worktree add "$target_dir" "$branch_name") || return 1
     echo "Created worktree: $target_dir"
   else
@@ -330,7 +426,16 @@ glprj-bare() {
   fi
 
   # Open in tmux
-  local session_name="${project}-$(basename "$target_dir")"
+  # Session name: use project name, if exists add parent directory prefix
+  local session_name="$project"
+  if tmux has-session -t "$session_name" 2>/dev/null; then
+    # Session exists, use parent directory as prefix
+    local parent_dir=$(dirname "$relative_path")
+    if [[ "$parent_dir" != "." ]]; then
+      session_name="${parent_dir##*/}_${project}"
+    fi
+  fi
+
   local starting_dir=$PWD
 
   if [[ -z $TMUX ]] && ! pgrep -x tmux &>/dev/null; then
@@ -379,45 +484,6 @@ glprj-init() {
   echo "To add more projects, edit the file and add paths like:"
   echo "  cloudflare/fl/fl2"
   echo "  cloudflare/workers/workers-sdk"
-}
-
-# Search GitLab and add matching projects to cache
-glprj-sync() {
-  local cache_file="$HOME/.gitlab-projects-cache"
-  
-  if [[ $# -eq 0 ]]; then
-    echo "Usage: glprj-sync SEARCH_TERM"
-    echo "Example: glprj-sync workers"
-    echo "         glprj-sync fl"
-    echo ""
-    echo "This searches GitLab for projects and adds matches to your cache."
-    return 1
-  fi
-  
-  local search_term="$1"
-  echo "Searching GitLab for projects matching '$search_term'..."
-  
-  # Use git ls-remote to search (SSH-based, no token)
-  # Try common patterns
-  local found=0
-  local patterns=(
-    "cloudflare/${search_term}"
-    "cloudflare/${search_term}/*"
-    "cloudflare/*/${search_term}"
-  )
-  
-  for pattern in "${patterns[@]}"; do
-    # This is a heuristic - we try to ls-remote and see if it works
-    # Not perfect but uses SSH
-    echo "Trying pattern: $pattern" >&2
-  done
-  
-  echo ""
-  echo "For now, manually browse GitLab and use glprj-add to add projects:"
-  echo "  1. Visit: https://gitlab.cfdata.org/cloudflare"
-  echo "  2. Search for: $search_term"
-  echo "  3. Copy project path (e.g., cloudflare/fl/fl2)"
-  echo "  4. Run: glprj-add cloudflare/fl/fl2"
 }
 
 # Add a project to cache manually
@@ -498,26 +564,11 @@ glprj-refresh() {
   while true; do
     echo -ne "\rFetching page $page... (${total_projects} projects so far)"
 
-    # Fetch page from GitLab API with token
-    local response=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
-      "${api_url}/projects?per_page=100&page=${page}&simple=true&order_by=id" 2>/dev/null)
-
-    # Check if response is empty
-    if [[ -z "$response" ]] || [[ "$response" == "[]" ]]; then
-      break
-    fi
-
-    # Check for API error
-    if echo "$response" | grep -q '"message".*"401'; then
-      echo ""
-      echo ""
-      echo "❌ Invalid token. Please check your GITLAB_TOKEN."
-      rm "$temp_file"
-      return 1
-    fi
-
-    # Extract project paths using Python script
-    local extracted=$(echo "$response" | python3 "$HOME/.glprj_extract.py")
+    # Extract project paths directly by piping curl to Python
+    # This avoids storing the JSON in a variable which can mangle control characters
+    local extracted=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+      "${api_url}/projects?per_page=100&page=${page}&simple=true&order_by=id" 2>/dev/null \
+      | python3 "$HOME/.glprj_extract.py")
 
     # Check if we got any projects from this page
     if [[ -z "$extracted" ]]; then

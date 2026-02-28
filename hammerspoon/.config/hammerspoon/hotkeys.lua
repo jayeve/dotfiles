@@ -39,8 +39,8 @@ hs.hotkey.bind({ "ctrl", "alt" }, "return", function()
 	local f = win:screen():frame()
 	win:setFrame(f, 0) -- 0 = no animation
 end)
-
-hs.hotkey.bind({}, "pagedown", function()
+hs.hotkey.bind({ "shift" }, "pageup", hs.reload)
+hs.hotkey.bind({ "shift" }, "pagedown", function()
 	hs.eventtap.keyStroke({ "cmd", "ctrl" }, "q", 0)
 end)
 hs.hotkey.bind(hyper, "l", function()
@@ -52,6 +52,62 @@ end)
 hs.hotkey.bind(hyper, "e", function()
 	hs.application.launchOrFocus(Apps.spark)
 end)
+
+local sparkHotkeys = {}
+
+-- Define hotkeys but DO NOT enable them yet
+sparkHotkeys.archive = hs.hotkey.new({ "ctrl" }, "j", nil, function()
+	hs.eventtap.keyStroke({ "cmd", "ctrl" }, "a", 0)
+end)
+sparkHotkeys.delete = hs.hotkey.new({ "ctrl" }, "d", nil, function()
+	hs.eventtap.keyStroke({ "cmd" }, "delete", 0)
+end)
+sparkHotkeys.forward = hs.hotkey.new({ "ctrl" }, "f", nil, function()
+	hs.eventtap.keyStroke({ "cmd", "shift" }, "f", 0)
+end)
+sparkHotkeys.move = hs.hotkey.new({ "ctrl" }, "m", nil, function()
+	hs.eventtap.keyStroke({ "cmd", "shift" }, "m", 0)
+end)
+sparkHotkeys.pin = hs.hotkey.new({ "ctrl" }, "p", nil, function()
+	hs.eventtap.keyStroke({ "cmd", "shift" }, "p", 0)
+end)
+sparkHotkeys.spam = hs.hotkey.new({ "ctrl" }, "s", function()
+	hs.eventtap.keyStroke({ "cmd", "shift" }, "j", 0)
+end)
+
+local function enableSparkHotkeys()
+	for _, hk in pairs(sparkHotkeys) do
+		hk:enable()
+	end
+end
+
+-- Function to disable Spark hotkeys
+local function disableSparkHotkeys()
+	for _, hk in pairs(sparkHotkeys) do
+		hk:disable()
+	end
+end
+
+-- hs.hotkey.bind({ "cmd" }, "k", function()
+-- 	local app = hs.application.frontmostapplication()
+-- 	if app:name() == apps.googlemaps then
+-- 		hs.eventtap.keystroke({}, "/")
+-- 	end
+-- end)
+-- Watch for app focus changes
+local appWatcher = hs.application.watcher.new(function(appName, event, app)
+	if event == hs.application.watcher.activated then
+		if app:name() == Apps.spark then
+			enableSparkHotkeys()
+		else
+			disableSparkHotkeys()
+		end
+	end
+end)
+
+appWatcher:start()
+disableSparkHotkeys()
+
 hs.hotkey.bind(hyper, "r", function()
 	hs.application.launchOrFocus(Apps.anki)
 end)
@@ -91,6 +147,7 @@ end)
 hs.hotkey.bind(hyper, "x", function()
 	hs.application.launchOrFocus(Apps.googlemaps)
 end)
+
 hs.hotkey.bind(hyper, "z", function()
 	local url = "https://gitdash.cfdata.org/"
 
@@ -314,10 +371,116 @@ tmuxMode:bind("", "escape", function()
 	resetTimer()
 	tmuxMode:exit()
 end)
-
 hs.hotkey.bind(hyper, "5", function()
 	targetLocation("dotfiles")
 end)
 hs.hotkey.bind(hyper, "tab", function()
 	tmux.fzf_tmux_sessions("dotfiles", dotfiles_repo)
+end)
+
+-- keep chooser alive (avoid garbage collection)
+local ankiChooser = nil
+
+local function ankiRequest(action, params)
+	local payload = hs.json.encode({
+		action = action,
+		version = 6,
+		params = params or {},
+	})
+
+	local status, body, _ = hs.http.post("http://localhost:8765", payload, {
+		["Content-Type"] = "application/json",
+	})
+
+	if status ~= 200 or not body then
+		return nil, ("HTTP error from AnkiConnect: %s"):format(tostring(status))
+	end
+
+	local decoded = hs.json.decode(body)
+	if not decoded then
+		return nil, "Failed to decode AnkiConnect JSON"
+	end
+
+	if decoded.error then
+		return nil, ("AnkiConnect error: %s"):format(tostring(decoded.error))
+	end
+
+	return decoded.result, nil
+end
+
+hs.hotkey.bind(hyper, "4", function()
+	local button, query =
+		hs.dialog.textPrompt("Search Anki", "Enter Anki search (e.g. foo, deck:Korean foo):", "", "Search", "Cancel")
+	if button ~= "Search" or not query or query == "" then
+		return
+	end
+
+	local cardIds, err = ankiRequest("findCards", { query = query })
+	if err then
+		hs.alert.show(err)
+		return
+	end
+	if not cardIds or #cardIds == 0 then
+		hs.alert.show("No cards found")
+		return
+	end
+
+	-- Optional: cap results so chooser stays snappy
+	if #cardIds > 200 then
+		local trimmed = {}
+		for i = 1, 200 do
+			trimmed[i] = cardIds[i]
+		end
+		cardIds = trimmed
+	end
+
+	local cards, err2 = ankiRequest("cardsInfo", { cards = cardIds })
+	if err2 then
+		hs.alert.show(err2)
+		return
+	end
+	if not cards then
+		hs.alert.show("No card info returned")
+		return
+	end
+
+	local choices = {}
+	for _, card in ipairs(cards) do
+		-- Try common field names; fall back gracefully
+		local fields = card.fields or {}
+		local front = (fields.Front and fields.Front.value)
+			or (fields["Front"] and fields["Front"].value)
+			or (fields.Question and fields.Question.value)
+			or (fields.Expression and fields.Expression.value)
+			or "(no Front field)"
+
+		-- strip basic HTML tags for readability
+		front = front:gsub("<.->", ""):gsub("&nbsp;", " "):gsub("%s+", " "):sub(1, 180)
+
+		table.insert(choices, {
+			text = front,
+			subText = ("%s  •  %s"):format(card.deckName or "", card.noteType or ""),
+			cardId = card.cardId,
+		})
+	end
+
+	if ankiChooser then
+		ankiChooser:hide()
+	end
+	ankiChooser = hs.chooser.new(function(choice)
+		if not choice then
+			return
+		end
+		-- Browse to the card, then focus Anki
+		local _, err3 = ankiRequest("guiBrowse", { query = "cid:" .. tostring(choice.cardId) })
+		if err3 then
+			hs.alert.show(err3)
+			return
+		end
+		hs.application.launchOrFocus("Anki")
+	end)
+
+	ankiChooser:choices(choices)
+	ankiChooser:placeholderText("Select a card…")
+	ankiChooser:show()
 end)

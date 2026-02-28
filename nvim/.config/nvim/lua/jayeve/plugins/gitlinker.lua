@@ -7,28 +7,38 @@ if not setup then
 end
 
 -- configure/enable gitlinker
+-- Using linrongbin16/gitlinker.nvim (newer, actively maintained, better worktree support)
 gitlinker.setup({
-	callbacks = {
-		-- cloudflare new
-		["gitlab.cfdata.org"] = require("gitlinker.hosts").get_gitlab_type_url,
-		-- cloudflare old
-		["bitbucket.cfdata.org"] = function(url_data)
-			local project = url_data.repo:sub(1, url_data.repo:find("/") - 1)
-			local repo = url_data.repo:sub(url_data.repo:find("/") + 1)
-			local url = "https://bitbucket.cfdata.org/projects/"
-				.. project
-				.. "/repos/"
-				.. repo
-				.. "/browse/"
-				.. url_data.file
-				.. "?at="
-				.. url_data.rev
-				.. "#"
-				.. url_data.lstart
-			if url_data.lend then
-				url = url .. "-" .. url_data.lend
-			end
-			return url
-		end,
+	message = true, -- print message when URL is copied
+	router = {
+		browse = {
+			-- cloudflare new
+			["^gitlab%.cfdata%.org"] = "https://gitlab.cfdata.org/"
+				.. "{_A.ORG}/"
+				.. "{_A.REPO}/blob/"
+				.. "{_A.REV}/"
+				.. "{_A.FILE}"
+				.. "#L{_A.LSTART}"
+				.. "{(_A.LEND > _A.LSTART and ('-L' .. _A.LEND) or '')}",
+			-- cloudflare old
+			["^bitbucket%.cfdata%.org"] = function(lk)
+				local project = lk.org
+				local repo = lk.repo
+				local url = "https://bitbucket.cfdata.org/projects/"
+					.. project
+					.. "/repos/"
+					.. repo
+					.. "/browse/"
+					.. lk.file
+					.. "?at="
+					.. lk.rev
+					.. "#"
+					.. lk.lstart
+				if lk.lend and lk.lend > lk.lstart then
+					url = url .. "-" .. lk.lend
+				end
+				return url
+			end,
+		},
 	},
 })
