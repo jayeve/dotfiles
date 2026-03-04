@@ -321,6 +321,20 @@ local function normalize_gitlab_base(remote)
 	return ("https://%s/%s"):format(host, path)
 end
 
+local function detect_git_platform(base_url)
+	-- Detect if the git hosting platform is GitHub or GitLab
+	-- Returns: "github", "gitlab", or nil
+	if not base_url then
+		return nil
+	end
+	if base_url:match("github%.com") then
+		return "github"
+	elseif base_url:match("gitlab") then
+		return "gitlab"
+	end
+	return nil
+end
+
 local function blame_commit_sha(absfile, lnum)
 	local current_buf_git_root = M.find_current_buffer_git_root()
 	-- Use porcelain blame so the commit is predictable to parse
@@ -348,6 +362,11 @@ end
 
 local function blame_commit_sha_universal(absfile, lnum)
 	local current_buf_git_root = M.find_current_buffer_git_worktree_root()
+	-- Make file path relative to git root
+	local relfile = absfile
+	if current_buf_git_root and absfile:sub(1, #current_buf_git_root) == current_buf_git_root then
+		relfile = absfile:sub(#current_buf_git_root + 2) -- +2 to skip the trailing slash
+	end
 	-- Use porcelain blame so the commit is predictable to parse
 	local out, err = syslist({
 		"git",
@@ -358,7 +377,7 @@ local function blame_commit_sha_universal(absfile, lnum)
 		("%d,%d"):format(lnum, lnum),
 		"--porcelain",
 		"--",
-		absfile,
+		relfile,
 	})
 	if not out then
 		return nil, ("git blame failed: %s"):format(err or "unknown")
@@ -484,43 +503,72 @@ function M.open_gitlab_link_for_current_line_universal()
 		return
 	end
 
-	-- Build GitLab base URL from remote
+	-- Build base URL from remote
 	local remote = git_remote_url(root)
 	local base = normalize_gitlab_base(remote)
-	if not base or not base:match("gitlab") then
-		-- Fallback: just echo the commit
+	if not base then
 		vim.notify(
-			("Commit %s (remote not GitLab?): %s"):format(sha, remote or "nil"),
+			("Commit %s (failed to parse remote): %s"):format(sha, remote or "nil"),
 			vim.log.levels.WARN,
 			{ title = "jayeve.utils" }
 		)
 		return
 	end
 
-	-- Try to detect MR number in commit body (e.g., "See merge request !123")
+	-- Detect platform (GitHub or GitLab)
+	local platform = detect_git_platform(base)
+	if not platform then
+		vim.notify(
+			("Commit %s (unknown platform): %s"):format(sha, base),
+			vim.log.levels.WARN,
+			{ title = "jayeve.utils" }
+		)
+		return
+	end
+
+	-- Try to detect PR/MR number in commit body
 	local body = commit_body(sha)
-	local mr = body:match("!([0-9]+)")
+	local pr_or_mr = nil
+	local pr_or_mr_url = nil
+	local commit_url = nil
+
+	if platform == "gitlab" then
+		-- GitLab: look for "!123" pattern
+		pr_or_mr = body:match("!([0-9]+)")
+		if pr_or_mr then
+			pr_or_mr_url = ("%s/-/merge_requests/%s"):format(base, pr_or_mr)
+		end
+		commit_url = ("%s/-/commit/%s"):format(base, sha)
+	elseif platform == "github" then
+		-- GitHub: look for "#123" or "Merge pull request #123" pattern
+		pr_or_mr = body:match("Merge pull request #([0-9]+)") or body:match("#([0-9]+)")
+		if pr_or_mr then
+			pr_or_mr_url = ("%s/pull/%s"):format(base, pr_or_mr)
+		end
+		commit_url = ("%s/commit/%s"):format(base, sha)
+	end
+
 	vim.notify(body, vim.log.levels.INFO, { title = "jayeve.utils" })
 
-	if mr then
-		local mr_url = ("%s/-/merge_requests/%s"):format(base, mr)
-		vim.notify(("Opening MR !%s (commit %s)"):format(mr, sha), vim.log.levels.INFO, { title = "jayeve.utils" })
-		open_url(mr_url)
-	else
-		-- Open a search page scoped to merge requests for this SHA (works in many setups)
-		local search_url = ("%s/-/commit/%s"):format(base, sha)
-		vim.fn.setreg("+", search_url)
-		-- optional: notify user
-		vim.notify("Copied to clipboard: " .. search_url, vim.log.levels.INFO, { title = "jayeve.utils" })
+	if pr_or_mr and pr_or_mr_url then
+		local pr_mr_label = platform == "github" and "PR" or "MR"
+		local pr_mr_prefix = platform == "github" and "#" or "!"
 		vim.notify(
-			("Opening commit (no MR tag found). Commit: %s"):format(sha),
+			("Opening %s %s%s (commit %s)"):format(pr_mr_label, pr_mr_prefix, pr_or_mr, sha),
 			vim.log.levels.INFO,
 			{ title = "jayeve.utils" }
 		)
-		-- Prefer MR search; if your instance is private, at least commit URL is useful:
-		open_url(search_url)
-		-- Uncomment to also open the specific commit page:
-		-- open_url(commit_url)
+		open_url(pr_or_mr_url)
+	else
+		-- Open commit page directly
+		vim.fn.setreg("+", commit_url)
+		vim.notify("Copied to clipboard: " .. commit_url, vim.log.levels.INFO, { title = "jayeve.utils" })
+		vim.notify(
+			("Opening commit (no PR/MR tag found). Commit: %s"):format(sha),
+			vim.log.levels.INFO,
+			{ title = "jayeve.utils" }
+		)
+		open_url(commit_url)
 	end
 end
 

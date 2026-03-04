@@ -321,7 +321,7 @@ which_key.add({
 	{ "<leader>d", utils.copy_directory_to_clipboard, desc = "copy current buffer directory", mode = "n" },
 
 	-- Git operations (additional)
-	{ "<leader>gc", utils.open_gitlab_link_for_current_line_universal, desc = "open gitlab MR or commit", mode = "n" },
+	{ "<leader>gc", utils.open_gitlab_link_for_current_line_universal, desc = "open git PR/MR or commit", mode = "n" },
 	{
 		"<leader>g.",
 		utils.cd_to_git_root_universal,
