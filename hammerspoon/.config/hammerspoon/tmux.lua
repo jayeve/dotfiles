@@ -8,8 +8,7 @@ end
 local function sh(cmd)
 	-- run via login shell so PATH/aliases/etc are present
 	-- Set PATH to include Homebrew before executing
-	local fullCmd = "export PATH=/opt/homebrew/bin:/opt/homebrew/sbin:$PATH; " .. cmd
-	local out, ok, _, rc = hs.execute("/bin/zsh -c " .. shQuote(fullCmd))
+	local out, ok, _, rc = hs.execute(cmd, true)
 	return out or "", ok, rc
 end
 
