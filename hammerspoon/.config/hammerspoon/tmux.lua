@@ -223,4 +223,7 @@ function M.target_session(session_name, session_root, default_session_name, defa
 	end)
 end
 
+-- Export focusedWindowIsTmux for use in other modules
+M.focusedWindowIsTmux = focusedWindowIsTmux
+
 return M

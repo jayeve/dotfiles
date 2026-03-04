@@ -19,6 +19,10 @@ export FZF_DEFAULT_OPTS="
   --layout=reverse
   --border
   --preview-window=right:60%
+  --color=border:#d2aef5
+  --no-separator
+  --no-scrollbar
+  --info=hidden
 "
 
 # --- Ctrl-T: file search ---

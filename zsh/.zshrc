@@ -1,3 +1,8 @@
+# emacs mode
+# bindkey -e
+bindkey -M viins '^P' up-line-or-history
+bindkey -M viins '^N' down-line-or-history
+
 # Load colors
 autoload -Uz colors && colors
 
@@ -268,8 +273,8 @@ hotkeys() {
 zle -N gch
 zle -N glprj
 
-bindkey '^G' gch
-bindkey '^F' glprj
+# bindkey '^G' gch
+# bindkey '^F' glprj
 
 # Load custom theme with git worktree support
 source_if_exists "$DOTFILES_PATH/zsh/.j.zsh-theme"

@@ -29,7 +29,7 @@ if command -v SwitchAudioSource &>/dev/null; then
 	done <<<"$DEVICES"
 
 	# Use fzf to select device
-	SELECTED=$(echo -e "$FORMATTED" | fzf \
+  SELECTED=$(echo -e "$FORMATTED" | grep -Eiv "output|zoomaudiodevice|blackhole 2ch" | fzf \
 		--height=100% \
 		--layout=reverse \
 		--border \

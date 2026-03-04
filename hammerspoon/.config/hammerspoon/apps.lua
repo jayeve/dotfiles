@@ -31,3 +31,7 @@ PWA_Aps = {
 	google_messages = "com.google.Chrome.app.hpfldicfbfomlpcikngkocigghgafkph",
 	google_maps = "com.google.Chrome.app.mnhkaebcjjhencmpkapnbdaogjamfbcj",
 }
+
+BundleIDs = {
+	spark = "com.readdle.smartemail-Mac",
+}

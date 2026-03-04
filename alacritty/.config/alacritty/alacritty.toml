@@ -38,16 +38,11 @@ bold        = { family = "JetBrainsMono Nerd Font Mono", style = "Regular" }
 italic      = { family = "JetBrainsMono Nerd Font Mono", style = "Light Italic" }
 bold_italic = { family = "JetBrainsMono Nerd Font Mono", style = "Italic" }
 
-[[keyboard.bindings]]
-chars = "\u001E"
-key = "Key6"
-mods = "Control"
-
 [selection]
 save_to_clipboard = true
 semantic_escape_chars = ",│`|:\"' ()[]{}<>\t"
 
 [window]
 dynamic_title = true
-dynamic_padding = true
 option_as_alt = "Both"
+decorations = "None"

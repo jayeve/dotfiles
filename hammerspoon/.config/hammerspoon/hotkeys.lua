@@ -1,6 +1,6 @@
 -- ~/.config/hammerspoon/hotkeys.lua
 local audio = require("audio")
-local window_manager = require("window_manager")
+local window_manager = require("window")
 local tmux = require("tmux")
 local home = os.getenv("HOME")
 local dotfiles_repo = home .. "/dotfiles.git"
@@ -25,8 +25,8 @@ hs.hotkey.bind({ "ctrl", "alt" }, "k", function()
 	window_manager.snapTop()
 end)
 
-hs.hotkey.bind({ "ctrl", "alt" }, "u", window_manager.snapTopLeft)
-hs.hotkey.bind({ "ctrl", "alt" }, "i", window_manager.snapTopRight)
+hs.hotkey.bind({ "ctrl", "alt" }, "y", window_manager.snapTopLeft)
+hs.hotkey.bind({ "ctrl", "alt" }, "u", window_manager.snapTopRight)
 hs.hotkey.bind({ "ctrl", "alt" }, "n", window_manager.snapBottomLeft)
 hs.hotkey.bind({ "ctrl", "alt" }, "m", window_manager.snapBottomRight)
 
@@ -55,25 +55,26 @@ end)
 
 local sparkHotkeys = {}
 
--- Define hotkeys but DO NOT enable them yet
 sparkHotkeys.archive = hs.hotkey.new({ "ctrl" }, "j", nil, function()
-	hs.eventtap.keyStroke({ "cmd", "ctrl" }, "a", 0)
+	hs.eventtap.keyStroke({ "cmd", "ctrl" }, "a", 20000) -- 20ms delay
 end)
 sparkHotkeys.delete = hs.hotkey.new({ "ctrl" }, "d", nil, function()
-	hs.eventtap.keyStroke({ "cmd" }, "delete", 0)
+	hs.eventtap.keyStroke({ "cmd" }, "delete", 20000)
 end)
 sparkHotkeys.forward = hs.hotkey.new({ "ctrl" }, "f", nil, function()
-	hs.eventtap.keyStroke({ "cmd", "shift" }, "f", 0)
+	hs.eventtap.keyStroke({ "cmd", "shift" }, "f", 20000)
 end)
 sparkHotkeys.move = hs.hotkey.new({ "ctrl" }, "m", nil, function()
-	hs.eventtap.keyStroke({ "cmd", "shift" }, "m", 0)
+	hs.eventtap.keyStroke({ "cmd", "shift" }, "m", 20000)
 end)
 sparkHotkeys.pin = hs.hotkey.new({ "ctrl" }, "p", nil, function()
-	hs.eventtap.keyStroke({ "cmd", "shift" }, "p", 0)
+	hs.eventtap.keyStroke({ "cmd", "shift" }, "p", 20000)
 end)
-sparkHotkeys.spam = hs.hotkey.new({ "ctrl" }, "s", function()
-	hs.eventtap.keyStroke({ "cmd", "shift" }, "j", 0)
+sparkHotkeys.spam = hs.hotkey.new({ "ctrl" }, "s", nil, function()
+	hs.eventtap.keyStroke({ "cmd", "shift" }, "j", 20000)
 end)
+
+-- Spark bundle identifier (more reliable than app name)
 
 local function enableSparkHotkeys()
 	for _, hk in pairs(sparkHotkeys) do
@@ -81,32 +82,47 @@ local function enableSparkHotkeys()
 	end
 end
 
--- Function to disable Spark hotkeys
 local function disableSparkHotkeys()
 	for _, hk in pairs(sparkHotkeys) do
 		hk:disable()
 	end
 end
 
--- hs.hotkey.bind({ "cmd" }, "k", function()
--- 	local app = hs.application.frontmostapplication()
--- 	if app:name() == apps.googlemaps then
--- 		hs.eventtap.keystroke({}, "/")
--- 	end
--- end)
--- Watch for app focus changes
-local appWatcher = hs.application.watcher.new(function(appName, event, app)
+-- Check if app is Spark using bundle ID
+local function isSparkApp(app)
+	if not app then
+		return false
+	end
+	local bundleID = app:bundleID()
+	return bundleID == BundleIDs.spark
+end
+
+-- Handle app activation/deactivation
+local function handleAppChange(appName, event, app)
 	if event == hs.application.watcher.activated then
-		if app:name() == Apps.spark then
+		if isSparkApp(app) then
 			enableSparkHotkeys()
 		else
 			disableSparkHotkeys()
 		end
+	elseif event == hs.application.watcher.deactivated then
+		if isSparkApp(app) then
+			disableSparkHotkeys()
+		end
 	end
-end)
+end
 
+-- Watch for app focus changes
+local appWatcher = hs.application.watcher.new(handleAppChange)
 appWatcher:start()
-disableSparkHotkeys()
+
+-- Initialize hotkeys based on current frontmost app
+local frontmost = hs.application.frontmostApplication()
+if isSparkApp(frontmost) then
+	enableSparkHotkeys()
+else
+	disableSparkHotkeys()
+end
 
 hs.hotkey.bind(hyper, "r", function()
 	hs.application.launchOrFocus(Apps.anki)
