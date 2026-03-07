@@ -276,6 +276,18 @@ zle -N glprj
 # bindkey '^G' gch
 # bindkey '^F' glprj
 
+# kubectl completion (cached for faster startup)
+if command -v kubectl &>/dev/null; then
+  kubectl_completion_cache="$HOME/.cache/zsh/kubectl_completion.zsh"
+
+  # Regenerate cache if kubectl binary is newer than cache
+  if [[ ! -f "$kubectl_completion_cache" ]] || [[ "$(command -v kubectl)" -nt "$kubectl_completion_cache" ]]; then
+    kubectl completion zsh > "$kubectl_completion_cache" 2>/dev/null
+  fi
+
+  [[ -f "$kubectl_completion_cache" ]] && source "$kubectl_completion_cache"
+fi
+
 # Load custom theme with git worktree support
 source_if_exists "$DOTFILES_PATH/zsh/.j.zsh-theme"
 export PATH="$HOME/.cargo/bin:$PATH"

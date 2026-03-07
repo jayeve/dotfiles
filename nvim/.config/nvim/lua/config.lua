@@ -117,6 +117,29 @@ lazy.setup({
 	},
 	{ "nvim-telescope/telescope-file-browser.nvim" },
 	{
+		"lrfurtado/telescope-gitlab.nvim",
+		dependencies = { "nvim-telescope/telescope.nvim" },
+		build = function()
+			-- Verify glab and jq are installed
+			local function check_dependency(cmd, install_msg)
+				local handle = io.popen("which " .. cmd)
+				local result = handle:read("*a")
+				handle:close()
+				if result == "" or result == nil then
+					vim.notify(
+						"telescope-gitlab.nvim: " .. cmd .. " not found!\n" .. install_msg,
+						vim.log.levels.WARN
+					)
+					return false
+				end
+				return true
+			end
+
+			check_dependency("glab", "Install via: brew install glab")
+			check_dependency("jq", "Install via: brew install jq")
+		end,
+	},
+	{
 		"nvim-telescope/telescope-frecency.nvim",
 		dependencies = { "kkharji/sqlite.lua" },
 	},

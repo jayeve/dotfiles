@@ -220,10 +220,17 @@ Opens a floating terminal with fzf selector showing scripts from the selected di
 - **Leader gs** - Git status
 - **Leader gc** - Open GitLab MR/commit
 - **Leader gg** - Open git repo URL
-- **Leader gr** - Open git repo URL
-- **Leader B** - Open ref link in browser
 - **Leader g.** - cd to git root
 - **Leader .** - cd to current buffer directory
+
+### GitLab Operations (Telescope)
+
+- **Leader gm** - GitLab merge requests (global, opened)
+- **Leader gi** - GitLab issues (global, opened)
+- **Leader gp** - GitLab projects/repos search
+- **Leader gS** - GitLab global search
+- **Leader gt** - GitLab MRs (cloudflare/cache team)
+- **Leader gr** - GitLab MRs (current repo/project)
 
 ### File & Path Operations
 

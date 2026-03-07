@@ -185,6 +185,48 @@ which_key.add({
 		desc = "cd to a directory in this git repo",
 		mode = "n",
 	},
+	-- GitLab Telescope commands
+	{
+		"<leader>gm",
+		"<cmd>lua require('telescope').extensions.gitlab.mrs({fields={state='opened'}})<cr>",
+		desc = "GitLab merge requests (opened)",
+		mode = "n",
+	},
+	{
+		"<leader>gi",
+		"<cmd>lua require('telescope').extensions.gitlab.issues({fields={state='opened'}})<cr>",
+		desc = "GitLab issues (opened)",
+		mode = "n",
+	},
+	{
+		"<leader>gp",
+		"<cmd>Telescope gitlab repos<cr>",
+		desc = "GitLab projects/repos",
+		mode = "n",
+	},
+	{
+		"<leader>gS",
+		"<cmd>Telescope gitlab search<cr>",
+		desc = "GitLab global search",
+		mode = "n",
+	},
+	-- Custom GitLab MR pickers (team and current project)
+	{
+		"<leader>gt",
+		function()
+			require("jayeve.gitlab_custom_pickers").group_mrs({ group = "cloudflare/cache" })
+		end,
+		desc = "GitLab MRs (cloudflare/cache team)",
+		mode = "n",
+	},
+	{
+		"<leader>gr",
+		function()
+			require("jayeve.gitlab_custom_pickers").current_project_mrs()
+		end,
+		desc = "GitLab MRs (current repo/project)",
+		mode = "n",
+	},
 	-- Telescope history commands
 	{ "<leader><leader>", "<cmd>Telescope command_history<cr>", desc = "command history", mode = "n" },
 	{ "<leader>Y", "<cmd>Telescope neoclip<cr>", desc = "yank history", mode = "n" },

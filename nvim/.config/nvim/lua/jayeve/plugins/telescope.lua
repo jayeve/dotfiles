@@ -110,3 +110,10 @@ telescope.setup({
 		},
 	},
 })
+
+-- Load telescope-gitlab extension
+local gitlab_setup, _ = pcall(telescope.load_extension, "gitlab")
+if not gitlab_setup then
+	local info = debug.getinfo(1, "S").short_src
+	print(info, "failed to load gitlab extension")
+end

@@ -21,6 +21,7 @@ Apps = {
 	spotify = "Spotify",
 	teams = "Microsoft Teams (PWA)",
 	whatsapp = "Whatsapp",
+	youtube = "Youtube",
 }
 
 -- these are typically chrome extensions bundle ids
