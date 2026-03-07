@@ -12,6 +12,7 @@ Apps = {
 	googlechat = "Google Chat",
 	googlemaps = "Google Maps",
 	googlemeet = "Google Meet",
+	kitty = "Kitty",
 	localsend = "Localsend",
 	onepassword = "1Password",
 	quicktime = "Quicktime Player",
