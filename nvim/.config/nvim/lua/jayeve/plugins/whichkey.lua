@@ -326,8 +326,40 @@ which_key.add({
 		desc = "open hotkey reference",
 		mode = "n",
 	},
-	{ "<leader>N", utils.open_personal_notes, desc = "open this week's personal notes", mode = "n" },
+	{ "<leader>m", utils.open_personal_notes, desc = "open this week's personal notes", mode = "n" },
 	{ "<leader>n", utils.open_notes, desc = "open this week's weekly notes", mode = "n" },
+	{
+		"[n",
+		function()
+			utils.navigate_to_week_note(-1, "work")
+		end,
+		desc = "previous week's work note",
+		mode = "n",
+	},
+	{
+		"]n",
+		function()
+			utils.navigate_to_week_note(1, "work")
+		end,
+		desc = "next week's work note",
+		mode = "n",
+	},
+	{
+		"[m",
+		function()
+			utils.navigate_to_week_note(-1, "personal")
+		end,
+		desc = "previous week's personal note",
+		mode = "n",
+	},
+	{
+		"]m",
+		function()
+			utils.navigate_to_week_note(1, "personal")
+		end,
+		desc = "next week's personal note",
+		mode = "n",
+	},
 	{
 		"<leader>l",
 		function()
@@ -410,7 +442,7 @@ which_key.add({
 
 	-- Tmux & Sessions
 	{
-		"<leader>m",
+		"<leader>t",
 		function()
 			prj.tmux_session_picker()
 		end,
@@ -468,6 +500,18 @@ which_key.add({
 		desc = "close current buffer",
 		mode = "n",
 	},
+
+	-- ���═════════════════════════════════════════════════════════════════
+	-- Notification/Message History (Noice + nvim-notify)
+	-- ══════════════════════════════════════════════════════════════════
+	{ "<leader>N", group = "notifications" },
+	{ "<leader>Nh", "<cmd>Noice<CR>", desc = "message history", mode = "n" },
+	{ "<leader>Nl", "<cmd>Noice last<CR>", desc = "last message", mode = "n" },
+	{ "<leader>Ne", "<cmd>Noice errors<CR>", desc = "error messages", mode = "n" },
+	{ "<leader>Nd", "<cmd>Noice dismiss<CR>", desc = "dismiss notifications", mode = "n" },
+	{ "<leader>Nt", "<cmd>Telescope noice<CR>", desc = "search messages", mode = "n" },
+	{ "<leader>Nm", "<cmd>messages<CR>", desc = "native :messages", mode = "n" },
+
 	-- Directory navigation
 	{ "<leader>.", utils.cd_to_current_buf_directory, desc = "cd into cur buf's dir", mode = "n" },
 	{ "<c-g>", utils.show_cur_location, desc = "show current location", mode = "n" },
@@ -488,6 +532,46 @@ which_key.add({
 		end,
 		desc = "prev in quickfix list",
 		mode = "n",
+	},
+
+	-- ══════════════════════════════════════════════════════════════════
+	-- LSP Hover Scrolling (noice.nvim)
+	-- ══════════════════════════════════════════════════════════════════
+	{
+		"<C-f>",
+		function()
+			if not require("noice.lsp").scroll(4) then
+				return "<C-f>"
+			end
+		end,
+		desc = "scroll hover down",
+		mode = { "n", "i", "s" },
+		expr = true,
+		silent = true,
+	},
+	{
+		"<C-b>",
+		function()
+			if not require("noice.lsp").scroll(-4) then
+				return "<C-b>"
+			end
+		end,
+		desc = "scroll hover up",
+		mode = { "n", "i", "s" },
+		expr = true,
+		silent = true,
+	},
+
+	-- ══════════════════════════════════════════════════════════════════
+	-- Cmdline Redirection (Shift-Enter in cmdline mode)
+	-- ══════════════════════════════════════════════════════════════════
+	{
+		"<S-Enter>",
+		function()
+			require("noice").redirect(vim.fn.getcmdline())
+		end,
+		desc = "redirect cmdline to popup",
+		mode = "c",
 	},
 })
 

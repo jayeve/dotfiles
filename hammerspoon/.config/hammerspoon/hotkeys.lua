@@ -473,16 +473,11 @@ local function resetScriptTimer()
 	end
 end
 
--- Load script directory mappings from config
-local scriptConfig = script_runner.loadConfig()
-
--- Dynamically bind keys from config
-for key, config in pairs(scriptConfig) do
-	scriptMode:bind("", key, function()
-		script_runner.launchScriptRunner(config.path, config.name, config.description)
-		scriptMode:exit()
-	end)
-end
+-- Only bind 's' key for consolidated view (shows all scripts from all categories)
+scriptMode:bind("", "s", function()
+	script_runner.launchConsolidatedScriptRunner()
+	scriptMode:exit()
+end)
 
 -- Escape to exit
 scriptMode:bind("", "escape", function()

@@ -75,7 +75,7 @@ function M.watchForWindow()
 
 	-- Create window filter for Alacritty windows with "Script Runner" title
 	local filter = hs.window.filter.new(false)
-	filter:setAppFilter("Alacritty", { allowTitles = "^Script Runner" })
+	filter:setAppFilter(Apps.alacritty, { allowTitles = "^Script Runner" })
 end
 
 -- Launch Alacritty with the script runner wrapper
@@ -108,7 +108,8 @@ function M.launchScriptRunner(directory, name, description)
 
 	-- Build Alacritty launch command using temp config
 	local cmd = string.format(
-		"open -na Alacritty --args --config-file %s -T %s -e %s %s %s %s &",
+		"open -na %s --args --config-file %s -T %s -e %s %s %s %s &",
+		shQuote(Apps.alacritty),
 		shQuote(tempConfig),
 		shQuote(windowTitle),
 		shQuote(wrapperScript),
@@ -169,6 +170,30 @@ function M.launchAudioInputSelector()
 	local ok, _, _, rc = hs.execute(cmd)
 	if not ok or rc ~= 0 then
 		hs.alert.show("Failed to launch audio input selector", 1.5)
+	end
+end
+
+-- Launch consolidated script runner showing all scripts from all categories
+function M.launchConsolidatedScriptRunner()
+	local wrapperScript = home .. "/dotfiles.git/master/scripts/.config/scripts/script-runner-consolidated.sh"
+
+	-- Create temp config
+	local tempConfig = M.createTempConfig()
+	if not tempConfig then
+		return
+	end
+
+	-- Build Alacritty launch command using temp config
+	local cmd = string.format(
+		'open -na Alacritty --args --config-file %s -T "Script Runner" -e %s &',
+		shQuote(tempConfig),
+		shQuote(wrapperScript)
+	)
+
+	-- Launch Alacritty
+	local ok, _, _, rc = hs.execute(cmd)
+	if not ok or rc ~= 0 then
+		hs.alert.show("Failed to launch consolidated script runner", 1.5)
 	end
 end
 

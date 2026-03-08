@@ -7,7 +7,7 @@ git clone --bare git@github.com:jayeve/dotfiles.git
 cd dotfiles.git
 git worktree add master
 cd master
-stow -t ~ fzf alacritty git nvim tmux zsh hammerspoon scripts htop karabiner opencode tig
+stow -t ~ fzf alacritty git nvim tmux zsh hammerspoon scripts htop karabiner opencode tig kitty
 ```
 
 ## hammerspoon

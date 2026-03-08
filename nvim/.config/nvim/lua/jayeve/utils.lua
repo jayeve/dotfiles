@@ -207,6 +207,101 @@ function M.open_notes()
 	open_or_create_file(path)
 end
 
+-- Parse week date from filename (week-of-YYYY.MM.DD.md)
+-- Returns the date string (YYYY.MM.DD) or nil if not a weekly note
+local function parse_week_from_filename(filepath)
+	if not filepath then
+		return nil
+	end
+	local pattern = "week%-of%-(%d%d%d%d%.%d%d%.%d%d)%.md"
+	return filepath:match(pattern)
+end
+
+-- Get Monday date offset by N weeks from a given date string (YYYY.MM.DD)
+-- If base_date is nil, uses current Monday
+local function get_monday_offset(base_date, week_offset)
+	local base_time
+	
+	if base_date then
+		-- Parse YYYY.MM.DD format
+		local year, month, day = base_date:match("(%d%d%d%d)%.(%d%d)%.(%d%d)")
+		if year and month and day then
+			base_time = os.time({ year = tonumber(year), month = tonumber(month), day = tonumber(day), hour = 12 })
+		else
+			-- Fallback to current Monday if parsing fails
+			base_time = os.time()
+			local current_date = os.date("*t", base_time)
+			local days_to_monday = (current_date.wday - 2) % 7
+			base_time = base_time - (days_to_monday * 86400)
+		end
+	else
+		-- Use current Monday
+		base_time = os.time()
+		local current_date = os.date("*t", base_time)
+		local days_to_monday = (current_date.wday - 2) % 7
+		base_time = base_time - (days_to_monday * 86400)
+	end
+	
+	-- Add/subtract weeks (7 days * week_offset)
+	local target_time = base_time + (week_offset * 7 * 86400)
+	
+	return os.date("%Y.%m.%d", target_time)
+end
+
+-- Check if a week date (YYYY.MM.DD) is in the future
+local function is_future_week(monday_date_string)
+	-- Get current Monday
+	local now = os.time()
+	local current_date = os.date("*t", now)
+	local days_to_monday = (current_date.wday - 2) % 7
+	local current_monday = now - (days_to_monday * 86400)
+	
+	-- Parse the target date
+	local year, month, day = monday_date_string:match("(%d%d%d%d)%.(%d%d)%.(%d%d)")
+	if not year or not month or not day then
+		return false
+	end
+	
+	local target_time = os.time({ year = tonumber(year), month = tonumber(month), day = tonumber(day), hour = 12 })
+	
+	-- Compare (allow same week)
+	return target_time > current_monday
+end
+
+-- Navigate to relative week note (work or personal)
+-- direction: 1 for next, -1 for previous
+-- note_type: "work" or "personal"
+function M.navigate_to_week_note(direction, note_type)
+	local current_buffer = vim.fn.expand("%:p")
+	local base_date = parse_week_from_filename(current_buffer)
+	
+	-- If not currently in a weekly note, use today's week as reference
+	if not base_date then
+		base_date = get_monday_date()
+	end
+	
+	-- Calculate target week
+	local target_date = get_monday_offset(base_date, direction)
+	
+	-- Check if target is in the future
+	if is_future_week(target_date) then
+		vim.notify("Cannot create notes for future weeks", vim.log.levels.WARN, {
+			title = "jayeve.utils",
+		})
+		return
+	end
+	
+	-- Determine the path based on note type
+	local path
+	if note_type == "personal" then
+		path = "/Users/jevans/vaults/personal/weekly-notes/week-of-" .. target_date .. ".md"
+	else
+		path = "/Users/jevans/cloudflare/vaults/work/weekly-notes/week-of-" .. target_date .. ".md"
+	end
+	
+	open_or_create_file(path)
+end
+
 function M.cd_fzf(path)
 	-- implement me
 end

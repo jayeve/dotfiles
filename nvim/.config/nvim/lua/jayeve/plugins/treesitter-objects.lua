@@ -1,10 +1,5 @@
 -- import nvim-treesitter plugin safely
-local status, treesitter = pcall(require, "nvim-treesitter.configs")
-if not status then
-	local info = debug.getinfo(1, "S").short_src
-	print(info, "failed to load")
-	return
-end
+local treesitter = require("nvim-treesitter.configs")
 
 treesitter.setup({
 	textobjects = {

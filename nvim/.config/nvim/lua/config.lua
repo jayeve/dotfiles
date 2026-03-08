@@ -61,6 +61,9 @@ lazy.setup({
 			"MunifTanjim/nui.nvim",
 			"rcarriga/nvim-notify",
 		},
+		config = function()
+			require("jayeve.plugins.noice")
+		end,
 	},
 	{ "folke/zen-mode.nvim" },
 	{ "ellisonleao/glow.nvim", config = true, cmd = "Glow" }, -- markdown fanciness
@@ -76,7 +79,6 @@ lazy.setup({
 	-- navigation plugins
 	{ "christoomey/vim-tmux-navigator" }, -- tmux & split window navigation
 	{ "szw/vim-maximizer" }, -- maximizes and restores current window
-	-- { "ggandor/leap.nvim" }, -- S keymap conflicts with vim-surround
 	{ "nvim-tree/nvim-tree.lua" }, -- file explorer
 	{
 		"ThePrimeagen/git-worktree.nvim",
@@ -99,23 +101,16 @@ lazy.setup({
 	{ "numToStr/Comment.nvim" }, -- commenting with gc
 	{ "kkharji/sqlite.lua" },
 	{ "tpope/vim-fugitive" }, -- fugitive (git operations)
-	-- use("vim-scripts/ReplaceWithRegister") -- replace with register contents using motion (gr + motion)
 
 	-- telescope
-	{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" }, -- dependency for better sorting performance
-	{
-		"kelly-lin/telescope-ag",
-		dependencies = { "nvim-telescope/telescope.nvim" },
-	},
 	{
 		"nvim-telescope/telescope.nvim",
 		dependencies = {
 			{ "nvim-lua/plenary.nvim" },
 			{ "nvim-telescope/telescope-github.nvim" },
 		},
-		branch = "0.1.x",
+		tag = "v0.2.1",
 	},
-	{ "nvim-telescope/telescope-file-browser.nvim" },
 	{
 		"lrfurtado/telescope-gitlab.nvim",
 		dependencies = { "nvim-telescope/telescope.nvim" },
@@ -126,10 +121,7 @@ lazy.setup({
 				local result = handle:read("*a")
 				handle:close()
 				if result == "" or result == nil then
-					vim.notify(
-						"telescope-gitlab.nvim: " .. cmd .. " not found!\n" .. install_msg,
-						vim.log.levels.WARN
-					)
+					vim.notify("telescope-gitlab.nvim: " .. cmd .. " not found!\n" .. install_msg, vim.log.levels.WARN)
 					return false
 				end
 				return true
@@ -146,19 +138,11 @@ lazy.setup({
 	{
 		"AckslD/nvim-neoclip.lua", -- clipboard
 		dependencies = {
-			{ "nvim-telescope/telescope.nvim", branch = "0.1.x" },
+			{ "nvim-telescope/telescope.nvim", tag = "v0.2.1" },
 			{ "kkharji/sqlite.lua" },
 		},
 	},
 	{ "jvgrootveld/telescope-zoxide" }, -- fancy 'cd' command, z
-	{
-		"dhruvmanila/telescope-bookmarks.nvim", -- web bookmarks
-		version = "*",
-		-- Uncomment if the selected browser is Firefox, Waterfox or buku
-		dependencies = {
-			"kkharji/sqlite.lua",
-		},
-	},
 
 	-- autocompletion
 	{ "hrsh7th/nvim-cmp" }, -- completion plugin
@@ -260,7 +244,7 @@ lazy.setup({
 })
 
 -- configure aforementioned plugins
-require("jayeve.plugins.noice")
+-- require("jayeve.plugins.noice") -- now configured via lazy.nvim config function
 require("jayeve.plugins.comment")
 require("jayeve.plugins.nvim-tree")
 require("jayeve.plugins.lualine")
