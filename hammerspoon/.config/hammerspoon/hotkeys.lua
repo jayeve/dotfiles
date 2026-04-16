@@ -39,8 +39,17 @@ hs.hotkey.bind({ "ctrl", "alt" }, "return", function()
 	local f = win:screen():frame()
 	win:setFrame(f, 0) -- 0 = no animation
 end)
-hs.hotkey.bind({ "shift" }, "delete", function()
+hs.hotkey.bind(hyper, "up", function()
+	hs.eventtap.keyStrokes("↑")
+end)
+hs.hotkey.bind(hyper, "left", function()
+	hs.eventtap.keyStrokes("←")
+end)
+hs.hotkey.bind(hyper, "right", function()
 	hs.eventtap.keyStrokes("→")
+end)
+hs.hotkey.bind(hyper, "down", function()
+	hs.eventtap.keyStrokes("↓")
 end)
 hs.hotkey.bind({ "shift" }, "pageup", hs.reload)
 hs.hotkey.bind({ "shift" }, "pagedown", function()
@@ -269,8 +278,7 @@ local function targetLocation(locationName)
 		hs.alert.show("Error: Location '" .. locationName .. "' not found in config", 2)
 		return
 	end
-	-- Replace underscores with dashes in session name
-	local sessionName = location[1]:gsub("_", "-")
+	local sessionName = location.session_name or location[1]:gsub("_", "-")
 	tmux.target_session(sessionName, location[2])
 end
 
@@ -476,6 +484,18 @@ end
 -- Only bind 's' key for consolidated view (shows all scripts from all categories)
 scriptMode:bind("", "s", function()
 	script_runner.launchConsolidatedScriptRunner()
+	scriptMode:exit()
+end)
+
+-- 'r' for screen recorder picker (ffmpeg-based)
+scriptMode:bind("", "r", function()
+	script_runner.launchScreenRecorderPicker()
+	scriptMode:exit()
+end)
+
+-- 'e' for OBS screen recorder picker
+scriptMode:bind("", "e", function()
+	script_runner.launchOBSScreenRecorderPicker()
 	scriptMode:exit()
 end)
 

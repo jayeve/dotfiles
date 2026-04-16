@@ -9,6 +9,7 @@ vim.api.nvim_create_autocmd("User", {
 		require("jayeve.plugins.whichkey")
 		require("jayeve.core.options")
 		require("jayeve.core.colorscheme")
+		require("jayeve.core.csv-highlights")
 	end,
 })
 

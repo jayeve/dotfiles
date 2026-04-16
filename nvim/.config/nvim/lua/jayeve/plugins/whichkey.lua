@@ -377,14 +377,6 @@ which_key.add({
 		mode = "n",
 	},
 	{
-		"<leader>p",
-		function()
-			prj.gitlab_project_picker()
-		end,
-		desc = "GitLab project picker (~9K repos)",
-		mode = "n",
-	},
-	{
 		"<leader>b",
 		function()
 			utils.copy_file_path_to_clipboard(false, false)
@@ -442,14 +434,13 @@ which_key.add({
 
 	-- Tmux & Sessions
 	{
-		"<leader>t",
+		"<leader>p",
 		function()
-			prj.tmux_session_picker()
+			prj.gitlab_project_picker()
 		end,
-		desc = "switch tmux session",
+		desc = "GitLab project picker (~9K repos)",
 		mode = "n",
 	},
-
 	-- Display & UI
 	{ "<leader>P", togglePurple, desc = "toggle purple display", mode = "n" },
 	{

@@ -8,6 +8,16 @@ local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 local previewers = require("telescope.previewers")
 
+-- Helper: Check if glab CLI is available
+local function check_glab_available()
+	local glab_check = vim.fn.system("which glab 2>/dev/null"):gsub("\n", "")
+	if glab_check == "" then
+		vim.notify("glab CLI tool is required. Install via: brew install glab", vim.log.levels.WARN)
+		return false
+	end
+	return true
+end
+
 -- Helper: URL encode for GitLab API paths
 local function urlencode(str)
 	if str == nil then
@@ -194,6 +204,11 @@ end
 
 -- Picker 1: Group/Team MRs
 function M.group_mrs(opts)
+	-- Check if glab is available
+	if not check_glab_available() then
+		return
+	end
+
 	opts = opts or {}
 	local group = opts.group or "cloudflare/cache"
 	local group_encoded = urlencode(group)
@@ -265,6 +280,11 @@ end
 
 -- Picker 2: Current Project MRs
 function M.current_project_mrs(opts)
+	-- Check if glab is available
+	if not check_glab_available() then
+		return
+	end
+
 	opts = opts or {}
 
 	-- Get current project from git remote

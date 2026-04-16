@@ -10,7 +10,7 @@ treesitter.setup({
 	-- enable syntax highlighting
 	highlight = {
 		enable = true,
-		disable = { "yaml" },
+		disable = { "yaml", "csv" },
 	},
 	-- enable indentation
 	indent = { enable = true },

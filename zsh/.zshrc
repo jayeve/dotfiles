@@ -291,3 +291,7 @@ fi
 # Load custom theme with git worktree support
 source_if_exists "$DOTFILES_PATH/zsh/.j.zsh-theme"
 export PATH="$HOME/.cargo/bin:$PATH"
+export PATH="$HOME/bin:$PATH"
+
+# Fix SSL cert validation for JVM tools (coursier, sbt, metals) behind Cloudflare Zero Trust
+export JAVA_TOOL_OPTIONS="-Djavax.net.ssl.trustStore=$HOME/OpenJDK/jdk-22.jdk/Contents/Home/lib/security/cacerts -Djavax.net.ssl.trustStorePassword=changeit"

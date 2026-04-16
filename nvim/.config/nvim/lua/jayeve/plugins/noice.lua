@@ -24,7 +24,7 @@ require("notify").setup({
 	},
 
 	-- Size constraints
-	max_width = 80,
+	max_width = 160,
 	max_height = 20,
 	minimum_width = 40,
 

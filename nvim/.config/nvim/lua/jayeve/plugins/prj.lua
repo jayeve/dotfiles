@@ -164,17 +164,6 @@ function M.tmux_session_picker()
 			prompt_title = "TMUX session picker",
 			finder = finders.new_table({
 				results = get_tmux_sessions(),
-				-- entry_maker = function(entry)
-				-- 	local display_name = table.concat(entry, "  ")
-				-- 	if contains(tmux_sessions, entry[2]) then
-				-- 		display_name = table.concat(entry, "  ") .. " ●"
-				-- 	end
-				-- 	return {
-				-- 		value = entry,
-				-- 		display = display_name,
-				-- 		ordinal = table.concat(entry, "/"),
-				-- 	}
-				-- end,
 			}),
 			sorter = conf.generic_sorter({}),
 			attach_mappings = function(_, _)
@@ -343,15 +332,13 @@ local function gitlab_prj_helper(full_path)
 		target_dir = vim.split(worktrees, "\n")[1]
 	end
 
-	-- Session name: use project name, if exists add parent directory prefix
-	local session_name = project
-	local session_check = os.execute("tmux has-session -t=" .. vim.fn.shellescape(session_name) .. " 2>/dev/null")
-	if session_check == 0 then
-		-- Session exists, use parent directory as prefix
-		local parent_dir = vim.fn.fnamemodify(relative_path, ":h")
-		if parent_dir ~= "." then
-			session_name = vim.fn.fnamemodify(parent_dir, ":t") .. "_" .. project
-		end
+	-- Session name: <team>|<repo>
+	local team = vim.fn.fnamemodify(relative_path, ":h:t")
+	local session_name
+	if team ~= "" and team ~= "." then
+		session_name = team .. "|" .. project
+	else
+		session_name = project
 	end
 
 	-- Check if tmux is running
@@ -404,18 +391,34 @@ function M.gitlab_project_picker()
 
 					local bare_dir = base .. "/" .. check_path .. ".git"
 					local project_name = vim.fn.fnamemodify(check_path, ":t")
+					local team_name = vim.fn.fnamemodify(check_path, ":h:t")
+					local session_name = (team_name ~= "" and team_name ~= ".") and (team_name .. "|" .. project_name)
+						or project_name
 					local is_local = vim.fn.isdirectory(bare_dir) == 1
-					local has_session = contains(tmux_sessions, project_name)
+					local has_session = contains(tmux_sessions, session_name)
 
-					local display = entry
+					local prefix
 					if is_local then
-						display = "LOCAL  " .. entry
+						prefix = "LOCAL  "
 					else
-						display = "REMOTE " .. entry
+						prefix = "REMOTE "
 					end
 
-					if has_session then
-						display = display .. " ●"
+					local suffix = has_session and " ●" or ""
+					local display_text = prefix .. entry .. suffix
+
+					local display = function()
+						local highlights = {}
+						if has_session then
+							-- Highlighted Green for repos with an active session
+							-- you can see available colors with vim command 'highlight'
+							table.insert(highlights, { { 0, #display_text }, "DiffAdd" })
+						elseif is_local then
+							table.insert(highlights, { { 0, #display_text }, "GruvboxGreenBold" })
+						else
+							table.insert(highlights, { { 0, #display_text }, "GruvboxBlue" })
+						end
+						return display_text, highlights
 					end
 
 					return {

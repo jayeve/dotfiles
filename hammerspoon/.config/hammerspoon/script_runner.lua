@@ -197,6 +197,54 @@ function M.launchConsolidatedScriptRunner()
 	end
 end
 
+-- Launch screen recorder picker in floating Alacritty window
+function M.launchScreenRecorderPicker()
+	local wrapperScript = home .. "/dotfiles.git/master/scripts/.config/scripts/screen-recorder-picker.sh"
+
+	-- Create temp config
+	local tempConfig = M.createTempConfig()
+	if not tempConfig then
+		return
+	end
+
+	-- Build Alacritty launch command using temp config with login shell
+	local cmd = string.format(
+		'open -na Alacritty --args --config-file %s -T "Script Runner" -e zsh -l -c %s &',
+		shQuote(tempConfig),
+		shQuote(wrapperScript)
+	)
+
+	-- Launch Alacritty
+	local ok, _, _, rc = hs.execute(cmd)
+	if not ok or rc ~= 0 then
+		hs.alert.show("Failed to launch screen recorder picker", 1.5)
+	end
+end
+
+-- Launch OBS screen recorder picker in floating Alacritty window
+function M.launchOBSScreenRecorderPicker()
+	local wrapperScript = home .. "/dotfiles.git/master/obs/scripts/obs-screen-recorder-picker.sh"
+
+	-- Create temp config
+	local tempConfig = M.createTempConfig()
+	if not tempConfig then
+		return
+	end
+
+	-- Build Alacritty launch command using temp config with login shell
+	local cmd = string.format(
+		'open -na Alacritty --args --config-file %s -T "OBS Screen Recorder" -e zsh -l -c %s &',
+		shQuote(tempConfig),
+		shQuote(wrapperScript)
+	)
+
+	-- Launch Alacritty
+	local ok, _, _, rc = hs.execute(cmd)
+	if not ok or rc ~= 0 then
+		hs.alert.show("Failed to launch OBS screen recorder picker", 1.5)
+	end
+end
+
 -- Initialize the watcher when module loads
 function M.init()
 	M.watchForWindow()

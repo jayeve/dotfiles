@@ -20,7 +20,7 @@ Apps = {
 	slack = "Slack",
 	spark = "Spark",
 	spotify = "Spotify",
-	teams = "Microsoft Teams (PWA)",
+	teams = "Microsoft Teams",
 	whatsapp = "Whatsapp",
 	youtube = "Youtube",
 }

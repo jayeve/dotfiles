@@ -1,0 +1,90 @@
+#!/bin/sh
+# gophersay - like cowsay but with a Go gopher
+
+# Read input from arguments or stdin
+if [ $# -eq 0 ]; then
+    # Check if stdin is a terminal (interactive mode)
+    if [ -t 0 ]; then
+        printf "What should the gopher say? "
+        read -r message
+    else
+        # Read from piped input
+        message=$(cat)
+    fi
+else
+    message="$*"
+fi
+
+# Calculate the width of the longest line
+max_width=0
+echo "$message" | while IFS= read -r line; do
+    len=${#line}
+    if [ $len -gt $max_width ]; then
+        max_width=$len
+    fi
+done
+
+# Build the speech bubble
+echo "$message" | awk '
+BEGIN {
+    max_len = 0
+}
+{
+    lines[NR] = $0
+    if (length($0) > max_len) max_len = length($0)
+}
+END {
+    # Top border
+    printf " "
+    for (i = 0; i < max_len + 2; i++) printf "_"
+    printf "\n"
+    
+    # Message lines
+    for (i = 1; i <= NR; i++) {
+        if (NR == 1) {
+            printf "< %s >\n", lines[i]
+            for (j = length(lines[i]); j < max_len; j++) printf " "
+        } else if (i == 1) {
+            printf "/ %s", lines[i]
+            for (j = length(lines[i]); j < max_len; j++) printf " "
+            printf " \\\n"
+        } else if (i == NR) {
+            printf "\\ %s", lines[i]
+            for (j = length(lines[i]); j < max_len; j++) printf " "
+            printf " /\n"
+        } else {
+            printf "| %s", lines[i]
+            for (j = length(lines[i]); j < max_len; j++) printf " "
+            printf " |\n"
+        }
+    }
+    
+    # Bottom border
+    printf " "
+    for (i = 0; i < max_len + 2; i++) printf "-"
+    printf "\n"
+}'
+
+# Print the gopher
+cat << 'EOF'
+       \
+        \
+         ,_---~~~~~----._         
+  _,,_,*^____      _____``*g*"*, 
+ / __/ /'     ^.  /      \ ^@q   f 
+[  @f | @))    |  | @))   l  0 _/  
+ \`/   \~____ / __ \_____/    \   
+  |           _l__l_           I   
+  }          [______]           I  
+  ]            | | |            |  
+  ]             ~ ~             |  
+  |                            |   
+   |                           |   
+EOF
+
+# Keep window open if running interactively
+if [ -t 0 ]; then
+    echo ""
+    printf "Press Enter to close..."
+    read -r
+fi
