@@ -295,3 +295,7 @@ export PATH="$HOME/bin:$PATH"
 
 # Fix SSL cert validation for JVM tools (coursier, sbt, metals) behind Cloudflare Zero Trust
 export JAVA_TOOL_OPTIONS="-Djavax.net.ssl.trustStore=$HOME/OpenJDK/jdk-22.jdk/Contents/Home/lib/security/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
+
+# Added by git-ai installer on Wed Apr 29 08:59:35 PDT 2026
+# export PATH="/Users/jevans/.git-ai/bin:$PATH"
+# export BORINGSSL_DIR=/Users/jevans/code/boringssl
