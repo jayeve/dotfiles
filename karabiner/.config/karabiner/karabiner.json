@@ -89,6 +89,32 @@
           ]
         },
         {
+          "identifiers": {
+            "is_keyboard": true,
+            "product_id": 13330,
+            "vendor_id": 14
+          },
+          "simple_modifications": [
+            {
+              "from": { "key_code": "delete_forward" },
+              "to": [{ "key_code": "grave_accent_and_tilde" }]
+            }
+          ]
+        },
+        {
+          "identifiers": {
+            "is_keyboard": true,
+            "product_id": 139,
+            "vendor_id": 9610
+          },
+          "simple_modifications": [
+            {
+              "from": { "key_code": "delete_forward" },
+              "to": [{ "key_code": "grave_accent_and_tilde" }]
+            }
+          ]
+        },
+        {
           "identifiers": { "is_keyboard": true },
           "simple_modifications": [
             {
