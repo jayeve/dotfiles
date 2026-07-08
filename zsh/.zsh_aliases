@@ -42,7 +42,7 @@ alias setdefault="git remote set-head origin --auto"
 alias g='git'
 alias glog='git log --graph --full-history --all --color --pretty=format:"%x1b[31m%h%x09%x1b[32m%d%x1b[0m%x20%s"'
 alias new='git log $1@{1}..$1@{0} "$@"'
-alias yoda="git push --force"
+alias yoda="git push --force-with-lease"
 alias amend="git commit -a --amend -C HEAD"
 alias prune="docker system prune --all --force --volumes"
 # remove local git branches that aren't remote
