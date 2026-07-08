@@ -51,6 +51,7 @@
       "awk *": "allow",
       "basename *": "allow",
       "cargo build *": "allow",
+      "cargo lint *": "allow",
       "cargo metadata *": "allow",
       "cargo nexttest *": "allow",
       "cargo test *": "allow",
