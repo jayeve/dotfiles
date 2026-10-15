@@ -3,5 +3,8 @@
   "keybinds": {
     "leader": "ctrl+x",
     "command_list": "ctrl+p"
-  }
+  },
+  "plugin": [
+    "@prevalentware/opencode-goal-plugin"
+  ]
 }

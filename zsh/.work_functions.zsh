@@ -1,6 +1,7 @@
 #!/usr/bin/env zsh
 
 # ---------- JIRA OPEN ----------
+alias chq-logshare='clickhouse-cli -h https://logshare.ch.cfdata.org -p 443 -c CF_Authorization=$(cloudflared access token --app=https://logshare.ch.cfdata.org) -u "$CLICKHOUSE_USER" -B "$CLICKHOUSE_TOKEN"'
 jopen() {
   if [[ $# -ne 1 ]]; then
     echo "Usage: jopen CR-958178"
@@ -528,79 +529,43 @@ glprj-search() {
 # Refresh cache by fetching all projects from GitLab
 glprj-refresh() {
   local cache_file="$HOME/.gitlab-projects-cache"
-  local api_url="https://gitlab.cfdata.org/api/v4"
   local temp_file=$(mktemp)
 
-  # Check if token is set
-  if [[ -z "$GITLAB_TOKEN" ]]; then
-    echo "❌ GITLAB_TOKEN not set"
-    echo ""
-    echo "To fetch all ~9000 projects, you need a GitLab personal access token:"
-    echo ""
-    echo "Setup (one-time):"
-    echo "  1. Visit: https://gitlab.cfdata.org/-/profile/personal_access_tokens"
-    echo "  2. Click 'Add new token'"
-    echo "  3. Name: 'CLI Access'"
-    echo "  4. Scopes: Check 'read_api'"
-    echo "  5. Click 'Create personal access token'"
-    echo "  6. Copy the token"
-    echo ""
-    echo "Then add to ~/.zshrc:"
-    echo "  export GITLAB_TOKEN='glpat-xxxxxxxxxxxxxxxxxxxx'"
-    echo ""
-    echo "And reload: source ~/.zshrc"
-    echo ""
-    echo "After that, run 'glprj-refresh' again."
+  # Requires glab with valid auth (handles OAuth token refresh automatically)
+  if ! command -v glab &>/dev/null; then
+    echo "❌ glab not found. Install with: brew install glab"
     return 1
   fi
 
-  echo "Fetching all GitLab projects from API..."
-  echo "This will take a few minutes for ~9000 projects..."
+  echo "Fetching all GitLab projects via glab (auto-paginates)..."
+  echo "This may take a few minutes..."
   echo ""
 
-  local page=1
-  local total_projects=0
+  # glab api --paginate fetches all pages automatically and streams ndjson
+  # (one JSON array per page). We pipe through python to extract paths.
+  glab api "projects?per_page=100&simple=true&order_by=id" \
+    --hostname gitlab.cfdata.org \
+    --paginate \
+    --output ndjson 2>/dev/null \
+    | python3 -c "
+import sys, json
+for line in sys.stdin:
+    line = line.strip()
+    if not line:
+        continue
+    try:
+        obj = json.loads(line)
+        if isinstance(obj, dict) and 'path_with_namespace' in obj:
+            print(obj['path_with_namespace'])
+    except json.JSONDecodeError:
+        pass
+" > "$temp_file"
 
-  while true; do
-    echo -ne "\rFetching page $page... (${total_projects} projects so far)"
+  local total_projects
+  total_projects=$(wc -l < "$temp_file" | tr -d ' ')
 
-    # Extract project paths directly by piping curl to Python
-    # This avoids storing the JSON in a variable which can mangle control characters
-    local extracted=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
-      "${api_url}/projects?per_page=100&page=${page}&simple=true&order_by=id" 2>/dev/null \
-      | python3 "$HOME/.glprj_extract.py")
-
-    # Check if we got any projects from this page
-    if [[ -z "$extracted" ]]; then
-      # No projects on this page, we're done
-      break
-    fi
-
-    # Append to temp file
-    echo "$extracted" >> "$temp_file"
-
-    # Update count
-    local new_count=$(wc -l < "$temp_file" 2>/dev/null || echo 0)
-    total_projects=$new_count
-
-    ((page++))
-
-    # Safety limit
-    if [[ $page -gt 100 ]]; then
-      echo ""
-      echo "Reached page limit (100 pages), stopping."
-      break
-    fi
-
-    # Small delay to be nice to API
-    sleep 0.1
-  done
-
-  echo ""
-  echo ""
-
-  if [[ $total_projects -eq 0 ]]; then
-    echo "❌ No projects fetched."
+  if [[ "$total_projects" -eq 0 ]]; then
+    echo "❌ No projects fetched. Check glab auth: glab auth status --hostname gitlab.cfdata.org"
     rm "$temp_file"
     return 1
   fi
@@ -608,6 +573,9 @@ glprj-refresh() {
   # Sort and deduplicate
   sort -u "$temp_file" > "$cache_file"
   rm "$temp_file"
+
+  # Recount after dedup
+  total_projects=$(wc -l < "$cache_file" | tr -d ' ')
 
   echo "✓ Successfully fetched and cached $total_projects projects"
   echo "  Cache location: $cache_file"

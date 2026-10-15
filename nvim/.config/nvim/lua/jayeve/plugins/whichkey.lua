@@ -193,6 +193,24 @@ which_key.add({
 		mode = "n",
 	},
 	{
+		"<leader>g1",
+		"<cmd>lua require('telescope').extensions.gitlab.mrs({fields={state='opened',scope='all',author_username='fdeng'}})<cr>",
+		desc = "GitLab fei merge requests (opened)",
+		mode = "n",
+	},
+	{
+		"<leader>g2",
+		"<cmd>lua require('telescope').extensions.gitlab.mrs({fields={state='opened',scope='all',author_username='kgaudel'}})<cr>",
+		desc = "GitLab kris merge requests (opened)",
+		mode = "n",
+	},
+	{
+		"<leader>g3",
+		"<cmd>lua require('telescope').extensions.gitlab.mrs({fields={state='opened',scope='all',author_username='ewang'}})<cr>",
+		desc = "GitLab edward merge requests (opened)",
+		mode = "n",
+	},
+	{
 		"<leader>gi",
 		"<cmd>lua require('telescope').extensions.gitlab.issues({fields={state='opened'}})<cr>",
 		desc = "GitLab issues (opened)",

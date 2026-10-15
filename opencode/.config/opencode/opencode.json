@@ -12,7 +12,7 @@
     "excalidraw": {
       "type": "remote",
       "url": "https://mcp.excalidraw.cfdata.org/mcp",
-      "enabled": false
+      "enabled": true
     },
     "cf-portal": {
       "type": "remote",
@@ -28,10 +28,6 @@
       "enabled": true
     }
   },
-  "plugin": [
-    "@franlol/opencode-md-table-formatter@0.0.3",
-    "@mathew-cf/opencode-terminal-notifier@0.1.3"
-  ],
   "lsp": {
     "rust": {
       "command": ["lspmux", "client", "--server-path", "rust-analyzer"],
@@ -133,6 +129,8 @@
       "tail *": "allow",
       "test": "allow",
       "test *": "allow",
+      "timeout *": "allow",
+      "tmux list-sessions *": "allow",
       "tr *": "allow",
       "uniq *": "allow",
       "wc *": "allow",
@@ -157,7 +155,9 @@
     "external_directory": {
       "~/cloudflare/**": "allow",
       "~/.cargo/**": "allow",
-      "~/.config/opencode/skills/**": "allow"
+      "~/.config/opencode/skills/**": "allow",
+      "/tmp/**": "allow",
+      "~/.config/opencode/agents/**": "allow"
     },
     "webfetch": "allow",
     "read": {
