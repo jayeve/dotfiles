@@ -126,6 +126,73 @@ tm() {
   }
 }
 
+# List tmux sessions attached/switched to in the last N hours (default 24), most recent first.
+# Merges ~/.tmux_history (written by tmux hooks, survives reboots) with the live server's
+# session_last_attached; sessions that no longer exist are marked "(closed)".
+tmux-recent() {
+  local hours=${1:-24}
+  local cutoff=$(( $(date +%s) - hours * 3600 ))
+  local hist=${TMUX_HISTORY_FILE:-$HOME/.tmux_history}
+  {
+    [[ -r $hist ]] && awk '{ print "H\t" $0 }' "$hist"
+    tmux list-sessions -F "L	#{session_last_attached}	#{session_name}" 2>/dev/null
+  } | awk -F'\t' -v c="$cutoff" '
+      $1 == "L" { live[$3] = 1 }
+      $2 ~ /^[0-9]+$/ && $2 >= c && $2 > last[$3] { last[$3] = $2 }
+      END { for (s in last) printf "%s\t%s\t%s\n", last[s], s, (s in live) ? "" : "  (closed)" }
+    ' \
+    | sort -rn \
+    | while IFS=$'\t' read -r ts name note; do
+        printf '%s  %s%s\n' "$(date -r "$ts" '+%Y-%m-%d %H:%M:%S')" "$name" "$note"
+      done
+}
+
+# Memory footprint (incl. compressed/swapped, same as Activity Monitor) per tmux session,
+# summed over every process under each pane. Also reports orphaned `nvim --embed` servers.
+tmux-mem() {
+  awk -F'\t' '
+    function tomb(s,  u, n) {
+      sub(/[+-]$/, "", s); u = substr(s, length(s)); n = substr(s, 1, length(s) - 1) + 0
+      if (u == "G") return n * 1024; if (u == "M") return n; if (u == "K") return n / 1024
+      if (u == "B") return n / 1048576; return s / 1048576
+    }
+    function tree(p,  i, t) { t = mem[p]; for (i = 1; i <= nkids[p]; i++) t += tree(kid[p, i]); return t }
+    FNR == 1 { file++ }
+    file == 1 { split($0, f, " "); if (f[1] ~ /^[0-9]+$/) mem[f[1]] = tomb(f[2]); next }
+    file == 2 { split($0, f, " "); kid[f[2], ++nkids[f[2]]] = f[1]
+                if (f[2] == 1 && f[3] ~ /(^|\/)nvim$/ && f[4] == "--embed") orph[f[1]] = 1; next }
+    file == 3 { sess[$1] += tree($2) }
+    END {
+      for (s in sess) printf "%8.1f MB  %s\n", sess[s], s | "sort -rn"
+      close("sort -rn")
+      for (p in orph) { om += mem[p]; oc++ }
+      if (oc) printf "\n%8.1f MB  (%d orphaned nvim --embed, not in any session: run nvim-orphans-kill)\n", om, oc
+    }
+  ' <(top -l 1 -stats pid,mem 2>/dev/null) \
+    <(ps -axo pid=,ppid=,args=) \
+    <(tmux list-panes -a -F "#{session_name}	#{pane_pid}")
+}
+
+# Kill `nvim --embed` servers orphaned when their TUI died (reparented to launchd, no tty).
+# They often ignore SIGTERM, so escalate to SIGKILL after a short wait.
+nvim-orphans-kill() {
+  local -a pids alive
+  pids=(${(f)"$(ps -axo pid=,ppid=,tty=,args= | awk '$2 == 1 && $3 == "??" && $4 == "nvim" && $5 == "--embed" { print $1 }')"})
+  if (( ! $#pids )); then
+    echo "No orphaned nvim --embed processes"
+    return 0
+  fi
+  echo "Killing $#pids orphaned nvim --embed: ${pids[*]}"
+  kill $pids 2>/dev/null
+  sleep 3
+  alive=(${(f)"$(pgrep -P 1 -f '^nvim --embed')"})
+  pids=(${pids:*alive})
+  if (( $#pids )); then
+    echo "$#pids ignored SIGTERM, sending SIGKILL"
+    kill -9 $pids 2>/dev/null
+  fi
+}
+
 gch () {
   git for-each-ref refs/heads \
     --sort=-committerdate \
@@ -295,7 +362,5 @@ export PATH="$HOME/bin:$PATH"
 
 # Fix SSL cert validation for JVM tools (coursier, sbt, metals) behind Cloudflare Zero Trust
 export JAVA_TOOL_OPTIONS="-Djavax.net.ssl.trustStore=$HOME/OpenJDK/jdk-22.jdk/Contents/Home/lib/security/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
-
-# Added by git-ai installer on Wed Apr 29 08:59:35 PDT 2026
 # export PATH="/Users/jevans/.git-ai/bin:$PATH"
 # export BORINGSSL_DIR=/Users/jevans/code/boringssl

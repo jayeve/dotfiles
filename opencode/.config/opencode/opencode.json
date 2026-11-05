@@ -2,6 +2,11 @@
   "$schema": "https://opencode.ai/config.json",
   "model": "anthropic/claude-opus-4-6-latest",
   "small_model": "anthropic/claude-3-5-haiku-latest",
+  "skills": {
+    "paths": [
+      "/Users/jevans/cloudflare/pingora/opencode.git/main/skills"
+    ]
+  },
   "tools": {
     "cf-portal_gitlab-mcp-server_*emoji*": false,
     "cf-portal_gitlab-mcp-server_list_merge_request_discussions*": false,
